@@ -1,0 +1,80 @@
+<svg width="600" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paper">
+      <feTurbulence baseFrequency="0.04" numOctaves="3" result="noise" seed="1"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/>
+    </filter>
+    <filter id="ink">
+      <feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed="6"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.6"/>
+      <feGaussianBlur stdDeviation="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Paper background -->
+  <rect width="100%" height="100%" fill="#F5F3E7" filter="url(#paper)"/>
+  
+  <!-- Handwritten lyrics -->
+  <g filter="url(#ink)" font-family="cursive" font-size="16" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.3">
+    
+    <!-- Title -->
+    <text x="50" y="40" font-size="24" font-weight="bold" transform="rotate(-0.5 50 40)">Do You Want A Feeling</text>
+    <line x1="50" y1="50" x2="350" y2="47" stroke-width="2"/>
+    
+    <!-- Korean-English mixed lyrics -->
+    <text x="80" y="100" transform="rotate(0.3 80 100)">두유 워너 필링</text>
+    
+    <text x="60" y="140" transform="rotate(-0.2 60 140)">두유워너 필링 투 나잇 투 나잇</text>
+    
+    <text x="40" y="180" font-size="14" transform="rotate(0.4 40 180)">두 유 워너 필링 두유를 먹고 느껴봐요</text>
+    
+    <text x="50" y="220" font-size="14" transform="rotate(-0.3 50 220)">두 유 워너 필링 두유를 먹고 느껴 필링</text>
+    
+    <text x="120" y="270" font-weight="bold" transform="rotate(0.5 120 270)">열이 나요</text>
+    
+    <text x="100" y="310" font-weight="bold" transform="rotate(-0.4 100 310)">열이 나요</text>
+    
+    <text x="90" y="350" font-weight="bold" transform="rotate(0.2 90 350)">열이 나요</text>
+    
+    <text x="70" y="400" transform="rotate(-0.1 70 400)">두 유 워너 필링</text>
+    
+    <text x="110" y="440" transform="rotate(0.6 110 440)">두 유 워너 필링 필링</text>
+    
+    <text x="45" y="480" font-size="14" transform="rotate(-0.3 45 480)">두유를 먹고 느껴 느껴</text>
+    
+    <text x="80" y="520" font-size="14" transform="rotate(0.4 80 520)">두유를 먹고 느껴봐요</text>
+    
+    <text x="120" y="560" font-weight="bold" transform="rotate(-0.2 120 560)">열이 나요</text>
+    
+    <text x="60" y="600" font-size="14" transform="rotate(0.3 60 600)">두유 먹고 필링 느껴봐요</text>
+    
+    <text x="90" y="640" transform="rotate(-0.1 90 640)">느껴봐요</text>
+    
+    <text x="150" y="680" font-style="italic" transform="rotate(0.5 150 680)">필링</text>
+    
+    <text x="50" y="720" transform="rotate(-0.3 50 720)">두유워너 필링</text>
+    
+    <text x="55" y="130" transform="rotate(-0.3 55 130)">날이 가면 갈수록 없어지는 웃음이</text>
+    
+    <text x="65" y="170" transform="rotate(0.8 65 170)">무서워 무서워</text>
+    
+    <text x="50" y="220" transform="rotate(-0.2 50 220)">걷다 보면 보이는 모든 것들에게</text>
+    <text x="55" y="250" transform="rotate(0.4 55 250)">무슨 말을 할까 고민해 보지만</text>
+    
+    <text x="70" y="290" transform="rotate(-0.6 70 290)">두려워 두려워 두려워</text>
+    
+    <text x="45" y="340" transform="rotate(0.2 45 340)">날이 가면 갈수록 없어지는 말들이</text>
+    
+    <text x="60" y="380" transform="rotate(-0.4 60 380)">날이 가면 갈수록 없어지는 웃음이</text>
+    
+    <text x="55" y="420" font-weight="bold" transform="rotate(0.7 55 420)">괴로워 괴로워 괴로워</text>
+    
+    <!-- Signature -->
+    <text x="400" y="720" font-size="14" font-style="italic" transform="rotate(-2 400 720)">- 하루살이 프로젝트</text>
+    
+    <!-- Decorative elements -->
+    <path d="M 20 200 Q 30 190 40 200" fill="none" stroke="#8B7AAE" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="500" cy="150" r="3" fill="#E5A45C" opacity="0.7"/>
+    <path d="M 520 350 L 530 340 L 540 350 L 530 360 Z" fill="#A8C5D1" opacity="0.5"/>
+  </g>
+</svg>

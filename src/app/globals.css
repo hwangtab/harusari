@@ -1,26 +1,237 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('/fonts/GmarketSansTTFLight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('/fonts/GmarketSansTTFMedium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('/fonts/GmarketSansTTFBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'YoonChildfundkoreaManSeh';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaManSeh.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Album artwork colors */
+  --cream: #F5F3E7;
+  --purple: #8B7AAE;
+  --orange: #E5A45C;
+  --light-blue: #A8C5D1;
+  --magenta: #E85D9A;
+  --cyan: #5DBCE8;
+  --black: #2C2C2C;
+  
+  /* System colors */
+  --background: var(--cream);
+  --foreground: var(--black);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-*: initial;
+  
+  /* Custom color palette */
+  --color-cream: var(--cream);
+  --color-album-purple: var(--purple);
+  --color-album-orange: var(--orange);
+  --color-album-blue: var(--light-blue);
+  --color-glitch-magenta: var(--magenta);
+  --color-glitch-cyan: var(--cyan);
+  --color-retro-black: var(--black);
+  
+  /* Typography */
+  --font-system: "GmarketSans", "MS Gothic", "굴림", "Gulim", sans-serif;
+  --font-handwriting: "YoonChildfundkoreaManSeh", "Comic Sans MS", cursive;
+  
+  /* Custom animations */
+  --animate-glitch: glitch 0.3s ease-in-out;
+  --animate-flicker: flicker 0.1s infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Global font application */
+* {
+  font-family: var(--font-system);
 }
 
+/* Noise texture background */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--black);
+  font-family: var(--font-system);
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(139, 122, 174, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(229, 164, 92, 0.1) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000' fill-opacity='0.02' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Glitch animation keyframes */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Retro cursor styles - Simple 90s/2000s Windows style */
+.cursor-retro {
+  cursor: default;
+}
+
+.cursor-hand {
+  cursor: pointer;
+}
+
+.cursor-move {
+  cursor: move;
+}
+
+.cursor-wait {
+  cursor: wait;
+}
+
+/* Apply retro cursor globally */
+button, a, [role="button"], .clickable {
+  cursor: pointer !important;
+}
+
+/* Window system base styles */
+.window {
+  background: var(--cream);
+  border: 2px solid var(--black);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  position: absolute;
+}
+
+.window-titlebar {
+  background: var(--album-purple);
+  color: white;
+  padding: 2px 4px;
+  font-size: 11px;
+  user-select: none;
+  cursor: move;
+}
+
+.window-content {
+  padding: 0;
+  background: var(--cream);
+  min-height: 100px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Desktop icon styles */
+.desktop-icon {
+  width: 64px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  color: var(--black);
+}
+
+.desktop-icon:hover {
+  background: rgba(139, 122, 174, 0.3);
+}
+
+.desktop-icon img {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 4px;
+}
+
+.desktop-icon span {
+  font-size: 11px;
+  display: block;
+  word-wrap: break-word;
+}
+
+/* Image viewer specific styles */
+.image-viewer-container {
+  box-sizing: border-box;
+}
+
+.image-viewer-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+
+
+/* Handwriting font class for lyrics */
+.font-handwriting {
+  font-family: var(--font-handwriting);
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom scrollbar for lyrics window */
+.lyrics-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lyrics-scroll::-webkit-scrollbar {
+  width: 12px;
+  background: var(--cream);
+  border: 1px solid var(--black);
+}
+
+.lyrics-scroll::-webkit-scrollbar-thumb {
+  background: var(--purple);
+  border: 1px solid var(--black);
+  cursor: pointer;
+}
+
+.lyrics-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--orange);
+}
+
+.lyrics-scroll::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+
+/* Smooth transitions for window resizing */
+.window {
+  transition: width 0.1s ease, height 0.1s ease;
 }

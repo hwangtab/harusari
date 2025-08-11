@@ -1,0 +1,21 @@
+<svg width="600" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paper"><feTurbulence baseFrequency="0.04" numOctaves="3" result="noise" seed="4"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/></filter>
+    <filter id="ink"><feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed="9"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="0.6"/><feGaussianBlur stdDeviation="0.2"/></filter>
+  </defs>
+  <rect width="100%" height="100%" fill="#F5F3E7" filter="url(#paper)"/>
+  <g filter="url(#ink)" font-family="cursive" font-size="16" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.3">
+    <text x="50" y="40" font-size="24" font-weight="bold" transform="rotate(-0.5 50 40)">새우 까주는 사람</text>
+    <line x1="50" y1="50" x2="280" y2="47" stroke-width="2"/>
+    
+    <text x="150" y="200" font-size="20" font-style="italic" transform="rotate(0.3 150 200)">[Instrumental]</text>
+    
+    <text x="80" y="300" font-size="14" transform="rotate(-0.2 80 300)">음악이 말하는 모든 것</text>
+    <text x="120" y="350" font-size="14" transform="rotate(0.4 120 350)">가사가 필요 없는 순간</text>
+    <text x="90" y="400" font-size="14" transform="rotate(-0.3 90 400)">베이스와 기타가 그리는</text>
+    <text x="110" y="450" font-size="14" transform="rotate(0.2 110 450)">따뜻한 이야기</text>
+    <text x="400" y="740" font-size="14" font-style="italic" transform="rotate(-1.8 400 740)">- 하루살이 프로젝트</text>
+    <path d="M 15 400 L 25 390 L 35 400 L 25 410 Z" fill="#E85D9A" opacity="0.5"/>
+    <circle cx="500" cy="300" r="5" fill="#A8C5D1" opacity="0.7"/>
+  </g>
+</svg>

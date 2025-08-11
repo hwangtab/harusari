@@ -1,0 +1,97 @@
+{
+  "title": "알 수 없는 느낌",
+  "artist": "하루살이 프로젝트",
+  "year": 2025,
+  "description": "하루살이 프로젝트의 데뷔 앨범 '알 수 없는 느낌'은 현대 음악의 규범과 형식을 해체하고 재구성한 실험적 걸작이다. 개러지밴드라는 디지털 도구로 탄생한 13개의 트랙은 로파이(Lo-fi) 미학과 DIY 정신의 절묘한 조화를 보여준다. 완벽하지 않은 균열 속에서 피어나는 예술적 가치를 담고 있다.",
+  "credits": {
+    "composition": "김지혜",
+    "mixing": "황경하 (@스튜디오 놀)",
+    "design": "김한샘 (@오와오와 스튜디오)",
+    "musicVideo": "송창식, 신명"
+  },
+  "tracks": [
+    {
+      "id": 1,
+      "title": "괴로워!",
+      "duration": "1:32",
+      "file": "1.mp3"
+    },
+    {
+      "id": 2,
+      "title": "사람생각",
+      "duration": "2:24",
+      "file": "2.mp3"
+    },
+    {
+      "id": 3,
+      "title": "아침밥 먹은 날에 더 배고파",
+      "duration": "1:30",
+      "file": "3.mp3"
+    },
+    {
+      "id": 4,
+      "title": "새우 까주는 사람",
+      "duration": "1:38",
+      "file": "4.mp3"
+    },
+    {
+      "id": 5,
+      "title": "집을 나선 고양이",
+      "duration": "3:04",
+      "file": "5.mp3"
+    },
+    {
+      "id": 6,
+      "title": "알수없느낌",
+      "duration": "2:28",
+      "file": "6.mp3"
+    },
+    {
+      "id": 7,
+      "title": "지 않았다",
+      "duration": "1:41",
+      "file": "7.mp3"
+    },
+    {
+      "id": 8,
+      "title": "예술가는술담배마약커피없이못사나요",
+      "duration": "2:07",
+      "file": "8.mp3"
+    },
+    {
+      "id": 9,
+      "title": "다 니맘때로",
+      "duration": "1:29",
+      "file": "9.mp3"
+    },
+    {
+      "id": 10,
+      "title": "말 필요 없는 노래",
+      "duration": "1:54",
+      "file": "10.mp3"
+    },
+    {
+      "id": 11,
+      "title": "Do you want a feeling",
+      "duration": "3:03",
+      "file": "11.mp3"
+    },
+    {
+      "id": 12,
+      "title": "그림을 그려",
+      "duration": "1:48",
+      "file": "12.mp3"
+    },
+    {
+      "id": 13,
+      "title": "집중 두 시간",
+      "duration": "3:52",
+      "file": "13.mp3"
+    }
+  ],
+  "streamingLinks": {
+    "spotify": "https://open.spotify.com/album/example",
+    "appleMusic": "https://music.apple.com/album/example",
+    "bandcamp": "https://harusari.bandcamp.com/album/example"
+  }
+}

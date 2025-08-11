@@ -1,0 +1,38 @@
+<svg width="600" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paper"><feTurbulence baseFrequency="0.04" numOctaves="3" result="noise" seed="5"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/></filter>
+    <filter id="ink"><feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed="10"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="0.6"/><feGaussianBlur stdDeviation="0.2"/></filter>
+  </defs>
+  <rect width="100%" height="100%" fill="#F5F3E7" filter="url(#paper)"/>
+  <g filter="url(#ink)" font-family="cursive" font-size="16" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.3">
+    <text x="50" y="40" font-size="24" font-weight="bold" transform="rotate(-0.8 50 40)">집을 나선 고양이</text>
+    <line x1="50" y1="50" x2="240" y2="47" stroke-width="2"/>
+    
+    <text x="60" y="90" transform="rotate(0.3 60 90)">집을 나선 고양이</text>
+    
+    <text x="45" y="130" transform="rotate(-0.4 45 130)">집을 나선 고양이</text>
+    
+    <text x="35" y="180" font-size="12" transform="rotate(0.1 35 180)">어 엄마 어 어디야? 아 그래? 아 괜찮으신가 아 그래?</text>
+    <text x="40" y="200" font-size="12" transform="rotate(-0.2 40 200)">응 어 먹었어 엄마 나 집 다와가서 끊을게 어 엄마도 응</text>
+    
+    <text x="70" y="250" transform="rotate(0.5 70 250)">집이 나선 고양이</text>
+    
+    <text x="55" y="290" transform="rotate(-0.3 55 290)">집을 나선 고양이</text>
+    
+    <text x="40" y="330" transform="rotate(0.4 40 330)">집을 나선 고양이</text>
+    
+    <text x="65" y="370" transform="rotate(-0.2 65 370)">집이 낯선 고양이</text>
+    
+    <text x="50" y="410" transform="rotate(0.6 50 410)">집이 낯선 고양이</text>
+    
+    <text x="75" y="450" transform="rotate(-0.4 75 450)">집이 낯선 고양이</text>
+    
+    <text x="120" y="500" font-weight="bold" transform="rotate(0.3 120 500)">고양이</text>
+    
+    <text x="45" y="540" transform="rotate(-0.1 45 540)">집이 낯선 고양이</text>
+    <text x="380" y="750" font-size="14" font-style="italic" transform="rotate(-1.2 380 750)">- 하루살이 프로젝트</text>
+    <text x="390" y="770" font-size="12" font-style="italic" transform="rotate(-0.8 390 770)">2023년 늦은 밤에</text>
+    <circle cx="20" cy="500" r="3" fill="#8B7AAE" opacity="0.6"/>
+    <path d="M 480 400 Q 490 390 500 400 Q 510 410 520 400" fill="none" stroke="#E5A45C" stroke-width="1.5" opacity="0.7"/>
+  </g>
+</svg>

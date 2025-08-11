@@ -1,0 +1,12 @@
+Hidden Track: "숨겨진 이야기"
+Duration: 2:33
+Description: A special ambient track that plays only when users discover the secret file.
+
+This is a placeholder file. In a real implementation, this would be replaced with:
+1. An actual audio file (MP3/WAV format)
+2. Ambient/glitch sounds matching the album's aesthetic
+3. Whispered vocals or instrumental piece
+
+For demo purposes, the app will show the track in the playlist but won't have actual audio to play.
+
+Note: The lyrics image (track06.svg) is already generated and will display when this track is selected.

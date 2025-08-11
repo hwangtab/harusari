@@ -1,0 +1,35 @@
+<svg width="600" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paper">
+      <feTurbulence baseFrequency="0.04" numOctaves="3" result="noise" seed="2"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/>
+    </filter>
+    <filter id="ink">
+      <feTurbulence baseFrequency="0.9" numOctaves="4" result="noise" seed="7"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.6"/>
+      <feGaussianBlur stdDeviation="0.2"/>
+    </filter>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="#F5F3E7" filter="url(#paper)"/>
+  
+  <g filter="url(#ink)" font-family="cursive" font-size="16" fill="#2C2C2C" stroke="#2C2C2C" stroke-width="0.3">
+    
+    <text x="50" y="40" font-size="24" font-weight="bold" transform="rotate(-0.5 50 40)">사람생각</text>
+    <line x1="50" y1="50" x2="200" y2="47" stroke-width="2"/>
+    
+    <text x="80" y="120" transform="rotate(0.3 80 120)">사람들이 살아</text>
+    <text x="70" y="160" transform="rotate(-0.4 70 160)">사랑하는 이유</text>
+    
+    <text x="90" y="220" transform="rotate(0.6 90 220)">사람들이</text>
+    <text x="75" y="260" transform="rotate(-0.2 75 260)">사랑하는 이유</text>
+    
+    <text x="85" y="320" transform="rotate(0.4 85 320)">사람들이</text>
+    <text x="60" y="360" transform="rotate(-0.5 60 360)">살아가는 이유</text>
+    
+    <text x="400" y="720" font-size="14" font-style="italic" transform="rotate(-1.5 400 720)">- 하루살이 프로젝트</text>
+    
+    <path d="M 25 250 Q 35 240 45 250 Q 55 260 65 250" fill="none" stroke="#E85D9A" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="480" cy="150" r="4" fill="#5DBCE8" opacity="0.7"/>
+  </g>
+</svg>
