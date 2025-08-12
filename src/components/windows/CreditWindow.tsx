@@ -75,7 +75,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
     
     if (section.type === 'title') {
       return (
-        <h2 className="text-lg font-bold mb-6 text-green-300">
+        <h2 className="text-lg font-bold mb-6 text-green-300 break-words">
           {text}
           {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
         </h2>
@@ -179,7 +179,9 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000'
+             scrollbarColor: '#22c55e #000',
+             wordBreak: 'keep-all',
+             overflowWrap: 'anywhere'
            }}>
         <div className="space-y-4">
           {/* Completed sections */}

@@ -113,14 +113,16 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
       <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000'
+             scrollbarColor: '#22c55e #000',
+             wordBreak: 'keep-all',
+             overflowWrap: 'anywhere'
            }}>
         <div className="space-y-4">
           {/* Completed sections */}
           {displayedSections.map((section, index) => (
             <div key={index}>
               {section.type === 'subtitle' ? (
-                <h2 className="font-bold text-base mb-3 text-center text-green-300">
+                <h2 className="font-bold text-base mb-3 text-center text-green-300 break-words">
                   {section.content}
                 </h2>
               ) : (
@@ -135,7 +137,7 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
           {currentSection && (
             <div>
               {currentSection.type === 'subtitle' ? (
-                <h2 className="font-bold text-base mb-3 text-center text-green-300">
+                <h2 className="font-bold text-base mb-3 text-center text-green-300 break-words">
                   {currentDisplayText}
                   {!isComplete && <span className="animate-pulse text-green-400">█</span>}
                 </h2>

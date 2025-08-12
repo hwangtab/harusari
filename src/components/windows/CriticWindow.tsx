@@ -103,14 +103,14 @@ export default function CriticWindow({ windowId: _ }: CriticWindowProps) {
     
     if (section.type === 'main-title') {
       return (
-        <h1 className="font-bold text-lg mb-4 text-green-300">
+        <h1 className="font-bold text-lg mb-4 text-green-300 break-words">
           {text}
           {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
         </h1>
       );
     } else if (section.type === 'subtitle') {
       return (
-        <h3 className="font-bold text-base mb-2 mt-6 text-green-300">
+        <h3 className="font-bold text-base mb-2 mt-6 text-green-300 break-words">
           {text}
           {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
         </h3>
@@ -151,7 +151,9 @@ export default function CriticWindow({ windowId: _ }: CriticWindowProps) {
       <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000'
+             scrollbarColor: '#22c55e #000',
+             wordBreak: 'keep-all',
+             overflowWrap: 'anywhere'
            }}>
         <div className="space-y-4">
           {/* Completed sections */}
