@@ -5,18 +5,22 @@ import { AnimatePresence } from 'framer-motion';
 import Window from './Window';
 import AlbuminfoWindow from './windows/AlbuminfoWindow';
 import CreditWindow from './windows/CreditWindow';
+import CriticWindow from './windows/CriticWindow';
 import MusicPlayerWindow from './windows/MusicPlayerWindow';
 import ImageViewerWindow from './windows/ImageViewerWindow';
 import SecretWindow from './windows/SecretWindow';
 import LyricsWindow from './windows/LyricsWindow';
+import AboutWindow from './windows/AboutWindow';
 
 const windowComponents = {
   AlbuminfoWindow,
   CreditWindow,
+  CriticWindow,
   MusicPlayerWindow,
   ImageViewerWindow,
   SecretWindow,
-  LyricsWindow
+  LyricsWindow,
+  AboutWindow
 };
 
 export default function WindowManager() {

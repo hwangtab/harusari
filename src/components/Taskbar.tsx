@@ -6,10 +6,10 @@ import { useStore } from '@/store/useStore';
 import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 export default function Taskbar() {
-  const { windows, minimizeWindow, focusWindow } = useStore();
+  const { windows, minimizeWindow, focusWindow, openWindow } = useStore();
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [streamingLinks, setStreamingLinks] = useState([
     { name: 'Spotify', url: 'https://open.spotify.com/album/28GJo72pSM7tHJ9l7fLwzV', color: 'bg-green-500' },
     { name: 'Apple Music', url: 'https://music.apple.com/kr/album/harusali-project2-unknown-feeling/1824108606', color: 'bg-gray-800' },
@@ -151,6 +151,20 @@ export default function Taskbar() {
                 <motion.div
                   className="px-2 py-1 text-xs text-retro-black hover:bg-album-blue cursor-pointer"
                   whileHover={{ x: 2 }}
+                  onClick={() => {
+                    openWindow({
+                      id: `window-about-${Date.now()}`,
+                      title: 'About',
+                      component: 'AboutWindow',
+                      x: Math.round((screenWidth - 320) / 2),
+                      y: Math.round((screenHeight - 580 - 40) / 2),
+                      width: 320,
+                      height: 580,
+                      isMinimized: false,
+                      isMaximized: false
+                    });
+                    setStartMenuOpen(false);
+                  }}
                 >
                   About
                 </motion.div>

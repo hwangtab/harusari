@@ -154,7 +154,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
   };
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden">
+    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden flex flex-col">
       {/* Terminal scanline effect */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-400 to-transparent animate-pulse" 
@@ -165,7 +165,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       </div>
       
       {/* Terminal header */}
-      <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700">
+      <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
           <span className="text-green-400">user@harusari-desktop:~$</span>
           {showCommand ? (
@@ -176,7 +176,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
         </div>
       </div>
       
-      <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
+      <div className="flex-1 overflow-auto p-4 pb-6 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
              scrollbarColor: '#22c55e #000',
