@@ -329,7 +329,7 @@ export default function LyricsWindow({ windowId }: LyricsWindowProps) {
                 className="min-h-full"
               >
                 <div 
-                  className="font-handwriting text-lg leading-relaxed whitespace-pre-wrap text-retro-black"
+                  className="font-handwriting text-lg leading-relaxed whitespace-pre-wrap text-retro-black break-words"
                   style={{
                     fontFamily: "'YoonChildfundkoreaManSeh', 'Comic Sans MS', cursive",
                     fontSize: '18px',

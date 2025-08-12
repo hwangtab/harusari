@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface DesktopIconProps {
   icon: string;
@@ -27,6 +28,7 @@ export default function DesktopIcon({
 }: DesktopIconProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,9 +67,9 @@ export default function DesktopIcon({
       dragElastic={0}
       dragConstraints={{
         left: -50,
-        right: (typeof window !== 'undefined' ? window.innerWidth - 100 : 1200),
+        right: screenWidth - 100,
         top: -50,
-        bottom: (typeof window !== 'undefined' ? window.innerHeight - 150 : 700)
+        bottom: screenHeight - 150
       }}
       onDragEnd={(event, info) => {
         if (onPositionChange) {
@@ -109,7 +111,7 @@ export default function DesktopIcon({
       </motion.div>
       
       <motion.span
-        className={`block text-xs text-center px-1 py-0.5 rounded select-none ${
+        className={`block text-xs text-center px-1 py-0.5 rounded select-none break-words ${
           isHovered ? 'bg-album-purple bg-opacity-30' : ''
         }`}
         animate={glitchActive ? {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useStore } from '@/store/useStore';
+import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface MusicPlayerWindowProps {
   windowId: string;
@@ -29,6 +30,7 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [visualization, setVisualization] = useState<string[]>([]);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   // Initialize tracks from album.json
   useEffect(() => {
@@ -154,14 +156,39 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
 
   const handleLyricsClick = () => {
     if (currentTrackData) {
+      // Get current window position from DOM
+      const windowElement = document.getElementById(windowId);
+      const rect = windowElement?.getBoundingClientRect();
+      const currentWindowX = rect?.left || 100;
+      const currentWindowY = rect?.top || 100;
+      const currentWindowWidth = rect?.width || 400;
+      
+      const lyricsWindowWidth = 400;
+      const lyricsWindowHeight = 500;
+      
+      // Position lyrics window next to music player
+      let x, y;
+      if (currentWindowX + currentWindowWidth + lyricsWindowWidth < screenWidth - 20) {
+        // Open to the right if there's space
+        x = currentWindowX + currentWindowWidth + 10;
+      } else {
+        // Open to the left if not enough space on right
+        x = Math.max(10, currentWindowX - lyricsWindowWidth - 10);
+      }
+      
+      y = currentWindowY;
+      
+      // Ensure window stays within screen bounds
+      y = Math.max(10, Math.min(y, screenHeight - lyricsWindowHeight - 60));
+      
       openWindow({
         id: `lyrics-${currentTrack}-${Date.now()}`,
         title: `${currentTrackData.title} - 가사`,
         component: 'LyricsWindow',
-        x: 100,
-        y: 100,
-        width: 400,
-        height: 500,
+        x,
+        y,
+        width: lyricsWindowWidth,
+        height: lyricsWindowHeight,
         isMinimized: false,
         isMaximized: false
       });
@@ -187,7 +214,7 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
       <div className="p-3">
         {/* Current Track Info */}
         <div className="bg-retro-black p-2 mb-3 border border-cream">
-          <div className="text-album-orange text-sm">
+          <div className="text-album-orange text-sm break-words">
             {currentTrackData ? `${currentTrackData.id}. ${currentTrackData.title}` : '곡을 선택하세요'}
           </div>
           <div className="text-xs text-cream mt-1">
@@ -286,7 +313,7 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
           {tracks.map((track) => (
             <motion.div
               key={track.id}
-              className={`cursor-pointer p-1 hover:bg-album-purple ${
+              className={`cursor-pointer p-1 hover:bg-album-purple break-words ${
                 currentTrack === track.id ? 'bg-album-orange text-retro-black' : 'text-cream'
               }`}
               onClick={() => handleTrackSelect(track.id)}

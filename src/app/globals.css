@@ -59,6 +59,15 @@
   --color-glitch-cyan: var(--cyan);
   --color-retro-black: var(--black);
   
+  /* Terminal colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-green-200: #bbf7d0;
+  --color-green-300: #86efac;
+  --color-green-400: #4ade80;
+  --color-green-700: #15803d;
+  --color-gray-900: #111827;
+  
   /* Typography */
   --font-system: "GmarketSans", "MS Gothic", "굴림", "Gulim", sans-serif;
   --font-handwriting: "YoonChildfundkoreaManSeh", "Comic Sans MS", cursive;
@@ -180,7 +189,6 @@ button, a, [role="button"], .clickable {
 .desktop-icon span {
   font-size: 11px;
   display: block;
-  word-wrap: break-word;
 }
 
 /* Image viewer specific styles */

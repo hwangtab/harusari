@@ -110,7 +110,7 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
         </div>
       </div>
       
-      <div className="h-full overflow-auto p-4 text-sm leading-relaxed" 
+      <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
              scrollbarColor: '#22c55e #000'
@@ -124,7 +124,7 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
                   {section.content}
                 </h2>
               ) : (
-                <p className="leading-relaxed text-green-400">
+                <p className="leading-relaxed text-green-400 break-words">
                   {section.content}
                 </p>
               )}
@@ -140,7 +140,7 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
                   {!isComplete && <span className="animate-pulse text-green-400">█</span>}
                 </h2>
               ) : (
-                <p className="leading-relaxed text-green-400">
+                <p className="leading-relaxed text-green-400 break-words">
                   {currentDisplayText}
                   {!isComplete && <span className="animate-pulse text-green-300">█</span>}
                 </p>

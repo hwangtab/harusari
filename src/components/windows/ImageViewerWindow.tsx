@@ -155,12 +155,12 @@ export default function ImageViewerWindow({ windowId }: ImageViewerWindowProps) 
             {/* Hidden content overlay */}
             {hiddenImageRevealed && (
               <div className="absolute inset-0 bg-glitch-magenta/80 flex items-center justify-center text-white font-bold animate-pulse">
-                <div className="text-center p-4 bg-retro-black border-2 border-white">
+                <div className="text-center p-4 bg-retro-black border-2 border-white break-words">
                   <div className="mb-2">🔍 Hidden Message Revealed!</div>
-                  <div className="text-sm">
+                  <div className="text-sm break-words">
                     {currentImage.description}
                   </div>
-                  <div className="text-xs mt-2 opacity-70">
+                  <div className="text-xs mt-2 opacity-70 break-words">
                     Double-click again to hide
                   </div>
                 </div>

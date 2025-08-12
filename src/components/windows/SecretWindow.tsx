@@ -53,7 +53,7 @@ P.S. 이 메시지를 찾으신 당신에게
 `;
 
 export default function SecretWindow({ windowId }: SecretWindowProps) {
-  const { unlockHiddenTrack, hiddenTrackUnlocked } = useStore();
+  const { } = useStore();
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [glitchChars, setGlitchChars] = useState<Set<number>>(new Set());
@@ -83,15 +83,12 @@ export default function SecretWindow({ windowId }: SecretWindowProps) {
       
       return () => clearTimeout(timer);
     } else {
-      // Message completed, show heart animation and unlock hidden track
+      // Message completed, show heart animation
       setTimeout(() => {
         setHeartAnimation(true);
-        if (!hiddenTrackUnlocked) {
-          unlockHiddenTrack();
-        }
       }, 1000);
     }
-  }, [currentIndex, glitchChars, hiddenTrackUnlocked, unlockHiddenTrack]);
+  }, [currentIndex, glitchChars]);
 
   // Generate glitched version of character
   const getGlitchChar = (char: string, index: number) => {
@@ -130,7 +127,7 @@ export default function SecretWindow({ windowId }: SecretWindowProps) {
 
       {/* Main content */}
       <div className="relative z-10 p-4 h-full overflow-auto">
-        <div className="text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
           {displayText.split('').map((char, index) => {
             const isGlitched = glitchChars.has(index);
             return (
@@ -212,7 +209,7 @@ export default function SecretWindow({ windowId }: SecretWindowProps) {
             animate={{ opacity: [0, 1, 0.7] }}
             transition={{ delay: 3, duration: 2 }}
           >
-            💝 {hiddenTrackUnlocked ? '히든 트랙이 플레이어에 추가되었습니다!' : '히든 트랙을 해금중...'}
+            💝 비밀 메모를 발견했습니다!
           </motion.div>
         )}
       </div>

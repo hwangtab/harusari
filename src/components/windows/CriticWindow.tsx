@@ -117,7 +117,7 @@ export default function CriticWindow({ windowId: _ }: CriticWindowProps) {
       );
     } else if (section.type === 'paragraph') {
       return (
-        <p className="leading-relaxed text-green-400">
+        <p className="leading-relaxed text-green-400 break-words">
           {text}
           {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </p>
@@ -148,7 +148,7 @@ export default function CriticWindow({ windowId: _ }: CriticWindowProps) {
         </div>
       </div>
       
-      <div className="h-full overflow-auto p-4 text-sm leading-relaxed" 
+      <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
              scrollbarColor: '#22c55e #000'

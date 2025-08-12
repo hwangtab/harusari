@@ -85,7 +85,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       if (section.content.includes('@스튜디오 놀')) {
         const parts = text?.split('(@스튜디오 놀)') || [''];
         return (
-          <div className="text-green-400">
+          <div className="text-green-400 break-words">
             <strong className="text-green-300">믹싱, 마스터링:</strong> 황경하 (
             {parts[0]?.includes('황경하') && (
               <a 
@@ -105,7 +105,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       } else if (section.content.includes('@오와오와 스튜디오')) {
         const parts = text?.split('(@오와오와 스튜디오)') || [''];
         return (
-          <div className="text-green-400">
+          <div className="text-green-400 break-words">
             <strong className="text-green-300">디자인:</strong> 김한샘 (
             {parts[0]?.includes('김한샘') && (
               <a 
@@ -129,14 +129,14 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
           const beforeColon = text?.substring(0, colonIndex + 1);
           const afterColon = text?.substring(colonIndex + 1);
           return (
-            <div className="text-green-400">
+            <div className="text-green-400 break-words">
               <strong className="text-green-300">{beforeColon}</strong>{afterColon}
               {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
             </div>
           );
         } else {
           return (
-            <div className="text-green-400">
+            <div className="text-green-400 break-words">
               {text}
               {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
             </div>
@@ -176,7 +176,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
         </div>
       </div>
       
-      <div className="h-full overflow-auto p-4 text-sm leading-relaxed" 
+      <div className="h-full overflow-auto p-4 text-sm leading-relaxed break-words" 
            style={{ 
              textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
              scrollbarColor: '#22c55e #000'
