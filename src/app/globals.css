@@ -153,7 +153,6 @@ button, a, [role="button"], .clickable {
 
 .window-content {
   padding: 0;
-  background: var(--cream);
   min-height: 100px;
   box-sizing: border-box;
   overflow: hidden;
