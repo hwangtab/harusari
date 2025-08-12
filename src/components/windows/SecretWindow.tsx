@@ -23,15 +23,11 @@ const secretMessage = `secret_memo.txt
 하지만 그런 우리의 모습이 
 가장 아름다울 수도 있다고 생각해요.
 
-이 웹사이트도 일부러 '깨트렸어요'.
-완벽한 UI/UX를 추구하지 않고,
-오히려 버그처럼 보이는 요소들을 넣었어요.
-
 왜냐하면...
 우리의 삶도 그렇잖아요?
 
 항상 예상대로 되지 않고,
-가끔은 글리치처럼 엉뚱한 일들이 일어나고,
+가끔은 엉뚱한 일들이 일어나고,
 계획했던 것과는 전혀 다른 결과가 나와요.
 
 하지만 그런 예측불가능함 속에서
@@ -43,13 +39,8 @@ const secretMessage = `secret_memo.txt
 완벽하지 않은 우리도
 충분히 아름답고 소중하니까요.
 
-감사합니다.
-
-- 하루살이 프로젝트
-  2023년 어느 늦은 밤에
-
 P.S. 이 메시지를 찾으신 당신에게
-특별한 선물이 있어요...
+특별한 선물이 있어요... [여기를 클릭하세요]
 `;
 
 export default function SecretWindow({ windowId }: SecretWindowProps) {
@@ -128,22 +119,81 @@ export default function SecretWindow({ windowId }: SecretWindowProps) {
       {/* Main content */}
       <div className="relative z-10 p-4 h-full overflow-auto">
         <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-          {displayText.split('').map((char, index) => {
-            const isGlitched = glitchChars.has(index);
-            return (
-              <motion.span
-                key={index}
-                className={isGlitched ? 'text-glitch-magenta' : ''}
-                animate={isGlitched ? {
-                  scale: [1, 1.2, 1],
-                  color: ['var(--color-glitch-magenta)', 'var(--color-glitch-cyan)', 'var(--color-glitch-magenta)']
-                } : {}}
-                transition={{ duration: 0.2 }}
-              >
-                {getGlitchChar(char, index)}
-              </motion.span>
-            );
-          })}
+          {(() => {
+            // Split text before and after the link
+            const linkText = '[여기를 클릭하세요]';
+            const linkIndex = displayText.indexOf(linkText);
+            
+            if (linkIndex === -1) {
+              // No link found, render normally
+              return displayText.split('').map((char, index) => {
+                const isGlitched = glitchChars.has(index);
+                return (
+                  <motion.span
+                    key={index}
+                    className={isGlitched ? 'text-glitch-magenta' : ''}
+                    animate={isGlitched ? {
+                      scale: [1, 1.2, 1],
+                      color: ['var(--color-glitch-magenta)', 'var(--color-glitch-cyan)', 'var(--color-glitch-magenta)']
+                    } : {}}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {getGlitchChar(char, index)}
+                  </motion.span>
+                );
+              });
+            } else {
+              // Link found, render with clickable link
+              const beforeLink = displayText.substring(0, linkIndex);
+              const afterLink = displayText.substring(linkIndex + linkText.length);
+              
+              return (
+                <>
+                  {beforeLink.split('').map((char, index) => {
+                    const isGlitched = glitchChars.has(index);
+                    return (
+                      <motion.span
+                        key={`before-${index}`}
+                        className={isGlitched ? 'text-glitch-magenta' : ''}
+                        animate={isGlitched ? {
+                          scale: [1, 1.2, 1],
+                          color: ['var(--color-glitch-magenta)', 'var(--color-glitch-cyan)', 'var(--color-glitch-magenta)']
+                        } : {}}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {getGlitchChar(char, index)}
+                      </motion.span>
+                    );
+                  })}
+                  <motion.span
+                    className="text-album-purple underline cursor-pointer hover:text-glitch-cyan"
+                    onClick={() => window.open('https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sharing', '_blank')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {linkText}
+                  </motion.span>
+                  {afterLink.split('').map((char, index) => {
+                    const adjustedIndex = linkIndex + linkText.length + index;
+                    const isGlitched = glitchChars.has(adjustedIndex);
+                    return (
+                      <motion.span
+                        key={`after-${index}`}
+                        className={isGlitched ? 'text-glitch-magenta' : ''}
+                        animate={isGlitched ? {
+                          scale: [1, 1.2, 1],
+                          color: ['var(--color-glitch-magenta)', 'var(--color-glitch-cyan)', 'var(--color-glitch-magenta)']
+                        } : {}}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {getGlitchChar(char, adjustedIndex)}
+                      </motion.span>
+                    );
+                  })}
+                </>
+              );
+            }
+          })()}
           
           {currentIndex < secretMessage.length && (
             <motion.span
