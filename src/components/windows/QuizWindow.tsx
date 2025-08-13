@@ -145,14 +145,14 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
 
   if (gameState !== 'playing') {
     return (
-      <div className="h-full bg-gradient-to-br from-purple-100 to-blue-100 p-6 flex flex-col items-center justify-center text-center">
-        <div className="bg-white rounded-lg p-8 shadow-2xl border-4 border-purple-400 max-w-md">
-          <h2 className="text-2xl font-bold mb-4 text-purple-800">게임 완료!</h2>
-          <p className="text-lg mb-6 text-gray-700">{getResultMessage()}</p>
+      <div className="h-full bg-cream text-retro-black font-system p-6 flex flex-col items-center justify-center text-center">
+        <div className="bg-cream border-2 border-retro-black p-8 max-w-md">
+          <h2 className="text-2xl font-bold mb-4 text-retro-black">게임 완료!</h2>
+          <p className="text-lg mb-6 text-retro-black">{getResultMessage()}</p>
           
           {gameState === 'completed' && (
-            <div className="mb-6 p-4 bg-green-100 rounded-lg border-2 border-green-400">
-              <p className="text-green-800 font-semibold">
+            <div className="mb-6 p-4 bg-album-orange border-2 border-retro-black">
+              <p className="text-retro-black font-semibold">
                 🎁 비밀 파일이 열렸습니다!<br/>
                 음원 다운로드 링크를 확인해보세요.
               </p>
@@ -161,7 +161,7 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
           
           <button
             onClick={resetGame}
-            className="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg hover:bg-purple-600 transition-colors shadow-lg border-2 border-purple-700"
+            className="px-6 py-3 bg-album-purple text-cream font-bold border-2 border-retro-black hover:bg-album-purple/80 transition-colors"
           >
             🔄 다시 도전하기
           </button>
@@ -171,29 +171,29 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
   }
 
   return (
-    <div className="h-full bg-gradient-to-br from-yellow-100 to-orange-100 p-4">
+    <div className="h-full bg-cream text-retro-black font-system p-4">
       {/* Header */}
-      <div className="bg-blue-500 text-white p-4 rounded-t-lg border-4 border-blue-700 text-center">
+      <div className="bg-album-purple text-cream p-4 border-2 border-retro-black text-center">
         <h1 className="text-xl font-bold">🎵 하루살이 앨범 퀴즈 🎵</h1>
-        <p className="text-blue-100">
+        <p className="text-cream">
           문제 {currentQuestion + 1}/{questions.length} | 점수: {score}/{questions.length}
         </p>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-white border-4 border-blue-700 border-t-0 px-4 py-2">
-        <div className="bg-gray-200 rounded-full h-3">
+      <div className="bg-cream border-2 border-retro-black border-t-0 px-4 py-2">
+        <div className="bg-retro-black border border-retro-black h-3">
           <div 
-            className="bg-green-400 h-3 rounded-full transition-all duration-500"
+            className="bg-album-orange h-full transition-all duration-500"
             style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
 
       {/* Question Area */}
-      <div className="bg-white border-4 border-blue-700 border-t-0 p-6 flex-1">
+      <div className="bg-cream border-2 border-retro-black border-t-0 p-6 flex-1">
         <div className="text-center mb-8">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 leading-relaxed">
+          <h2 className="text-lg font-bold text-retro-black mb-4 leading-relaxed">
             {questions[currentQuestion].question}
           </h2>
           
@@ -215,18 +215,18 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
               key={index}
               onClick={() => handleAnswerSelect(index)}
               disabled={selectedAnswer !== null}
-              className={`p-4 text-left font-semibold rounded-lg border-3 transition-all duration-200 ${
+              className={`p-4 text-left font-semibold border-2 transition-all duration-200 ${
                 selectedAnswer === null
-                  ? 'bg-white border-gray-400 hover:bg-blue-50 hover:border-blue-400 hover:scale-105'
+                  ? 'bg-cream border-retro-black text-retro-black hover:bg-album-orange hover:border-retro-black'
                   : selectedAnswer === index
                   ? showResult
                     ? index === questions[currentQuestion].correct
-                      ? 'bg-green-200 border-green-500 text-green-800'
-                      : 'bg-red-200 border-red-500 text-red-800'
-                    : 'bg-blue-200 border-blue-500 text-blue-800'
+                      ? 'bg-album-orange border-retro-black text-retro-black'
+                      : 'bg-glitch-magenta border-retro-black text-cream'
+                    : 'bg-album-purple border-retro-black text-cream'
                   : index === questions[currentQuestion].correct && showResult
-                  ? 'bg-green-200 border-green-500 text-green-800'
-                  : 'bg-gray-100 border-gray-300 text-gray-600'
+                  ? 'bg-album-orange border-retro-black text-retro-black'
+                  : 'bg-cream border-retro-black text-retro-black opacity-60'
               }`}
             >
               <span className="font-bold mr-3">
@@ -242,7 +242,7 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
           <div className="text-center mt-8">
             <button
               onClick={handleNextQuestion}
-              className="px-8 py-4 bg-orange-400 text-white font-bold rounded-lg hover:bg-orange-500 transition-colors shadow-lg border-3 border-orange-600 text-lg"
+              className="px-8 py-4 bg-album-orange text-retro-black font-bold border-2 border-retro-black hover:bg-album-orange/80 transition-colors text-lg"
             >
               {currentQuestion === questions.length - 1 ? '🏁 결과 보기' : '➡️ 다음 문제'}
             </button>
