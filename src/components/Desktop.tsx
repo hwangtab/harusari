@@ -45,6 +45,12 @@ const desktopIconsData = [
     title: 'trashcan.ico',
     icon: '/images/icons/trash.svg',
     windowComponent: null // No window opens, just plays sound
+  },
+  {
+    id: 'instagram',
+    title: 'instagram.html',
+    icon: '/images/icons/instagram.svg',
+    windowComponent: null // External link, no window
   }
 ];
 
@@ -234,6 +240,9 @@ export default function Desktop() {
     } else if (icon.id === 'trash') {
       // Play noise sound
       playTrashSound();
+    } else if (icon.id === 'instagram') {
+      // Open Instagram link in new tab
+      window.open('https://www.instagram.com/9.17.p.m/', '_blank');
     }
   };
 
