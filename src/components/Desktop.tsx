@@ -175,10 +175,17 @@ export default function Desktop() {
           width: Math.min(580, maxWidth), 
           height: Math.min(720, maxHeight) 
         };
+      case 'AlbuminfoWindow':
+      case 'CreditWindow': 
+      case 'CriticWindow':
+        return { 
+          width: Math.min(550, maxWidth), 
+          height: Math.min(520, maxHeight) 
+        };
       case 'ReadmeWindow': 
         return { 
-          width: Math.min(500, maxWidth), 
-          height: Math.min(400, maxHeight) 
+          width: Math.min(550, maxWidth), 
+          height: Math.min(520, maxHeight) 
         };
       case 'LyricsWindow': 
         return { 
