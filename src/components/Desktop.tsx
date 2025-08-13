@@ -35,6 +35,12 @@ const desktopIconsData = [
     windowComponent: 'SpecialThanksWindow'
   },
   {
+    id: 'sketchbook',
+    title: 'sketchbook.exe',
+    icon: '/images/icons/sketchbook.svg',
+    windowComponent: 'SketchbookWindow'
+  },
+  {
     id: 'music-player',
     title: 'Music Player.exe',
     icon: '/images/icons/music-player.svg',
@@ -180,6 +186,11 @@ export default function Desktop() {
         return { 
           width: Math.min(580, maxWidth), 
           height: Math.min(720, maxHeight) 
+        };
+      case 'SketchbookWindow':
+        return { 
+          width: Math.min(900, maxWidth), 
+          height: Math.min(700, maxHeight) 
         };
       case 'AlbuminfoWindow':
       case 'CreditWindow': 

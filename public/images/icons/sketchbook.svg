@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Paper background -->
+  <rect x="3" y="2" width="26" height="28" fill="#FFF8DC" stroke="#D3D3D3" stroke-width="1"/>
+  
+  <!-- Spiral binding holes -->
+  <circle cx="7" cy="6" r="1" fill="#E0E0E0"/>
+  <circle cx="7" cy="10" r="1" fill="#E0E0E0"/>
+  <circle cx="7" cy="14" r="1" fill="#E0E0E0"/>
+  <circle cx="7" cy="18" r="1" fill="#E0E0E0"/>
+  <circle cx="7" cy="22" r="1" fill="#E0E0E0"/>
+  <circle cx="7" cy="26" r="1" fill="#E0E0E0"/>
+  
+  <!-- Crayon drawing -->
+  <path d="M12 8 Q16 12 20 8" stroke="#FF6B6B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M11 12 Q15 15 19 12" stroke="#4ECDC4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M13 16 Q17 19 21 16" stroke="#FFE66D" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Small crayon in corner -->
+  <rect x="22" y="22" width="6" height="2" fill="#FF8B94" rx="1"/>
+  <rect x="22" y="24" width="6" height="1" fill="#FFB3BA"/>
+  <circle cx="28.5" cy="23" r="0.5" fill="#333"/>
+</svg>

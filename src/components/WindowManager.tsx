@@ -7,6 +7,7 @@ import AlbuminfoWindow from './windows/AlbuminfoWindow';
 import CreditWindow from './windows/CreditWindow';
 import CriticWindow from './windows/CriticWindow';
 import SpecialThanksWindow from './windows/SpecialThanksWindow';
+import SketchbookWindow from './windows/SketchbookWindow';
 import MusicPlayerWindow from './windows/MusicPlayerWindow';
 import ImageViewerWindow from './windows/ImageViewerWindow';
 import SecretWindow from './windows/SecretWindow';
@@ -18,6 +19,7 @@ const windowComponents = {
   CreditWindow,
   CriticWindow,
   SpecialThanksWindow,
+  SketchbookWindow,
   MusicPlayerWindow,
   ImageViewerWindow,
   SecretWindow,

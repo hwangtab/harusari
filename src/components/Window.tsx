@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useStore, type Window as WindowType } from '@/store/useStore';
 import { useWindowDimensions } from '@/hooks/useWindowDimensions';
@@ -13,6 +13,7 @@ interface WindowProps {
 export default function Window({ window, children }: WindowProps) {
   const { closeWindow, focusWindow, moveWindow, resizeWindow, minimizeWindow, maximizeWindow } = useStore();
   const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const dragRef = useRef<HTMLDivElement>(null);
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
@@ -31,6 +32,48 @@ export default function Window({ window, children }: WindowProps) {
   const handleWindowClick = () => {
     focusWindow(window.id);
   };
+
+  const handleTitleBarMouseDown = (e: React.MouseEvent) => {
+    if (window.isMaximized) return;
+    
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - window.x,
+      y: e.clientY - window.y
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = Math.max(
+      -window.width + 50,
+      Math.min(screenWidth - 50, e.clientX - dragStart.x)
+    );
+    const newY = Math.max(
+      -window.height + 50,
+      Math.min(screenHeight - 50, e.clientY - dragStart.y)
+    );
+    
+    moveWindow(window.id, newX, newY);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // 전역 마우스 이벤트 리스너
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart, window.x, window.y]);
 
   if (window.isMinimized) {
     return null; // Window is minimized, don't render
@@ -54,32 +97,19 @@ export default function Window({ window, children }: WindowProps) {
       }}
       exit={{ scale: 0.8, opacity: 0 }}
       transition={{ duration: 0.2 }}
-      drag={!window.isMaximized}
-      dragMomentum={false}
-      dragElastic={0}
-      dragConstraints={{
-        left: -window.width + 50,
-        right: screenWidth - 50,
-        top: -window.height + 50,
-        bottom: screenHeight - 50
-      }}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={(event, info) => {
-        setIsDragging(false);
-        // Use offset calculation - simple and reliable method
-        moveWindow(window.id, window.x + info.offset.x, window.y + info.offset.y);
-      }}
     >
       {/* Title Bar */}
       <div 
         ref={dragRef}
-        className="window-titlebar flex justify-between items-center"
+        className={`window-titlebar flex justify-between items-center ${isDragging ? 'cursor-move' : 'cursor-default'}`}
+        onMouseDown={handleTitleBarMouseDown}
       >
         <span className="text-retro-black font-bold">{window.title}</span>
         <div className="flex space-x-1">
           <button
             className="w-4 h-4 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
             onClick={handleMinimize}
+            onMouseDown={(e) => e.stopPropagation()}
             title="Minimize"
           >
             _
@@ -87,6 +117,7 @@ export default function Window({ window, children }: WindowProps) {
           <button
             className="w-4 h-4 bg-album-blue hover:bg-album-blue/80 text-xs font-bold text-white border border-retro-black"
             onClick={handleMaximize}
+            onMouseDown={(e) => e.stopPropagation()}
             title="Maximize"
           >
             □
@@ -94,6 +125,7 @@ export default function Window({ window, children }: WindowProps) {
           <button
             className="w-4 h-4 bg-glitch-magenta hover:bg-glitch-magenta/80 text-xs font-bold text-white border border-retro-black"
             onClick={handleClose}
+            onMouseDown={(e) => e.stopPropagation()}
             title="Close"
           >
             ×
