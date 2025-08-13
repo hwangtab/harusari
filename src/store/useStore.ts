@@ -53,12 +53,6 @@ interface StoreState {
   setTracks: (tracks: Track[]) => void;
   nextTrack: () => void;
   previousTrack: () => void;
-  
-  // Desktop state
-  hiddenFileRevealed: boolean;
-  revealHiddenFile: () => void;
-  
-
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -173,10 +167,4 @@ export const useStore = create<StoreState>((set, get) => ({
       set({ currentTrack: tracks[prevIndex].id, currentTime: 0 });
     }
   },
-  
-  // Desktop state
-  hiddenFileRevealed: false,
-  revealHiddenFile: () => set({ hiddenFileRevealed: true }),
-  
-
 }));

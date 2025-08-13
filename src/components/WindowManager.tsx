@@ -12,7 +12,6 @@ import QuizWindow from './windows/QuizWindow';
 import SecretTxtWindow from './windows/SecretTxtWindow';
 import MusicPlayerWindow from './windows/MusicPlayerWindow';
 import ImageViewerWindow from './windows/ImageViewerWindow';
-import SecretWindow from './windows/SecretWindow';
 import LyricsWindow from './windows/LyricsWindow';
 import AboutWindow from './windows/AboutWindow';
 
@@ -26,7 +25,6 @@ const windowComponents = {
   SecretTxtWindow,
   MusicPlayerWindow,
   ImageViewerWindow,
-  SecretWindow,
   LyricsWindow,
   AboutWindow
 };

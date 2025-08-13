@@ -54,7 +54,7 @@ const desktopIconsData = [
   },
   {
     id: 'images',
-    title: 'images/',
+    title: 'images',
     icon: '/images/icons/folder.svg',
     windowComponent: 'ImageViewerWindow'
   },
@@ -73,8 +73,7 @@ const desktopIconsData = [
 ];
 
 export default function Desktop() {
-  const { openWindow, hiddenFileRevealed, revealHiddenFile } = useStore();
-  const [clickCount, setClickCount] = useState(0);
+  const { openWindow } = useStore();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   // 반응형 아이콘 위치 계산
@@ -201,7 +200,7 @@ export default function Desktop() {
       case 'QuizWindow':
         return { 
           width: Math.min(600, maxWidth), 
-          height: Math.min(750, maxHeight) 
+          height: Math.min(710, maxHeight) 
         };
       case 'AlbuminfoWindow':
       case 'CreditWindow': 
@@ -220,11 +219,6 @@ export default function Desktop() {
         return { 
           width: Math.min(400, maxWidth), 
           height: Math.min(500, maxHeight) 
-        };
-      case 'SecretWindow': 
-        return { 
-          width: Math.min(350, maxWidth), 
-          height: Math.min(250, maxHeight) 
         };
       default: 
         return { 
@@ -313,32 +307,11 @@ export default function Desktop() {
     }));
   };
 
-  const handleDesktopClick = (e: React.MouseEvent) => {
-    // Check if clicking on empty desktop area
-    if (e.target === e.currentTarget) {
-      setClickCount(prev => prev + 1);
-      
-      // Reveal hidden file after 5 clicks on empty space
-      if (clickCount >= 4 && !hiddenFileRevealed) {
-        revealHiddenFile();
-        setClickCount(0); // Reset click count after revealing
-      }
-    }
-  };
 
-  const hiddenFileIcon = {
-    id: 'secret',
-    title: 'secret_memo.txt',
-    icon: '/images/icons/readme.svg',
-    x: Math.random() * (screenWidth - 100) || 200,
-    y: Math.random() * (screenHeight - 200) || 150,
-    windowComponent: 'SecretWindow'
-  };
 
   return (
     <div 
       className="relative w-full h-screen overflow-hidden cursor-retro"
-      onClick={handleDesktopClick}
     >
       {/* Desktop Icons */}
       {desktopIconsData.map((iconData) => {
@@ -358,41 +331,6 @@ export default function Desktop() {
           />
         );
       })}
-      
-      {/* Hidden File Icon */}
-      {hiddenFileRevealed && (
-        <DesktopIcon
-          key={hiddenFileIcon.id}
-          icon={hiddenFileIcon.icon}
-          title={hiddenFileIcon.title}
-          x={hiddenFileIcon.x}
-          y={hiddenFileIcon.y}
-          onClick={() => {
-            if (hiddenFileIcon.windowComponent) {
-              const optimalSize = getOptimalWindowSize(hiddenFileIcon.windowComponent);
-              const position = getWindowPosition(
-                hiddenFileIcon.x,
-                hiddenFileIcon.y,
-                optimalSize.width,
-                optimalSize.height
-              );
-              
-              openWindow({
-                id: `window-${hiddenFileIcon.id}-${Date.now()}`,
-                title: hiddenFileIcon.title,
-                component: hiddenFileIcon.windowComponent,
-                x: position.x,
-                y: position.y,
-                width: optimalSize.width,
-                height: optimalSize.height,
-                isMinimized: false,
-                isMaximized: false
-              });
-            }
-          }}
-          className="animate-pulse"
-        />
-      )}
       
       {/* Window Manager */}
       <WindowManager />
