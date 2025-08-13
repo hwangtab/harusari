@@ -201,7 +201,7 @@ export default function Desktop() {
       case 'QuizWindow':
         return { 
           width: Math.min(600, maxWidth), 
-          height: Math.min(650, maxHeight) 
+          height: Math.min(750, maxHeight) 
         };
       case 'AlbuminfoWindow':
       case 'CreditWindow': 
