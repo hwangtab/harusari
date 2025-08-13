@@ -12,37 +12,37 @@ import { playTrashSound } from '@/utils/audioUtils';
 const desktopIconsData = [
   {
     id: 'albuminfo',
-    title: 'albuminfo.txt',
+    title: 'albuminfo',
     icon: '/images/icons/readme.svg',
     windowComponent: 'AlbuminfoWindow'
   },
   {
     id: 'credit',
-    title: 'credit.txt',
+    title: 'credit',
     icon: '/images/icons/readme.svg',
     windowComponent: 'CreditWindow'
   },
   {
     id: 'critic',
-    title: 'critic.txt',
+    title: 'critic',
     icon: '/images/icons/readme.svg',
     windowComponent: 'CriticWindow'
   },
   {
     id: 'specialthanks',
-    title: 'specialthanks.txt',
+    title: 'specialthanks',
     icon: '/images/icons/readme.svg',
     windowComponent: 'SpecialThanksWindow'
   },
   {
     id: 'sketchbook',
-    title: 'sketchbook.exe',
+    title: 'sketchbook',
     icon: '/images/icons/sketchbook.svg',
     windowComponent: 'SketchbookWindow'
   },
   {
     id: 'music-player',
-    title: 'Music Player.exe',
+    title: 'Music Player',
     icon: '/images/icons/music-player.svg',
     windowComponent: 'MusicPlayerWindow'
   },
@@ -54,13 +54,13 @@ const desktopIconsData = [
   },
   {
     id: 'trash',
-    title: 'trashcan.ico',
+    title: 'trashcan',
     icon: '/images/icons/trash.svg',
     windowComponent: null // No window opens, just plays sound
   },
   {
     id: 'instagram',
-    title: 'instagram.html',
+    title: 'instagram',
     icon: '/images/icons/instagram.svg',
     windowComponent: null // External link, no window
   }

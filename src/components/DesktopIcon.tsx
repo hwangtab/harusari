@@ -147,7 +147,7 @@ export default function DesktopIcon({
       </motion.div>
       
       <motion.span
-        className={`block text-xs text-center px-1 py-0.5 rounded select-none break-words ${
+        className={`block text-xs text-center px-1 py-0.5 rounded select-none break-all max-w-full ${
           isHovered ? 'bg-album-purple bg-opacity-30' : ''
         }`}
         animate={glitchActive ? {
