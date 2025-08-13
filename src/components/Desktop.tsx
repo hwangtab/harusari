@@ -29,6 +29,12 @@ const desktopIconsData = [
     windowComponent: 'CriticWindow'
   },
   {
+    id: 'specialthanks',
+    title: 'specialthanks.txt',
+    icon: '/images/icons/readme.svg',
+    windowComponent: 'SpecialThanksWindow'
+  },
+  {
     id: 'music-player',
     title: 'Music Player.exe',
     icon: '/images/icons/music-player.svg',
@@ -178,6 +184,7 @@ export default function Desktop() {
       case 'AlbuminfoWindow':
       case 'CreditWindow': 
       case 'CriticWindow':
+      case 'SpecialThanksWindow':
         return { 
           width: Math.min(550, maxWidth), 
           height: Math.min(520, maxHeight) 
