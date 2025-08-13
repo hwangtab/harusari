@@ -41,6 +41,12 @@ const desktopIconsData = [
     windowComponent: 'SketchbookWindow'
   },
   {
+    id: 'quiz',
+    title: 'quiz',
+    icon: '/images/icons/quiz.svg',
+    windowComponent: 'QuizWindow'
+  },
+  {
     id: 'music-player',
     title: 'Music Player',
     icon: '/images/icons/music-player.svg',
@@ -191,6 +197,11 @@ export default function Desktop() {
         return { 
           width: Math.min(900, maxWidth), 
           height: Math.min(700, maxHeight) 
+        };
+      case 'QuizWindow':
+        return { 
+          width: Math.min(600, maxWidth), 
+          height: Math.min(650, maxHeight) 
         };
       case 'AlbuminfoWindow':
       case 'CreditWindow': 
