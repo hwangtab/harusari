@@ -191,21 +191,24 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
       </div>
 
       {/* Question Area */}
-      <div className="bg-cream border-2 border-retro-black border-t-0 p-6 flex-1">
-        <div className="text-center mb-8">
+      <div className="bg-cream border-2 border-retro-black border-t-0 p-6 flex-1 overflow-y-auto">
+        <div className="text-center mb-6">
           <h2 className="text-lg font-bold text-retro-black mb-4 leading-relaxed">
             {questions[currentQuestion].question}
           </h2>
           
-          {showResult && (
-            <div className={`text-xl font-bold mb-4 ${
-              selectedAnswer === questions[currentQuestion].correct 
-                ? 'text-green-600' 
-                : 'text-red-600'
-            }`}>
-              {getAnswerFeedback()}
-            </div>
-          )}
+          {/* Fixed height feedback area to prevent layout shift */}
+          <div className="h-12 flex items-center justify-center mb-4">
+            {showResult && (
+              <div className={`text-xl font-bold ${
+                selectedAnswer === questions[currentQuestion].correct 
+                  ? 'text-green-600' 
+                  : 'text-red-600'
+              }`}>
+                {getAnswerFeedback()}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Answer Options */}
@@ -239,7 +242,7 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
 
         {/* Next Button */}
         {selectedAnswer !== null && (
-          <div className="text-center mt-8">
+          <div className="text-center mt-6">
             <button
               onClick={handleNextQuestion}
               className="px-8 py-4 bg-album-orange text-retro-black font-bold border-2 border-retro-black hover:bg-album-orange/80 transition-colors text-lg"
