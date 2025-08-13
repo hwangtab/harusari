@@ -223,12 +223,12 @@ export default function Desktop() {
     };
   };;
 
-  const handleIconClick = (icon: typeof desktopIcons[0]) => {
+  const handleIconClick = (icon: typeof desktopIconsData[0] & { x: number; y: number }) => {
     if (icon.windowComponent) {
       const optimalSize = getOptimalWindowSize(icon.windowComponent);
       const position = getWindowPosition(
-        iconPositions[icon.id]?.x || icon.x,
-        iconPositions[icon.id]?.y || icon.y,
+        icon.x,
+        icon.y,
         optimalSize.width,
         optimalSize.height
       );
@@ -253,12 +253,12 @@ export default function Desktop() {
     }
   };
 
-  const handleIconDoubleClick = (icon: typeof desktopIcons[0]) => {
+  const handleIconDoubleClick = (icon: typeof desktopIconsData[0] & { x: number; y: number }) => {
     if (icon.id === 'images' && icon.windowComponent) {
       const optimalSize = getOptimalWindowSize(icon.windowComponent);
       const position = getWindowPosition(
-        iconPositions[icon.id]?.x || icon.x,
-        iconPositions[icon.id]?.y || icon.y,
+        icon.x,
+        icon.y,
         optimalSize.width,
         optimalSize.height
       );
