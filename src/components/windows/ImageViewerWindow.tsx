@@ -52,7 +52,7 @@ export default function ImageViewerWindow({ windowId }: ImageViewerWindowProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [glitchActive, setGlitchActive] = useState(false);
-  const [hiddenImageRevealed, setHiddenImageRevealed] = useState(false);
+
 
   const currentImage = albumImages[currentImageIndex];
 
@@ -95,14 +95,7 @@ export default function ImageViewerWindow({ windowId }: ImageViewerWindowProps) 
     }
   };
 
-  const handleImageDoubleClick = () => {
-    // Reveal hidden content with glitch effect
-    setGlitchActive(true);
-    setTimeout(() => {
-      setGlitchActive(false);
-      setHiddenImageRevealed(!hiddenImageRevealed);
-    }, 300);
-  };
+
 
   return (
     <div className="h-full flex flex-col bg-cream text-retro-black font-system">
@@ -149,31 +142,17 @@ export default function ImageViewerWindow({ windowId }: ImageViewerWindowProps) 
               className={`max-w-full max-h-full object-contain border-2 border-retro-black ${
                 glitchActive ? 'animate-pulse filter contrast-150 hue-rotate-180' : ''
               }`}
-              onDoubleClick={handleImageDoubleClick}
+
             />
             
-            {/* Hidden content overlay */}
-            {hiddenImageRevealed && (
-              <div className="absolute inset-0 bg-glitch-magenta/80 flex items-center justify-center text-white font-bold animate-pulse">
-                <div className="text-center p-4 bg-retro-black border-2 border-white break-words">
-                  <div className="mb-2">🔍 Hidden Message Revealed!</div>
-                  <div className="text-sm break-words">
-                    {currentImage.description}
-                  </div>
-                  <div className="text-xs mt-2 opacity-70 break-words">
-                    Double-click again to hide
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
         )}
       </div>
 
       {/* Status Bar */}
-      <div className="flex-shrink-0 bg-cream p-1 text-xs border-t border-retro-black flex justify-between">
+      <div className="flex-shrink-0 bg-cream p-1 text-xs border-t border-retro-black">
         <span>{currentImage.title}</span>
-        <span>Double-click for secrets ✨</span>
       </div>
     </div>
   );

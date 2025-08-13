@@ -58,9 +58,7 @@ interface StoreState {
   hiddenFileRevealed: boolean;
   revealHiddenFile: () => void;
   
-  // Hidden track state
-  hiddenTrackUnlocked: boolean;
-  unlockHiddenTrack: () => void;
+
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -180,19 +178,5 @@ export const useStore = create<StoreState>((set, get) => ({
   hiddenFileRevealed: false,
   revealHiddenFile: () => set({ hiddenFileRevealed: true }),
   
-  // Hidden track state
-  hiddenTrackUnlocked: false,
-  unlockHiddenTrack: () => {
-    const hiddenTrack: Track = {
-      id: 14,
-      title: "숨겨진 이야기",
-      duration: "2:33",
-      file: "hidden_track.mp3"
-    };
-    
-    set((state) => ({
-      hiddenTrackUnlocked: true,
-      tracks: [...state.tracks, hiddenTrack]
-    }));
-  }
+
 }));

@@ -1,51 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
+import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 import DesktopIcon from './DesktopIcon';
 import WindowManager from './WindowManager';
 import Taskbar from './Taskbar';
 import { playTrashSound } from '@/utils/audioUtils';
 
-const desktopIcons = [
+// 기본 아이콘 정보 (위치는 동적으로 계산됨)
+const desktopIconsData = [
   {
     id: 'albuminfo',
     title: 'albuminfo.txt',
     icon: '/images/icons/readme.svg',
-    x: 50,
-    y: 50,
     windowComponent: 'AlbuminfoWindow'
   },
   {
     id: 'credit',
     title: 'credit.txt',
     icon: '/images/icons/readme.svg',
-    x: 50,
-    y: 150,
     windowComponent: 'CreditWindow'
+  },
+  {
+    id: 'critic',
+    title: 'critic.txt',
+    icon: '/images/icons/readme.svg',
+    windowComponent: 'CriticWindow'
   },
   {
     id: 'music-player',
     title: 'Music Player.exe',
     icon: '/images/icons/music-player.svg',
-    x: 150,
-    y: 50,
     windowComponent: 'MusicPlayerWindow'
   },
   {
     id: 'images',
     title: 'images/',
     icon: '/images/icons/folder.svg',
-    x: 250,
-    y: 50,
     windowComponent: 'ImageViewerWindow'
   },
   {
     id: 'trash',
     title: 'trashcan.ico',
     icon: '/images/icons/trash.svg',
-    x: 350,
-    y: 50,
     windowComponent: null // No window opens, just plays sound
   }
 ];
@@ -53,12 +51,85 @@ const desktopIcons = [
 export default function Desktop() {
   const { openWindow, hiddenFileRevealed, revealHiddenFile } = useStore();
   const [clickCount, setClickCount] = useState(0);
-  const [iconPositions, setIconPositions] = useState(
-    desktopIcons.reduce((acc, icon) => {
-      acc[icon.id] = { x: icon.x, y: icon.y };
-      return acc;
-    }, {} as Record<string, { x: number; y: number }>)
-  );
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  // 반응형 아이콘 위치 계산
+  const getResponsiveIconPositions = () => {
+    const iconSize = 80; // 아이콘 + 텍스트 충돌 영역
+    const padding = 30;
+    const minDistance = screenWidth < 600 ? 60 : 80; // 작은 화면에서는 더 촘촘하게
+    
+    // 아이콘 배치 가능한 영역
+    const minX = padding;
+    const maxX = screenWidth - iconSize - padding;
+    const minY = padding;
+    const maxY = screenHeight - iconSize - 120; // 태스크바 + 여유 공간
+    
+    const positions: Record<string, { x: number; y: number }> = {};
+    const placedPositions: { x: number; y: number }[] = [];
+    
+    // 시드 기반 랜덤 함수 (개선된 버전)
+    const getSeededRandom = (str: string, salt: number = 0) => {
+      let hash = salt;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 32비트 정수로 변환
+      }
+      return Math.abs(hash % 10000) / 10000; // 0-1 사이 값 반환
+    };
+    
+    // 두 점 간 거리 계산
+    const getDistance = (pos1: {x: number, y: number}, pos2: {x: number, y: number}) => {
+      return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
+    };
+    
+    // 충돌 체크
+    const isValidPosition = (newPos: {x: number, y: number}) => {
+      return placedPositions.every(existingPos => 
+        getDistance(newPos, existingPos) >= minDistance
+      );
+    };
+    
+    // 각 아이콘을 완전 랜덤하게 배치
+    desktopIconsData.forEach((iconData, index) => {
+      let attempts = 0;
+      let position = { x: 0, y: 0 };
+      
+      // 최대 50번 시도하여 충돌하지 않는 위치 찾기
+      do {
+        const seedX = getSeededRandom(iconData.id, attempts * 2);
+        const seedY = getSeededRandom(iconData.id, attempts * 2 + 1);
+        
+        position = {
+          x: minX + seedX * (maxX - minX),
+          y: minY + seedY * (maxY - minY)
+        };
+        
+        attempts++;
+      } while (!isValidPosition(position) && attempts < 50);
+      
+      // 50번 시도해도 안 되면 강제 배치 (폴백)
+      if (attempts >= 50) {
+        position = {
+          x: minX + (index * 100) % (maxX - minX),
+          y: minY + Math.floor(index * 100 / (maxX - minX)) * 100
+        };
+      }
+      
+      positions[iconData.id] = position;
+      placedPositions.push(position);
+    });
+    
+    return positions;
+  };;;
+
+  const [iconPositions, setIconPositions] = useState(getResponsiveIconPositions());
+
+  // 화면 크기 변경 시 아이콘 위치 재계산
+  useEffect(() => {
+    setIconPositions(getResponsiveIconPositions());
+  }, [screenWidth, screenHeight]);
 
   // Calculate optimal height for MusicPlayer based on content
   const calculateMusicPlayerHeight = () => {
@@ -82,8 +153,6 @@ export default function Desktop() {
 
   // Get optimal window size based on component type
   const getOptimalWindowSize = (component: string) => {
-    const screenWidth = typeof globalThis !== 'undefined' ? globalThis.innerWidth : 1200;
-    const screenHeight = typeof globalThis !== 'undefined' ? globalThis.innerHeight : 800;
     
     const maxWidth = Math.floor(screenWidth * 0.9);
     const maxHeight = Math.floor(screenHeight * 0.9);
@@ -123,16 +192,40 @@ export default function Desktop() {
     }
   };
 
+  // Get window position based on icon location and screen dimensions
+  const getWindowPosition = (iconX: number, iconY: number, windowWidth: number, windowHeight: number) => {
+    // 화면에서 유효한 위치 범위 계산 (아이콘 위치 완전 무시)
+    const minX = 20;
+    const maxX = Math.max(100, screenWidth - windowWidth - 20);
+    const minY = 20;
+    const maxY = Math.max(100, screenHeight - windowHeight - 80); // 태스크바 고려
+    
+    // 화면 전체에서 완전 랜덤 위치 생성
+    const x = minX + Math.random() * (maxX - minX);
+    const y = minY + Math.random() * (maxY - minY);
+    
+    return { 
+      x: Math.round(x), 
+      y: Math.round(y) 
+    };
+  };;
+
   const handleIconClick = (icon: typeof desktopIcons[0]) => {
     if (icon.windowComponent) {
       const optimalSize = getOptimalWindowSize(icon.windowComponent);
+      const position = getWindowPosition(
+        iconPositions[icon.id]?.x || icon.x,
+        iconPositions[icon.id]?.y || icon.y,
+        optimalSize.width,
+        optimalSize.height
+      );
       
       openWindow({
         id: `window-${icon.id}-${Date.now()}`,
         title: icon.title,
         component: icon.windowComponent,
-        x: icon.x + 100,
-        y: icon.y + 100,
+        x: position.x,
+        y: position.y,
         width: optimalSize.width,
         height: optimalSize.height,
         isMinimized: false,
@@ -147,13 +240,19 @@ export default function Desktop() {
   const handleIconDoubleClick = (icon: typeof desktopIcons[0]) => {
     if (icon.id === 'images' && icon.windowComponent) {
       const optimalSize = getOptimalWindowSize(icon.windowComponent);
+      const position = getWindowPosition(
+        iconPositions[icon.id]?.x || icon.x,
+        iconPositions[icon.id]?.y || icon.y,
+        optimalSize.width,
+        optimalSize.height
+      );
       
       openWindow({
         id: `window-${icon.id}-${Date.now()}`,
         title: icon.title,
         component: icon.windowComponent,
-        x: icon.x + 100,
-        y: icon.y + 100,
+        x: position.x,
+        y: position.y,
         width: optimalSize.width,
         height: optimalSize.height,
         isMinimized: false,
@@ -186,8 +285,8 @@ export default function Desktop() {
     id: 'secret',
     title: 'secret_memo.txt',
     icon: '/images/icons/readme.svg',
-    x: Math.random() * (typeof globalThis !== 'undefined' ? globalThis.innerWidth - 100 : 800) || 200,
-    y: Math.random() * (typeof globalThis !== 'undefined' ? globalThis.innerHeight - 200 : 600) || 150,
+    x: Math.random() * (screenWidth - 100) || 200,
+    y: Math.random() * (screenHeight - 200) || 150,
     windowComponent: 'SecretWindow'
   };
 
@@ -197,18 +296,23 @@ export default function Desktop() {
       onClick={handleDesktopClick}
     >
       {/* Desktop Icons */}
-      {desktopIcons.map((icon) => (
-        <DesktopIcon
-          key={icon.id}
-          icon={icon.icon}
-          title={icon.title}
-          x={iconPositions[icon.id]?.x || icon.x}
-          y={iconPositions[icon.id]?.y || icon.y}
-          onClick={() => handleIconClick(icon)}
-          onDoubleClick={() => handleIconDoubleClick(icon)}
-          onPositionChange={(x, y) => handlePositionChange(icon.id, x, y)}
-        />
-      ))}
+      {desktopIconsData.map((iconData) => {
+        const position = iconPositions[iconData.id];
+        if (!position) return null;
+        
+        return (
+          <DesktopIcon
+            key={iconData.id}
+            icon={iconData.icon}
+            title={iconData.title}
+            x={position.x}
+            y={position.y}
+            onClick={() => handleIconClick({ ...iconData, x: position.x, y: position.y })}
+            onDoubleClick={() => handleIconDoubleClick({ ...iconData, x: position.x, y: position.y })}
+            onPositionChange={(x, y) => handlePositionChange(iconData.id, x, y)}
+          />
+        );
+      })}
       
       {/* Hidden File Icon */}
       {hiddenFileRevealed && (
@@ -218,7 +322,29 @@ export default function Desktop() {
           title={hiddenFileIcon.title}
           x={hiddenFileIcon.x}
           y={hiddenFileIcon.y}
-          onClick={() => handleIconClick(hiddenFileIcon)}
+          onClick={() => {
+            if (hiddenFileIcon.windowComponent) {
+              const optimalSize = getOptimalWindowSize(hiddenFileIcon.windowComponent);
+              const position = getWindowPosition(
+                hiddenFileIcon.x,
+                hiddenFileIcon.y,
+                optimalSize.width,
+                optimalSize.height
+              );
+              
+              openWindow({
+                id: `window-${hiddenFileIcon.id}-${Date.now()}`,
+                title: hiddenFileIcon.title,
+                component: hiddenFileIcon.windowComponent,
+                x: position.x,
+                y: position.y,
+                width: optimalSize.width,
+                height: optimalSize.height,
+                isMinimized: false,
+                isMaximized: false
+              });
+            }
+          }}
           className="animate-pulse"
         />
       )}

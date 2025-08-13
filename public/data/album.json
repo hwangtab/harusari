@@ -90,8 +90,16 @@
     }
   ],
   "streamingLinks": {
-    "spotify": "https://open.spotify.com/album/example",
-    "appleMusic": "https://music.apple.com/album/example",
-    "bandcamp": "https://harusari.bandcamp.com/album/example"
+    "spotify": "https://open.spotify.com/album/28GJo72pSM7tHJ9l7fLwzV",
+    "appleMusic": "https://music.apple.com/kr/album/harusali-project2-unknown-feeling/1824108606",
+    "amazon": "https://music.amazon.com/albums/B0FGCRWTVL?ref=dm_ff_amazonmusic_3p&tag=featurefm-20",
+    "tidal": "https://tidal.com/album/445573254",
+    "youtubeMusic": "https://api.ffm.to/sl/e/c/ymn3qx1?cd=eyJ1YSI6eyJ1YSI6Ik1vemlsbGEvNS4wIChNYWNpbnRvc2g7IEludGVsIE1hYyBPUyBYIDEwXzE1XzcpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS8xMzkuMC4wLjAgU2FmYXJpLzUzNy4zNiIsImJyb3dzZXIiOnsibmFtZSI6IkNocm9tZSIsInZlcnNpb24iOiIxMzkuMC4wLjAiLCJtYWpvciI6IjEzOSJ9LCJjcHUiOnt9LCJkZXZpY2UiOnsibW9kZWwiOiJNYWNpbnRvc2giLCJ2ZW5kb3IiOiJBcHBsZSJ9LCJlbmdpbmUiOnsibmFtZSI6IkJsaW5rIiwidmVyc2lvbiI6IjEzOS4wLjAuMCJ9LCJvcyI6eyJuYW1lIjoibWFjT1MiLCJ2ZXJzaW9uIjoiMTAuMTUuNyJ9fSwiY2xpZW50Ijp7InJpZCI6IjU1NDI2N2I1LTE5YjktNDNkOC1hNjY0LTdiZTA0ZmNjODY3ZiIsInNpZCI6IjE1MDA0ZDYxLWEyYjItNDhmNy05OGFiLWMxZGZjNTI4YTVhMSIsImlwIjoiMjIwLjg2LjU1LjE4NyIsInJlZiI6IiIsImhvc3QiOiJvcmNkLmNvIiwibGFuZyI6ImtvIiwiaXBDb3VudHJ5IjoiS1IifSwiaXNXZWJwU3VwcG9ydGVkIjp0cnVlLCJnZHByRW5mb3JjZSI6ZmFsc2UsImNvdW50cnlDb2RlIjoiS1IiLCJpc0JvdCI6ZmFsc2UsInVzZUFmZiI6Im9yaWdpbiIsInZpZCI6IjEzZWMyNWI2LWI3NjUtNGU5OC04M2YyLWNiZTIyOTU1MmRmMCIsImlkIjoiNjg3ZWZlZTg0ODAwMDAwYjAwZWM5MzZmIiwicHJ2Ijp0cnVlLCJpc1ByZVIiOmZhbHNlLCJ0em8iOi01NDAsImNoIjpudWxsLCJhbiI6bnVsbCwiZGVzdFVybCI6Imh0dHBzOi8vbXVzaWMueW91dHViZS5jb20vcGxheWxpc3Q_bGlzdD1PTEFLNXV5X25YTWhyU1NYakFGaUtUeUVlSjJqWEI0Q1BXSDhaQ0VWWSZzcmM9RkZNJmxpZD0wMDAwMDAwMC02ODdlLWZlZTgtNDgwMC0wMDBiMDBlYzkzNmYmY2lkPWVlZjI2N2Y2LTNmNTEtNWQ0Ni1hNzE3LTcxMWFjMTJiY2Y3NiIsInNydmMiOiJ5b3V0dWJlbXVzaWMiLCJwcm9kdWN0Ijoic21hcnRsaW5rIiwic2hvcnRJZCI6InltbjNxeDEiLCJpc0F1dGhvcml6YXRpb25SZXF1aXJlZCI6ZmFsc2UsIm93bmVyIjoiNjcxMDdlNzMyOTAwMDBhODIxNTljYWQyIiwidGVuYW50IjoiNWJkOWUzNDA3OGY0ZjAzZmE3MmE5ZmIxIiwiYXIiOiI2ODY0Yjc5ZjI2MDAwMDBiMDA1Njk1OTkiLCJpc1Nob3J0TGluayI6ZmFsc2UsIm5hdGl2ZSI6ZmFsc2V9&_gl=1*1htoqjt*_gcl_au*MTM4MTM0NDg3MS4xNzQ4NTkwMDU1",
+    "bugs": "https://music.bugs.co.kr/album/38275340?wl_ref=list_ab_03",
+    "flo": "https://www.music-flo.com/detail/album/440277705/albumtrack",
+    "melon": "https://www.melon.com/album/detail.htm?albumId=11902523",
+    "vibe": "https://vibe.naver.com/album/34653151",
+    "genie": "https://www.genie.co.kr/detail/albumInfo?axnm=86516805",
+    "bandcamp": "https://harusari.bandcamp.com"
   }
 }

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useStore, type Window as WindowType } from '@/store/useStore';
+import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface WindowProps {
   window: WindowType;
@@ -13,6 +14,7 @@ export default function Window({ window, children }: WindowProps) {
   const { closeWindow, focusWindow, moveWindow, resizeWindow, minimizeWindow, maximizeWindow } = useStore();
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<HTMLDivElement>(null);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const handleClose = () => {
     closeWindow(window.id);
@@ -57,9 +59,9 @@ export default function Window({ window, children }: WindowProps) {
       dragElastic={0}
       dragConstraints={{
         left: -window.width + 50,
-        right: (typeof globalThis !== 'undefined' ? globalThis.innerWidth : 1200) - 50,
+        right: screenWidth - 50,
         top: -window.height + 50,
-        bottom: (typeof globalThis !== 'undefined' ? globalThis.innerHeight : 800) - 50
+        bottom: screenHeight - 50
       }}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={(event, info) => {
@@ -76,7 +78,7 @@ export default function Window({ window, children }: WindowProps) {
         <span className="text-retro-black font-bold">{window.title}</span>
         <div className="flex space-x-1">
           <button
-            className="w-4 h-4 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black"
+            className="w-4 h-4 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
             onClick={handleMinimize}
             title="Minimize"
           >
