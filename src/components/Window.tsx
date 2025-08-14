@@ -50,6 +50,12 @@ export default function Window({ window, children }: WindowProps) {
   const handleTitleBarTouchStart = (e: TouchEvent) => {
     if (window.isMaximized) return;
     
+    // 버튼 영역 터치인지 확인
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'BUTTON' || target.closest('button')) {
+      return; // 버튼 영역에서는 드래그 시작하지 않음
+    }
+    
     e.preventDefault(); // 이제 passive: false로 작동함
     const touch = e.touches[0];
     setIsDragging(true);
@@ -92,7 +98,7 @@ export default function Window({ window, children }: WindowProps) {
     );
     
     moveWindow(window.id, newX, newY);
-  };;;
+  };
 
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging) return;
@@ -130,7 +136,7 @@ export default function Window({ window, children }: WindowProps) {
     );
     
     moveWindow(window.id, newX, newY);
-  };;;
+  };
 
   const handleMouseUp = () => {
     setIsDragging(false);
@@ -197,25 +203,43 @@ export default function Window({ window, children }: WindowProps) {
         <span className="text-retro-black font-bold">{window.title}</span>
         <div className="flex space-x-1">
           <button
-            className="w-4 h-4 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
+            className="w-5 h-5 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
             onClick={handleMinimize}
             onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleMinimize();
+            }}
             title="Minimize"
           >
             _
           </button>
           <button
-            className="w-4 h-4 bg-album-blue hover:bg-album-blue/80 text-xs font-bold text-white border border-retro-black"
+            className="w-5 h-5 bg-album-blue hover:bg-album-blue/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
             onClick={handleMaximize}
             onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleMaximize();
+            }}
             title="Maximize"
           >
             □
           </button>
           <button
-            className="w-4 h-4 bg-glitch-magenta hover:bg-glitch-magenta/80 text-xs font-bold text-white border border-retro-black"
+            className="w-5 h-5 bg-glitch-magenta hover:bg-glitch-magenta/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
             onClick={handleClose}
             onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClose();
+            }}
             title="Close"
           >
             ×
@@ -224,7 +248,7 @@ export default function Window({ window, children }: WindowProps) {
       </div>
 
       {/* Window Content */}
-      <div className="window-content overflow-auto" style={{ height: 'calc(100% - 28px)' }}>
+      <div className="window-content overflow-auto" style={{ height: screenWidth < 768 ? 'calc(100% - 42px)' : 'calc(100% - 36px)' }}>
         {children}
       </div>
 

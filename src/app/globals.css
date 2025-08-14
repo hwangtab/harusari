@@ -268,8 +268,8 @@ button, a, [role="button"], .clickable {
 .window-titlebar {
   background: var(--album-purple);
   color: white;
-  padding: 2px 4px;
-  font-size: 11px;
+  padding: 6px 8px;
+  font-size: 12px;
   user-select: none;
   cursor: move;
 }
@@ -311,6 +311,14 @@ button, a, [role="button"], .clickable {
 /* Window titlebar touch optimization */
 .window-titlebar {
   touch-action: none; /* 터치 스크롤 방지로 드래그 향상 */
+}
+
+/* Mobile titlebar enhancement */
+@media (max-width: 768px) {
+  .window-titlebar {
+    padding: 8px 10px; /* 모바일에서 더 큰 터치 영역 */
+    font-size: 13px;
+  }
 }
 
 /* Image viewer specific styles */
