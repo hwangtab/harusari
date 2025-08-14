@@ -46,7 +46,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
 --------------------------------------------------------
                          사랑을 담아, 김지혜 올림
                          Harusari Project 2025
-========================================================`;
+--------------------------------------------------------`;
 
   const isComplete = currentIndex >= secretContent.length;
 
@@ -81,7 +81,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
           const afterLink = line.substring(line.indexOf(linkMatch[0]) + linkMatch[0].length);
           
           return (
-            <div key={index} className="text-green-400 break-words">
+            <div key={index} className="text-green-300 break-words">
               {beforeLink}
               <a 
                 href={linkMatch[0]}
@@ -112,7 +112,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
         );
       } else if (line.includes('하루살이 프로젝트') || line.includes('Harusari Project')) {
         return (
-          <div key={index} className="text-green-300 font-bold text-center break-words">
+          <div key={index} className="text-white font-bold text-center break-words" style={{ textShadow: '0 0 15px currentColor' }}>
             {line}
           </div>
         );
@@ -126,7 +126,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
         return <div key={index} className="h-2"></div>;
       } else {
         return (
-          <div key={index} className="text-green-400 break-words">
+          <div key={index} className="text-green-300 break-words">
             {line}
           </div>
         );
@@ -135,12 +135,12 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
   };
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden flex flex-col">
+    <div className="h-full bg-black text-green-300 font-mono relative overflow-hidden flex flex-col" style={{ textShadow: '0 0 10px currentColor' }}>
       {/* Terminal scanline effect */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-400 to-transparent animate-pulse" 
+        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-300 to-transparent animate-pulse" 
              style={{
-               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 197, 94, 0.1) 2px, rgba(34, 197, 94, 0.1) 4px)',
+               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(134, 239, 172, 0.1) 2px, rgba(134, 239, 172, 0.1) 4px)',
                animation: 'scanline 2s linear infinite'
              }}></div>
       </div>
@@ -148,19 +148,18 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-400">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusari-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat secret.txt</span>
           ) : (
-            <span className="animate-pulse text-green-400">█</span>
+            <span className="animate-pulse text-green-300">█</span>
           )}
         </div>
       </div>
       
       <div className="flex-1 overflow-auto p-4 pb-6 text-sm leading-relaxed break-words" 
            style={{ 
-             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000',
+             scrollbarColor: '#86efac #000',
              wordBreak: 'keep-all',
              overflowWrap: 'anywhere'
            }}>
@@ -169,7 +168,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
           
           {/* Cursor */}
           {!isComplete && (
-            <span className="animate-pulse text-green-400">█</span>
+            <span className="animate-pulse text-green-300">█</span>
           )}
         </div>
         

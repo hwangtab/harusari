@@ -75,9 +75,9 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
     
     if (section.type === 'title') {
       return (
-        <h2 className="text-lg font-bold mb-6 text-green-300 break-words">
+        <h2 className="text-lg font-bold mb-6 text-white break-words" style={{ textShadow: '0 0 15px currentColor' }}>
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </h2>
       );
     } else if (section.type === 'credit') {
@@ -85,7 +85,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       if (section.content.includes('@스튜디오 놀')) {
         const parts = text?.split('(@스튜디오 놀)') || [''];
         return (
-          <div className="text-green-400 break-words">
+          <div className="text-green-300 break-words">
             <strong className="text-green-300">믹싱, 마스터링:</strong> 황경하 (
             {parts[0]?.includes('황경하') && (
               <a 
@@ -99,13 +99,13 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
             )}
             {!parts[0]?.includes('황경하') && text}
             )
-            {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+            {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
           </div>
         );
       } else if (section.content.includes('@오와오와 스튜디오')) {
         const parts = text?.split('(@오와오와 스튜디오)') || [''];
         return (
-          <div className="text-green-400 break-words">
+          <div className="text-green-300 break-words">
             <strong className="text-green-300">디자인:</strong> 김한샘 (
             {parts[0]?.includes('김한샘') && (
               <a 
@@ -119,7 +119,7 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
             )}
             {!parts[0]?.includes('김한샘') && text}
             )
-            {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+            {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
           </div>
         );
       } else {
@@ -129,37 +129,37 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
           const beforeColon = text?.substring(0, colonIndex + 1);
           const afterColon = text?.substring(colonIndex + 1);
           return (
-            <div className="text-green-400 break-words">
+            <div className="text-green-300 break-words">
               <strong className="text-green-300">{beforeColon}</strong>{afterColon}
-              {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+              {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
             </div>
           );
         } else {
           return (
-            <div className="text-green-400 break-words">
+            <div className="text-green-300 break-words">
               {text}
-              {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+              {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
             </div>
           );
         }
       }
     } else if (section.type === 'copyright') {
       return (
-        <div className="mt-8 pt-4 border-t border-green-700 text-xs opacity-80 text-green-400">
+        <div className="mt-8 pt-4 border-t border-green-700 text-xs opacity-80 text-green-300">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     }
   };
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden flex flex-col">
+    <div className="h-full bg-black text-green-300 font-mono relative overflow-hidden flex flex-col" style={{ textShadow: '0 0 10px currentColor' }}>
       {/* Terminal scanline effect */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-400 to-transparent animate-pulse" 
+        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-300 to-transparent animate-pulse" 
              style={{
-               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 197, 94, 0.1) 2px, rgba(34, 197, 94, 0.1) 4px)',
+               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(134, 239, 172, 0.1) 2px, rgba(134, 239, 172, 0.1) 4px)',
                animation: 'scanline 2s linear infinite'
              }}></div>
       </div>
@@ -167,19 +167,18 @@ export default function CreditWindow({ windowId: _ }: CreditWindowProps) {
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-400">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusari-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat credit.txt</span>
           ) : (
-            <span className="animate-pulse text-green-400">█</span>
+            <span className="animate-pulse text-green-300">█</span>
           )}
         </div>
       </div>
       
       <div className="flex-1 overflow-auto p-4 pb-6 text-sm leading-relaxed break-words" 
            style={{ 
-             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000',
+             scrollbarColor: '#86efac #000',
              wordBreak: 'keep-all',
              overflowWrap: 'anywhere'
            }}>

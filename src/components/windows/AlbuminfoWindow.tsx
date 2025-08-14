@@ -88,12 +88,12 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
   const currentDisplayText = currentSection ? currentSection.content.substring(0, currentCharIndex) : '';
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden flex flex-col">
+    <div className="h-full bg-black text-green-300 font-mono relative overflow-hidden flex flex-col" style={{ textShadow: '0 0 10px currentColor' }}>
       {/* Terminal scanline effect */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-400 to-transparent animate-pulse" 
+        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-300 to-transparent animate-pulse" 
              style={{
-               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 197, 94, 0.1) 2px, rgba(34, 197, 94, 0.1) 4px)',
+               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(134, 239, 172, 0.1) 2px, rgba(134, 239, 172, 0.1) 4px)',
                animation: 'scanline 2s linear infinite'
              }}></div>
       </div>
@@ -101,19 +101,18 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-400">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusari-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat albuminfo.txt</span>
           ) : (
-            <span className="animate-pulse text-green-400">█</span>
+            <span className="animate-pulse text-green-300">█</span>
           )}
         </div>
       </div>
       
       <div className="flex-1 overflow-auto p-4 pb-6 text-sm leading-relaxed break-words" 
            style={{ 
-             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000',
+             scrollbarColor: '#86efac #000',
              wordBreak: 'keep-all',
              overflowWrap: 'anywhere'
            }}>
@@ -122,11 +121,11 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
           {displayedSections.map((section, index) => (
             <div key={index}>
               {section.type === 'subtitle' ? (
-                <h2 className="font-bold text-base mb-3 text-center text-green-300 break-words">
+                <h2 className="font-bold text-base mb-3 text-center text-white break-words" style={{ textShadow: '0 0 15px currentColor' }}>
                   {section.content}
                 </h2>
               ) : (
-                <p className="leading-relaxed text-green-400 break-words">
+                <p className="leading-relaxed text-green-300 break-words">
                   {section.content}
                 </p>
               )}
@@ -137,12 +136,12 @@ export default function AlbuminfoWindow({ windowId }: AlbuminfoWindowProps) {
           {currentSection && (
             <div>
               {currentSection.type === 'subtitle' ? (
-                <h2 className="font-bold text-base mb-3 text-center text-green-300 break-words">
+                <h2 className="font-bold text-base mb-3 text-center text-white break-words" style={{ textShadow: '0 0 15px currentColor' }}>
                   {currentDisplayText}
-                  {!isComplete && <span className="animate-pulse text-green-400">█</span>}
+                  {!isComplete && <span className="animate-pulse text-green-300">█</span>}
                 </h2>
               ) : (
-                <p className="leading-relaxed text-green-400 break-words">
+                <p className="leading-relaxed text-green-300 break-words">
                   {currentDisplayText}
                   {!isComplete && <span className="animate-pulse text-green-300">█</span>}
                 </p>

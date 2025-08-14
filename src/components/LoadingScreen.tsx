@@ -101,7 +101,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black text-green-400 font-mono text-sm flex flex-col justify-center items-start p-8 z-50"
+        className="fixed inset-0 bg-black text-green-300 font-mono text-sm flex flex-col justify-center items-start p-8 z-50"
+        style={{ textShadow: '0 0 10px currentColor' }} // CRT 글로우 효과
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 1 }}
@@ -110,8 +111,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           {/* Display previous lines */}
           {bootSequence.slice(0, currentLine).map((line, index) => (
             <div key={index} className="mb-1">
-              {line === '하루살이 프로젝트 2: 알 수 없는 느낌' ? (
-                <div className="text-yellow-300 font-bold text-lg my-4">
+{line === '하루살이 프로젝트 2: 알 수 없는 느낌' ? (
+                <div className="text-white font-bold text-lg my-4" style={{ textShadow: '0 0 15px currentColor' }}>
                   {line}
                 </div>
               ) : (
@@ -123,8 +124,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
           {/* Current typing line */}
           {currentLine < bootSequence.length && (
             <div className="mb-1">
-              {bootSequence[currentLine] === '하루살이 프로젝트 2: 알 수 없는 느낌' ? (
-                <div className="text-yellow-300 font-bold text-lg my-4">
+{bootSequence[currentLine] === '하루살이 프로젝트 2: 알 수 없는 느낌' ? (
+                <div className="text-white font-bold text-lg my-4" style={{ textShadow: '0 0 15px currentColor' }}>
                   {displayedText}
                   {showCursor && isTyping && <span className="animate-pulse">|</span>}
                 </div>

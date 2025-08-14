@@ -111,63 +111,63 @@ export default function SpecialThanksWindow({ windowId: _ }: SpecialThanksWindow
     
     if (section.type === 'title') {
       return (
-        <h1 className="text-xl font-bold mb-4 text-green-300 break-words text-center">
+        <h1 className="text-xl font-bold mb-4 text-white break-words text-center" style={{ textShadow: '0 0 15px currentColor' }}>
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </h1>
       );
     } else if (section.type === 'subtitle') {
       return (
-        <h2 className="text-lg mb-6 text-green-400 break-words text-center">
+        <h2 className="text-lg mb-6 text-green-300 break-words text-center">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </h2>
       );
     } else if (section.type === 'separator') {
       return (
         <div className="text-green-700 mb-4 text-center">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     } else if (section.type === 'header') {
       return (
         <div className="text-green-300 mb-4 font-semibold">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     } else if (section.type === 'person') {
       return (
-        <div className="text-green-400 mb-2 ml-4">
+        <div className="text-green-300 mb-2 ml-4">
           • {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     } else if (section.type === 'message') {
       return (
-        <div className="text-green-400 mb-3 mt-6 break-words">
+        <div className="text-green-300 mb-3 mt-6 break-words">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     } else if (section.type === 'footer') {
       return (
         <div className="mt-8 pt-4 border-t border-green-700 text-green-300 text-center font-semibold">
           {text}
-          {isTyping && !isComplete && <span className="animate-pulse text-green-400">█</span>}
+          {isTyping && !isComplete && <span className="animate-pulse text-green-300">█</span>}
         </div>
       );
     }
   };
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono relative overflow-hidden flex flex-col">
+    <div className="h-full bg-black text-green-300 font-mono relative overflow-hidden flex flex-col" style={{ textShadow: '0 0 10px currentColor' }}>
       {/* Terminal scanline effect */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-400 to-transparent animate-pulse" 
+        <div className="h-full w-full opacity-10 bg-gradient-to-b from-transparent via-green-300 to-transparent animate-pulse" 
              style={{
-               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34, 197, 94, 0.1) 2px, rgba(34, 197, 94, 0.1) 4px)',
+               backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(134, 239, 172, 0.1) 2px, rgba(134, 239, 172, 0.1) 4px)',
                animation: 'scanline 2s linear infinite'
              }}></div>
       </div>
@@ -175,19 +175,18 @@ export default function SpecialThanksWindow({ windowId: _ }: SpecialThanksWindow
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-400">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusari-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat specialthanks.txt</span>
           ) : (
-            <span className="animate-pulse text-green-400">█</span>
+            <span className="animate-pulse text-green-300">█</span>
           )}
         </div>
       </div>
       
       <div className="flex-1 overflow-auto p-4 pb-6 text-sm leading-relaxed break-words" 
            style={{ 
-             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
-             scrollbarColor: '#22c55e #000',
+             scrollbarColor: '#86efac #000',
              wordBreak: 'keep-all',
              overflowWrap: 'anywhere'
            }}>
