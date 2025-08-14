@@ -45,7 +45,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
 
 --------------------------------------------------------
                          사랑을 담아, 김지혜 올림
-                         Harusari Project 2025
+                         Harusali Project 2025
 --------------------------------------------------------`;
 
   const isComplete = currentIndex >= secretContent.length;
@@ -110,7 +110,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
             {line}
           </div>
         );
-      } else if (line.includes('하루살이 프로젝트') || line.includes('Harusari Project')) {
+      } else if (line.includes('하루살이 프로젝트') || line.includes('Harusali Project')) {
         return (
           <div key={index} className="text-white font-bold text-center break-words" style={{ textShadow: '0 0 15px currentColor' }}>
             {line}
@@ -148,7 +148,7 @@ https://drive.google.com/drive/folders/18JuRA2luy8AWM69_e3j2JVdGZ6KKrIc3?usp=sha
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-300">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusali-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat secret.txt</span>
           ) : (

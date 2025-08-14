@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const bootSequence = [
-  'HARUSARI_OS loading...',
+  'HARUSALI_OS loading...',
   'Checking memory... OK',
   'Initializing sound system... OK',
   'Loading album data... OK',

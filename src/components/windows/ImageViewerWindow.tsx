@@ -41,8 +41,8 @@ const albumImages = [
   },
   {
     id: 6,
-    title: "Harusari Logo",
-    src: "/images/album/harusari.png",
+    title: "Harusali Logo",
+    src: "/images/album/harusali.png",
     description: "하루살이 프로젝트 로고"
   }
 ];

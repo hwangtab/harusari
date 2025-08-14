@@ -139,7 +139,7 @@ export default function CriticWindow({ windowId: _ }: CriticWindowProps) {
       {/* Terminal header */}
       <div className="bg-gray-900 text-green-300 px-4 py-2 text-xs border-b border-green-700 flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <span className="text-green-300">user@harusari-desktop:~$</span>
+          <span className="text-green-300">user@harusali-desktop:~$</span>
           {showCommand ? (
             <span className="text-white">cat critic.txt</span>
           ) : (
