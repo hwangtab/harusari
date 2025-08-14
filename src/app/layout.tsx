@@ -24,10 +24,34 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://harusari.vercel.app'),
   title: "하루살이 프로젝트 2: 알 수 없는 느낌",
-  description: "Interactive album archive website for Harusari Project - 90년대 컴퓨터 환경에서 탐험하는 인터랙티브 앨범 아카이브",
-  keywords: ["하루살이", "음악", "앨범", "인터랙티브", "90년대", "레트로", "아트", "김지혜", "Harusari Project"],
-  authors: [{ name: "김지혜 (Harusari Project)" }],
-  creator: "김지혜 (Harusari Project)",
+  description: "하루살이 프로젝트의 실험적 로파이 데뷔앨범 '알 수 없는 느낌' - 의도된 불완전함과 DIY 정신이 담긴 13곡의 인디 사운드를 90년대 데스크톱 인터페이스로 경험하는 인터랙티브 음악 아카이브",
+  keywords: [
+    // 프로젝트명
+    "하루살이", "하루살이 프로젝트", "Harusari Project",
+    
+    // 앨범 정보
+    "알 수 없는 느낌", "Unknown Feeling", "데뷔앨범", "2025년 앨범",
+    
+    // 음악 장르/스타일
+    "실험음악", "experimental music", "로파이", "lo-fi", "lofi",
+    "인디음악", "indie music", "DIY 음악", "홈레코딩",
+    "앰비언트", "ambient", "아방가르드", "avant-garde",
+    "개러지밴드", "GarageBand", "노이즈", "소음음악",
+    
+    // 미학/컨셉
+    "불완전함의 미학", "의도된 불완전함", "완벽하지 않은",
+    "깨진 사운드", "날것의", "조악함", "투박한",
+    
+    // 인터랙티브/디지털아트
+    "90년대", "레트로", "인터랙티브", "웹아트", "디지털아트",
+    "데스크톱 인터페이스", "Windows 98", "터미널",
+    
+    // 한국 음악 씬
+    "한국 인디", "Korean indie", "한국 실험음악", 
+    "Korean experimental", "K-indie", "언더그라운드"
+  ],
+  authors: [{ name: "Harusari Project" }],
+  creator: "Harusari Project",
   robots: "index, follow",
   openGraph: {
     type: "website",
@@ -35,7 +59,7 @@ export const metadata: Metadata = {
     url: "https://harusari.vercel.app",
     siteName: "하루살이 프로젝트 2: 알 수 없는 느낌",
     title: "하루살이 프로젝트 2: 알 수 없는 느낌",
-    description: "90년대 컴퓨터 환경에서 탐험하는 인터랙티브 앨범 아카이브 - 음악, 이미지, 크레용 그리기까지",
+    description: "실험적 로파이 인디 앨범 '알 수 없는 느낌' - 의도된 불완전함과 DIY 정신이 담긴 13곡을 90년대 데스크톱에서 경험하는 인터랙티브 아카이브",
     images: [
       {
         url: "/images/album/album_front.png",
@@ -54,9 +78,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "하루살이 프로젝트 2: 알 수 없는 느낌",
-    description: "90년대 컴퓨터 환경에서 탐험하는 인터랙티브 앨범 아카이브",
+    description: "실험적 로파이 인디 앨범 - 의도된 불완전함과 DIY 정신이 담긴 13곡을 90년대 데스크톱에서 경험",
     images: ["/images/album/album_front.png"],
-    creator: "@9_17_p_m",
   },
   other: {
     "mobile-web-app-capable": "yes", // apple-mobile-web-app-capable 대체
