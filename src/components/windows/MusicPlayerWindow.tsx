@@ -307,23 +307,21 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
           <span>{Math.round(volume * 100)}%</span>
         </div>
 
-        {/* Track List - Scrollable for mobile */}
-        <div className="bg-retro-black border border-cream text-xs flex flex-col" style={{ minHeight: '200px', maxHeight: '300px' }}>
-          <div className="text-album-orange p-2 pb-1 flex-shrink-0">Track List:</div>
-          <div className="flex-1 overflow-auto px-2 pb-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5A45C #2C2C2C' }}>
-            {tracks.map((track) => (
-              <motion.div
-                key={track.id}
-                className={`cursor-pointer p-1 hover:bg-album-purple break-words ${
-                  currentTrack === track.id ? 'bg-album-orange text-retro-black' : 'text-cream'
-                }`}
-                onClick={() => handleTrackSelect(track.id)}
-                whileHover={{ x: 2 }}
-              >
-                {track.id}. {track.title} ({track.duration})
-              </motion.div>
-            ))}
-          </div>
+        {/* Track List - All Tracks Visible */}
+        <div className="bg-retro-black border border-cream p-2 text-xs">
+          <div className="text-album-orange mb-2">Track List:</div>
+          {tracks.map((track) => (
+            <motion.div
+              key={track.id}
+              className={`cursor-pointer p-1 hover:bg-album-purple break-words ${
+                currentTrack === track.id ? 'bg-album-orange text-retro-black' : 'text-cream'
+              }`}
+              onClick={() => handleTrackSelect(track.id)}
+              whileHover={{ x: 2 }}
+            >
+              {track.id}. {track.title} ({track.duration})
+            </motion.div>
+          ))}
         </div>
 
         {/* Lyrics Button */}
