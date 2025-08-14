@@ -24,6 +24,13 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://harusali.vercel.app'),
   title: "하루살이 프로젝트 2: 알 수 없는 느낌",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' }
+    ],
+    apple: '/icon.png',
+  },
   description: "하루살이 프로젝트의 실험적 로파이 데뷔앨범 '알 수 없는 느낌' - 의도된 불완전함과 DIY 정신이 담긴 13곡의 인디 사운드를 90년대 데스크톱 인터페이스로 경험하는 인터랙티브 음악 아카이브",
   keywords: [
     // 프로젝트명
@@ -62,16 +69,25 @@ export const metadata: Metadata = {
     description: "실험적 로파이 인디 앨범 '알 수 없는 느낌' - 의도된 불완전함과 DIY 정신이 담긴 13곡을 90년대 데스크톱에서 경험하는 인터랙티브 아카이브",
     images: [
       {
-        url: "/images/album/album_front.png",
+        url: "https://harusali.vercel.app/images/album/album_front.png",
         width: 800,
         height: 800,
         alt: "하루살이 프로젝트 2 앨범 커버",
+        type: "image/png",
       },
       {
-        url: "/images/album/background.png", 
+        url: "https://harusali.vercel.app/images/album/album_art.png", 
+        width: 800,
+        height: 800,
+        alt: "하루살이 프로젝트 2 앨범 아트워크",
+        type: "image/png",
+      },
+      {
+        url: "https://harusali.vercel.app/images/album/background.png", 
         width: 800,
         height: 800,
         alt: "하루살이 프로젝트 2 배경 아트워크",
+        type: "image/png",
       },
     ],
   },
@@ -79,7 +95,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "하루살이 프로젝트 2: 알 수 없는 느낌",
     description: "실험적 로파이 인디 앨범 - 의도된 불완전함과 DIY 정신이 담긴 13곡을 90년대 데스크톱에서 경험",
-    images: ["/images/album/album_front.png"],
+    images: ["https://harusali.vercel.app/images/album/album_front.png"],
   },
   other: {
     "mobile-web-app-capable": "yes", // apple-mobile-web-app-capable 대체
