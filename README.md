@@ -148,3 +148,5 @@ Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ---
 
 *This website is itself a completed interactive digital art piece that embodies the album's artistic vision.*
+
+**Auto-deploy test commit** - Testing Vercel GitHub integration
