@@ -262,7 +262,7 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
               }
             </button>
           </div>
-        })
+        )}
         </div>
       </div>
     </div>
