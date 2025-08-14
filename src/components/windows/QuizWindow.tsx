@@ -196,8 +196,9 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
         </div>
       </div>
 
-      {/* Question Area */}
-      <div className="bg-cream border-2 border-retro-black border-t-0 p-6 flex-1 overflow-y-auto">
+      {/* Question Area - Scrollable */}
+      <div className="bg-cream border-2 border-retro-black border-t-0 flex-1 flex flex-col overflow-hidden">
+        <div className="p-6 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E5A45C #F5F3E7' }}>
         <div className="text-center mb-6">
           <h2 className="text-lg font-bold text-retro-black mb-4 leading-relaxed">
             {questions[currentQuestion].question}
@@ -261,7 +262,8 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
               }
             </button>
           </div>
-        )}
+        })
+        </div>
       </div>
     </div>
   );

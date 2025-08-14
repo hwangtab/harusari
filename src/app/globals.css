@@ -1,5 +1,36 @@
 @import "tailwindcss";
 
+/* Retro-style scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-album-orange) var(--color-retro-black);
+}
+
+/* Webkit scrollbar styling for Chrome/Safari */
+*::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-retro-black);
+  border: 2px inset var(--color-cream);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-album-orange);
+  border: 2px outset var(--color-album-orange);
+  border-radius: 0;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-album-purple);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--color-retro-black);
+}
+
 @font-face {
   font-family: 'GmarketSans';
   src: url('/fonts/GmarketSansTTFLight.ttf') format('truetype');
@@ -318,6 +349,17 @@ button, a, [role="button"], .clickable {
   .window-titlebar {
     padding: 8px 10px; /* 모바일에서 더 큰 터치 영역 */
     font-size: 13px;
+  }
+  
+  /* Mobile scroll optimization */
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Improve scroll momentum on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
