@@ -26,6 +26,13 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const [showCursor, setShowCursor] = useState(true);
+  
+  // 모바일 최적화를 위한 속도 설정
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const typingSpeed = isMobile ? 8 : 15;  // 모바일에서 더 빠른 타이핑
+  const lineDelay = isMobile ? 40 : 75;   // 라인 간 대기시간 단축
+  const finalDelay = isMobile ? 200 : 500; // 마지막 대기시간 단축
+  const titleTypingSpeed = isMobile ? 15 : 30; // 제목 타이핑 속도
 
   useEffect(() => {
     if (currentLine < bootSequence.length) {
@@ -45,16 +52,16 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             setCurrentLine(prev => prev + 1);
             setDisplayedText('');
             setIsTyping(true);
-          }, currentLine === bootSequence.length - 1 ? 500 : 75);
+          }, currentLine === bootSequence.length - 1 ? finalDelay : lineDelay);
         }
-      }, currentLine === bootSequence.length - 3 ? 30 : 15); // Slower typing for title
+      }, currentLine === bootSequence.length - 3 ? titleTypingSpeed : typingSpeed); // 모바일 최적화된 속도
       
       return () => clearInterval(typeInterval);
     } else {
       // Boot sequence complete, wait then fade out
       setTimeout(() => {
         onComplete();
-      }, 250);
+      }, isMobile ? 150 : 250); // 모바일에서 더 빠른 완료
     }
   }, [currentLine, onComplete]);
 
@@ -67,17 +74,29 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     return () => clearInterval(cursorInterval);
   }, []);
 
-  // Handle any key press to skip
+  // Handle any key press or touch to skip
   useEffect(() => {
-    const handleKeyPress = () => {
+    const handleSkip = () => {
       if (currentLine >= bootSequence.length - 1) {
         onComplete();
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentLine, onComplete]);
+    const handleTouch = () => {
+      // 모바일에서 터치 시 즉시 스킵
+      if (isMobile) {
+        onComplete();
+      }
+    };
+
+    window.addEventListener('keydown', handleSkip);
+    window.addEventListener('touchstart', handleTouch);
+    
+    return () => {
+      window.removeEventListener('keydown', handleSkip);
+      window.removeEventListener('touchstart', handleTouch);
+    };
+  }, [currentLine, onComplete, isMobile]);
 
   return (
     <AnimatePresence>

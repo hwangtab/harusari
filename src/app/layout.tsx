@@ -12,20 +12,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Viewport configuration (separate from metadata in Next.js 15+)
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: false,
+  themeColor: '#F5F3E7'
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://harusari.vercel.app'),
   title: "하루살이 프로젝트 2: 알 수 없는 느낌",
   description: "Interactive album archive website for Harusari Project - 90년대 컴퓨터 환경에서 탐험하는 인터랙티브 앨범 아카이브",
   keywords: ["하루살이", "음악", "앨범", "인터랙티브", "90년대", "레트로", "아트", "김지혜", "Harusari Project"],
   authors: [{ name: "김지혜 (Harusari Project)" }],
   creator: "김지혜 (Harusari Project)",
   robots: "index, follow",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1.0,
-    maximumScale: 1.0,
-    userScalable: false,
-  },
-  themeColor: "#F5F3E7",
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -56,7 +59,7 @@ export const metadata: Metadata = {
     creator: "@9_17_p_m",
   },
   other: {
-    "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes", // apple-mobile-web-app-capable 대체
     "apple-mobile-web-app-status-bar-style": "default",
     "apple-mobile-web-app-title": "하루살이 프로젝트 2",
   },

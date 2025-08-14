@@ -308,6 +308,11 @@ button, a, [role="button"], .clickable {
   line-height: 1.2;
 }
 
+/* Window titlebar touch optimization */
+.window-titlebar {
+  touch-action: none; /* 터치 스크롤 방지로 드래그 향상 */
+}
+
 /* Image viewer specific styles */
 .image-viewer-container {
   box-sizing: border-box;

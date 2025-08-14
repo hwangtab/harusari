@@ -173,78 +173,165 @@ export default function Desktop() {
            trackListHeader + (tracksCount * trackItemHeight) + 
            lyricsButtonHeight + padding;
   };
+  // Calculate optimal height for QuizWindow based on content
+  const calculateQuizWindowHeight = () => {
+    // 실제 QuizWindow 구조 기반 정확한 높이 계산
+    const mainPadding = 32;           // p-4 = 16px * 2 (메인 컨테이너)
+    const headerHeight = 100;         // 제목 + 진행상황 텍스트 + p-4 패딩
+    const progressBarHeight = 30;     // 진행바 영역 + px-4 py-2 패딩
+    const questionAreaPadding = 48;   // p-6 = 24px * 2 (질문 영역 패딩)
+    const questionTextHeight = 80;    // text-lg font-bold + leading-relaxed + mb-4
+    const feedbackAreaHeight = 64;    // h-12 (48px) + mb-4 (16px) = 고정 피드백 영역
+    const questionBottomMargin = 24;  // mb-6 = 질문 섹션 하단 여백
+    const answerButtonHeight = 70;    // p-4 패딩 + 텍스트 + border + 한국어 텍스트 높이
+    const answerButtonsCount = 4;     // 답변 선택지 4개
+    const answerButtonsGap = 48;      // gap-4 = 16px, 3개 간격 = 48px
+    const nextButtonArea = 80;        // mt-6 + py-4 + 버튼 텍스트 + 하단 여백
+    
+    return mainPadding + headerHeight + progressBarHeight + 
+           questionAreaPadding + questionTextHeight + feedbackAreaHeight + 
+           questionBottomMargin + (answerButtonHeight * answerButtonsCount) + 
+           answerButtonsGap + nextButtonArea;
+  };;
 
   // Get optimal window size based on component type
   const getOptimalWindowSize = (component: string) => {
     
-    const maxWidth = Math.floor(screenWidth * 0.9);
-    const maxHeight = Math.floor(screenHeight * 0.9);
+    // 화면 크기에 따른 적응형 최대 크기 설정
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
+    
+    let maxWidthRatio, maxHeightRatio;
+    
+    if (isMobile) {
+      // 모바일: 화면의 95% 이하로 제한 (더 보수적)
+      maxWidthRatio = 0.95;
+      maxHeightRatio = 0.85; // 태스크바와 상태바 고려
+    } else if (isTablet) {
+      // 태블릿: 화면의 90% 이하로 제한
+      maxWidthRatio = 0.9;
+      maxHeightRatio = 0.9;
+    } else {
+      // 데스크톱: 기존대로 90%
+      maxWidthRatio = 0.9;
+      maxHeightRatio = 0.9;
+    }
+    
+    const maxWidth = Math.floor(screenWidth * maxWidthRatio);
+    const maxHeight = Math.floor(screenHeight * maxHeightRatio);
     
     switch(component) {
       case 'MusicPlayerWindow': 
         const optimalHeight = calculateMusicPlayerHeight();
         return { 
-          width: Math.min(400, maxWidth), 
+          width: Math.min(isMobile ? 350 : 400, maxWidth), 
           height: Math.min(optimalHeight, maxHeight) 
         };
       case 'ImageViewerWindow': 
         return { 
-          width: Math.min(580, maxWidth), 
-          height: Math.min(720, maxHeight) 
+          width: Math.min(isMobile ? 350 : 580, maxWidth), 
+          height: Math.min(isMobile ? 500 : 720, maxHeight) 
         };
       case 'SketchbookWindow':
         return { 
-          width: Math.min(900, maxWidth), 
-          height: Math.min(700, maxHeight) 
+          width: Math.min(isMobile ? 350 : 900, maxWidth), 
+          height: Math.min(isMobile ? 500 : 700, maxHeight) 
         };
       case 'QuizWindow':
+        const optimalQuizHeight = calculateQuizWindowHeight();
+        // 화면 크기별 추가 여유공간 (모바일은 더 넉넉하게)
+        const quizHeightBuffer = isMobile ? 50 : isTablet ? 30 : 40;
         return { 
-          width: Math.min(600, maxWidth), 
-          height: Math.min(710, maxHeight) 
+          width: Math.min(isMobile ? 350 : 600, maxWidth), 
+          height: Math.min(optimalQuizHeight + quizHeightBuffer, maxHeight) 
         };
       case 'AlbuminfoWindow':
       case 'CreditWindow': 
       case 'CriticWindow':
       case 'SpecialThanksWindow':
         return { 
-          width: Math.min(550, maxWidth), 
-          height: Math.min(520, maxHeight) 
+          width: Math.min(isMobile ? 340 : 550, maxWidth), 
+          height: Math.min(isMobile ? 450 : 520, maxHeight) 
         };
       case 'ReadmeWindow': 
         return { 
-          width: Math.min(550, maxWidth), 
-          height: Math.min(520, maxHeight) 
+          width: Math.min(isMobile ? 340 : 550, maxWidth), 
+          height: Math.min(isMobile ? 450 : 520, maxHeight) 
         };
       case 'LyricsWindow': 
         return { 
-          width: Math.min(400, maxWidth), 
-          height: Math.min(500, maxHeight) 
+          width: Math.min(isMobile ? 320 : 400, maxWidth), 
+          height: Math.min(isMobile ? 400 : 500, maxHeight) 
         };
       default: 
         return { 
-          width: Math.min(400, maxWidth), 
-          height: Math.min(300, maxHeight) 
+          width: Math.min(isMobile ? 320 : 400, maxWidth), 
+          height: Math.min(isMobile ? 300 : 300, maxHeight) 
         };
     }
-  };
+  };;
 
   // Get window position based on icon location and screen dimensions
   const getWindowPosition = (iconX: number, iconY: number, windowWidth: number, windowHeight: number) => {
-    // 화면에서 유효한 위치 범위 계산 (아이콘 위치 완전 무시)
-    const minX = 20;
-    const maxX = Math.max(100, screenWidth - windowWidth - 20);
-    const minY = 20;
-    const maxY = Math.max(100, screenHeight - windowHeight - 80); // 태스크바 고려
+    // 화면 크기에 따른 적응형 위치 계산
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
     
-    // 화면 전체에서 완전 랜덤 위치 생성
-    const x = minX + Math.random() * (maxX - minX);
-    const y = minY + Math.random() * (maxY - minY);
-    
-    return { 
-      x: Math.round(x), 
-      y: Math.round(y) 
-    };
-  };;
+    if (isMobile) {
+      // 모바일: 창이 화면 중앙 근처에서만 생성되도록 제한
+      const padding = 10;
+      const centerX = screenWidth / 2;
+      const centerY = (screenHeight - 80) / 2; // 태스크바 고려
+      
+      // 모바일에서는 창이 화면을 벗어나지 않도록 매우 보수적으로 배치
+      const maxOffsetX = Math.min(100, (screenWidth - windowWidth) / 4);
+      const maxOffsetY = Math.min(80, (screenHeight - windowHeight - 80) / 4);
+      
+      const x = Math.max(padding, Math.min(
+        screenWidth - windowWidth - padding,
+        centerX - windowWidth/2 + (Math.random() - 0.5) * maxOffsetX
+      ));
+      
+      const y = Math.max(padding, Math.min(
+        screenHeight - windowHeight - 80,
+        centerY - windowHeight/2 + (Math.random() - 0.5) * maxOffsetY
+      ));
+      
+      return { 
+        x: Math.round(x), 
+        y: Math.round(y) 
+      };
+    } else if (isTablet) {
+      // 태블릿: 중간 정도의 제한
+      const padding = 20;
+      const minX = padding;
+      const maxX = Math.max(minX + 50, screenWidth - windowWidth - padding);
+      const minY = padding;
+      const maxY = Math.max(minY + 50, screenHeight - windowHeight - 80);
+      
+      const x = minX + Math.random() * (maxX - minX);
+      const y = minY + Math.random() * (maxY - minY);
+      
+      return { 
+        x: Math.round(x), 
+        y: Math.round(y) 
+      };
+    } else {
+      // 데스크톱: 기존 로직 유지 (더 자유로운 배치)
+      const minX = 20;
+      const maxX = Math.max(100, screenWidth - windowWidth - 20);
+      const minY = 20;
+      const maxY = Math.max(100, screenHeight - windowHeight - 80);
+      
+      const x = minX + Math.random() * (maxX - minX);
+      const y = minY + Math.random() * (maxY - minY);
+      
+      return { 
+        x: Math.round(x), 
+        y: Math.round(y) 
+      };
+    }
+  };;;
 
   const handleIconClick = (icon: typeof desktopIconsData[0] & { x: number; y: number }) => {
     if (icon.windowComponent) {

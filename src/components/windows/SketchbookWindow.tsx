@@ -184,6 +184,27 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     }
   };
 
+  const startTouchDrawing = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.preventDefault();
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    setIsDrawing(true);
+    setLastPoint({ x, y });
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      drawCrayonStroke(ctx, x, y);
+    }
+  };
+
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !lastPoint) return;
     
@@ -205,9 +226,40 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     setLastPoint({ x, y });
   };
 
+  const touchDraw = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !lastPoint) return;
+    
+    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.preventDefault();
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      drawLine(ctx, lastPoint, { x, y });
+    }
+
+    setLastPoint({ x, y });
+  };
+
   const stopDrawing = (e?: React.MouseEvent<HTMLCanvasElement>) => {
     if (e) {
       e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    }
+    setIsDrawing(false);
+    setLastPoint(null);
+  };
+
+  const stopTouchDrawing = (e?: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e) {
+      e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+      e.preventDefault();
     }
     setIsDrawing(false);
     setLastPoint(null);
@@ -319,6 +371,10 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={() => stopDrawing()}
+            onTouchStart={startTouchDrawing}
+            onTouchMove={touchDraw}
+            onTouchEnd={stopTouchDrawing}
+            onTouchCancel={() => stopTouchDrawing()}
             style={{ imageRendering: 'pixelated' }}
           />
         </div>

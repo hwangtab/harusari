@@ -84,15 +84,16 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
     if (selectedAnswer === null) return;
 
     const isCorrect = selectedAnswer === questions[currentQuestion].correct;
-    const newScore = isCorrect ? score + 1 : score;
-    setScore(newScore);
-
     setShowResult(true);
 
-    setTimeout(() => {
-      if (currentQuestion === questions.length - 1) {
-        // 게임 끝
-        if (newScore === questions.length) {
+    if (isCorrect) {
+      // 정답일 때
+      const newScore = score + 1;
+      setScore(newScore);
+
+      setTimeout(() => {
+        if (currentQuestion === questions.length - 1) {
+          // 마지막 문제 정답 - 게임 완료
           setGameState('completed');
           // secret.txt 창 자동 열기
           setTimeout(() => {
@@ -109,15 +110,20 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
             });
           }, 1000);
         } else {
-          setGameState('failed');
+          // 다음 문제로 진행
+          setCurrentQuestion(prev => prev + 1);
+          setSelectedAnswer(null);
+          setShowResult(false);
         }
-      } else {
-        setCurrentQuestion(prev => prev + 1);
+      }, 1000);
+    } else {
+      // 틀렸을 때 - 다시 시도 가능
+      setTimeout(() => {
         setSelectedAnswer(null);
         setShowResult(false);
-      }
-    }, 2000);
-  };
+      }, 1000);
+    }
+  };;
 
   const resetGame = () => {
     setCurrentQuestion(0);
@@ -247,7 +253,12 @@ export default function QuizWindow({ windowId: _ }: QuizWindowProps) {
               onClick={handleNextQuestion}
               className="px-8 py-4 bg-album-orange text-retro-black font-bold border-2 border-retro-black hover:bg-album-orange/80 transition-colors text-lg"
             >
-              {currentQuestion === questions.length - 1 ? '🏁 결과 보기' : '➡️ 다음 문제'}
+              {showResult 
+                ? (selectedAnswer === questions[currentQuestion].correct 
+                    ? (currentQuestion === questions.length - 1 ? '🏁 결과 보기' : '➡️ 다음 문제')
+                    : '🔄 다시 시도')
+                : '✅ 확인'
+              }
             </button>
           </div>
         )}

@@ -44,33 +44,123 @@ export default function Window({ window, children }: WindowProps) {
     });
   };
 
+  // titlebar ref for event listeners
+  const titlebarRef = useRef<HTMLDivElement>(null);
+
+  const handleTitleBarTouchStart = (e: TouchEvent) => {
+    if (window.isMaximized) return;
+    
+    e.preventDefault(); // 이제 passive: false로 작동함
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({
+      x: touch.clientX - window.x,
+      y: touch.clientY - window.y
+    });
+  };
+
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
     
+    // 화면 크기에 따른 적응형 경계 제한
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
+    
+    let minVisibleWidth, minVisibleHeight;
+    
+    if (isMobile) {
+      // 모바일: 창의 80% 이상이 화면 안에 보이도록
+      minVisibleWidth = Math.min(window.width * 0.8, window.width - 20);
+      minVisibleHeight = Math.min(window.height * 0.8, window.height - 20);
+    } else if (isTablet) {
+      // 태블릿: 창의 60% 이상이 화면 안에 보이도록
+      minVisibleWidth = Math.min(window.width * 0.6, window.width - 50);
+      minVisibleHeight = Math.min(window.height * 0.6, window.height - 50);
+    } else {
+      // 데스크톱: 기존 로직 (100px 정도만 보이면 됨)
+      minVisibleWidth = 100;
+      minVisibleHeight = 50;
+    }
+    
     const newX = Math.max(
-      -window.width + 50,
-      Math.min(screenWidth - 50, e.clientX - dragStart.x)
+      -window.width + minVisibleWidth,
+      Math.min(screenWidth - minVisibleWidth, e.clientX - dragStart.x)
     );
     const newY = Math.max(
-      -window.height + 50,
-      Math.min(screenHeight - 50, e.clientY - dragStart.y)
+      0, // 제목표시줄이 화면 위로 올라가지 않도록
+      Math.min(screenHeight - minVisibleHeight, e.clientY - dragStart.y)
     );
     
     moveWindow(window.id, newX, newY);
-  };
+  };;;
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    
+    // 마우스 드래그와 동일한 적응형 경계 제한 적용
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
+    
+    let minVisibleWidth, minVisibleHeight;
+    
+    if (isMobile) {
+      // 모바일: 창의 80% 이상이 화면 안에 보이도록
+      minVisibleWidth = Math.min(window.width * 0.8, window.width - 20);
+      minVisibleHeight = Math.min(window.height * 0.8, window.height - 20);
+    } else if (isTablet) {
+      // 태블릿: 창의 60% 이상이 화면 안에 보이도록
+      minVisibleWidth = Math.min(window.width * 0.6, window.width - 50);
+      minVisibleHeight = Math.min(window.height * 0.6, window.height - 50);
+    } else {
+      // 데스크톱: 기존 로직 (100px 정도만 보이면 됨)
+      minVisibleWidth = 100;
+      minVisibleHeight = 50;
+    }
+    
+    const newX = Math.max(
+      -window.width + minVisibleWidth,
+      Math.min(screenWidth - minVisibleWidth, touch.clientX - dragStart.x)
+    );
+    const newY = Math.max(
+      0, // 제목표시줄이 화면 위로 올라가지 않도록
+      Math.min(screenHeight - minVisibleHeight, touch.clientY - dragStart.y)
+    );
+    
+    moveWindow(window.id, newX, newY);
+  };;;
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  // 전역 마우스 이벤트 리스너
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  // titlebar 터치 이벤트 리스너 (passive: false)
+  useEffect(() => {
+    const titlebar = titlebarRef.current;
+    if (!titlebar) return;
+
+    titlebar.addEventListener('touchstart', handleTitleBarTouchStart, { passive: false });
+    return () => titlebar.removeEventListener('touchstart', handleTitleBarTouchStart);
+  }, [window.isMaximized]);
+
+  // 전역 마우스 및 터치 이벤트 리스너
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
       };
     }
   }, [isDragging, dragStart, window.x, window.y]);
@@ -100,7 +190,7 @@ export default function Window({ window, children }: WindowProps) {
     >
       {/* Title Bar */}
       <div 
-        ref={dragRef}
+        ref={titlebarRef}
         className={`window-titlebar flex justify-between items-center ${isDragging ? 'cursor-move' : 'cursor-default'}`}
         onMouseDown={handleTitleBarMouseDown}
       >
