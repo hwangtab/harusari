@@ -309,7 +309,13 @@ button, a, [role="button"], .clickable {
   padding: 0;
   min-height: 100px;
   box-sizing: border-box;
-  overflow: hidden;
+}
+
+/* Mobile window content scrolling */
+@media (max-width: 768px) {
+  .window-content {
+    overflow: auto;
+  }
 }
 
 /* Desktop icon styles */
