@@ -8,13 +8,14 @@ Interactive album archive website for "하루살이 프로젝트 2: 알 수 없�
 
 ## Tech Stack
 
-- **Framework**: Next.js 15.4.6 with App Router
+- **Framework**: Next.js 15.4.6 with App Router (Turbopack enabled for dev)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 with custom design tokens
+- **Styling**: Tailwind CSS v4 with custom design tokens (no explicit config file)
 - **State Management**: Zustand
 - **Animations**: Framer Motion
 - **Audio**: HTML5 Audio API
 - **Deployment**: Vercel
+- **Code Quality**: ESLint, Prettier, Husky, lint-staged
 
 ## Development Commands
 
@@ -31,7 +32,7 @@ npm start
 # Run ESLint
 npm run lint
 
-# Format code with Prettier (manual)
+# Format code with Prettier (configured: semi, trailing commas, single quotes)
 npx prettier --write .
 ```
 

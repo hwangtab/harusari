@@ -14,6 +14,7 @@ interface DesktopIconProps {
   onDoubleClick?: () => void;
   className?: string;
   onPositionChange?: (x: number, y: number) => void;
+  size?: number; // 동적 크기 조정을 위한 선택적 prop
 }
 
 export default function DesktopIcon({ 
@@ -24,7 +25,8 @@ export default function DesktopIcon({
   onClick, 
   onDoubleClick,
   className = '',
-  onPositionChange
+  onPositionChange,
+  size
 }: DesktopIconProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
@@ -32,6 +34,21 @@ export default function DesktopIcon({
   const [hasDragged, setHasDragged] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  
+  // 반응형 아이콘 크기 계산
+  const getResponsiveIconSize = () => {
+    if (size) return size; // 직접 지정된 크기가 있으면 사용
+    
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
+    
+    if (isMobile) return 24; // 모바일: 더 작은 아이콘
+    if (isTablet) return 30; // 태블릿: 중간 크기
+    return 32; // 데스크톱: 기본 크기
+  };
+  
+  const iconSize = getResponsiveIconSize();
+  const iconMargin = Math.max(iconSize + 20, 60); // 드래그 경계 계산용
 
   const handleClick = (e: React.MouseEvent) => {
     if (isDragging || hasDragged) return; // 드래그 중이거나 드래그 직후에는 클릭 무시
@@ -69,8 +86,8 @@ export default function DesktopIcon({
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isDragging && onPositionChange) {
-      const newX = Math.max(0, Math.min(screenWidth - 100, e.clientX - dragStart.x));
-      const newY = Math.max(0, Math.min(screenHeight - 100, e.clientY - dragStart.y));
+      const newX = Math.max(0, Math.min(screenWidth - iconMargin, e.clientX - dragStart.x));
+      const newY = Math.max(0, Math.min(screenHeight - iconMargin, e.clientY - dragStart.y));
       
       // 최소 이동 거리(5px) 이상일 때만 드래그로 인식
       const dragDistance = Math.sqrt(Math.pow(newX - x, 2) + Math.pow(newY - y, 2));
@@ -126,8 +143,8 @@ export default function DesktopIcon({
         <Image
           src={icon}
           alt={title}
-          width={32}
-          height={32}
+          width={iconSize}
+          height={iconSize}
           className="block mx-auto mb-1"
           draggable={false}
         />
@@ -147,7 +164,9 @@ export default function DesktopIcon({
       </motion.div>
       
       <motion.span
-        className={`block text-xs text-center px-1 py-0.5 rounded select-none break-all max-w-full ${
+        className={`block text-center px-1 py-0.5 rounded select-none break-all max-w-full ${
+          screenWidth < 768 ? 'text-xs' : 'text-xs'
+        } ${
           isHovered ? 'bg-album-purple bg-opacity-30' : ''
         }`}
         animate={glitchActive ? {
