@@ -69,6 +69,18 @@ const desktopIconsData = [
     title: 'instagram',
     icon: '/images/icons/instagram.svg',
     windowComponent: null // External link, no window
+  },
+  {
+    id: 'email',
+    title: 'email',
+    icon: '/images/icons/email.svg',
+    windowComponent: null // External mailto link, no window
+  },
+  {
+    id: 'tuner',
+    title: 'tuner',
+    icon: '/images/icons/tuner.svg',
+    windowComponent: 'TunerWindow'
   }
 ];
 
@@ -440,9 +452,9 @@ export default function Desktop() {
       maxWidthRatio = 0.9;
       maxHeightRatio = 0.9;
     } else {
-      // 데스크톱: 기존대로 90%
+      // 데스크톱: 튜너 윈도우는 더 관대한 높이 허용
       maxWidthRatio = 0.9;
-      maxHeightRatio = 0.9;
+      maxHeightRatio = component === 'TunerWindow' ? 0.95 : 0.9;
     }
     
     const maxWidth = Math.floor(screenWidth * maxWidthRatio);
@@ -490,6 +502,25 @@ export default function Desktop() {
         return { 
           width: Math.min(isMobile ? 320 : 400, maxWidth), 
           height: Math.min(isMobile ? 400 : 500, maxHeight) 
+        };
+      case 'TunerWindow':
+        // 튜너 윈도우 컴팩트 디자인 기반 높이 계산
+        const tunerHeaderHeight = 60;       // 헤더 영역 (p-3 + 축소된 텍스트)
+        const tunerDisplayHeight = 80;      // 디지털 디스플레이 (축소된 패딩+여백)
+        const tunerStringHeight = 300;      // 6개 기타 줄 (28px * 6 + space-y-3 간격)
+        const tunerVolumeHeight = 60;       // 볼륨 컨트롤 (축소된 패딩)
+        const tunerFooterHeight = 36;       // 하단 정보 (p-2 + 텍스트)
+        const tunerMainPadding = isMobile ? 24 : 32; // 메인 컨테이너 패딩 (축소)
+        const tunerBufferSpace = 12;        // 여유 공간
+        
+        const optimalTunerHeight = tunerHeaderHeight + tunerDisplayHeight + 
+                                 tunerStringHeight + tunerVolumeHeight + 
+                                 tunerFooterHeight + tunerMainPadding + 
+                                 tunerBufferSpace; // 총 ~568px
+                                 
+        return { 
+          width: Math.min(isMobile ? 350 : 480, maxWidth), 
+          height: Math.min(optimalTunerHeight, maxHeight) 
         };
       default: 
         return { 
@@ -588,6 +619,9 @@ export default function Desktop() {
     } else if (icon.id === 'instagram') {
       // Open Instagram link in new tab
       window.open('https://www.instagram.com/9.17.p.m/', '_blank');
+    } else if (icon.id === 'email') {
+      // Open email client with mailto link
+      window.open('mailto:homeoutgimo@karts.ac.kr', '_self');
     }
   };
 

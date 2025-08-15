@@ -14,6 +14,7 @@ import MusicPlayerWindow from './windows/MusicPlayerWindow';
 import ImageViewerWindow from './windows/ImageViewerWindow';
 import LyricsWindow from './windows/LyricsWindow';
 import AboutWindow from './windows/AboutWindow';
+import TunerWindow from './windows/TunerWindow';
 
 const windowComponents = {
   AlbuminfoWindow,
@@ -26,7 +27,8 @@ const windowComponents = {
   MusicPlayerWindow,
   ImageViewerWindow,
   LyricsWindow,
-  AboutWindow
+  AboutWindow,
+  TunerWindow
 };
 
 export default function WindowManager() {

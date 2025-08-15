@@ -30,11 +30,31 @@ const crayonColors: CrayonColor[] = [
 
 export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentTool, setCurrentTool] = useState<Tool>('crayon');
   const [currentColor, setCurrentColor] = useState('#FF6B6B');
   const [brushSize, setBrushSize] = useState(8);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+
+  // Canvas 초기화 함수 (useEffect보다 먼저 정의)
+  const initializeCanvas = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    // 종이 질감 배경
+    ctx.fillStyle = '#FFFEF7';
+    ctx.fillRect(0, 0, width, height);
+
+    // 종이 텍스처 추가
+    ctx.globalAlpha = 0.05;
+    const texturePoints = Math.floor((width * height) / 1000); // 밀도 조정
+    for (let i = 0; i < texturePoints; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      ctx.fillStyle = Math.random() > 0.5 ? '#E8E8E8' : '#F5F5F5';
+      ctx.fillRect(x, y, 1, 1);
+    }
+    ctx.globalAlpha = 1;
+  }, []);
 
   // 색상을 파스텔 톤으로 변환하는 함수
   const toPastelColor = useCallback((hexColor: string) => {
@@ -51,28 +71,98 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     return `rgb(${Math.round(pastelR)}, ${Math.round(pastelG)}, ${Math.round(pastelB)})`;
   }, []);
 
-  // Canvas 초기화
+  // Canvas 크기 동적 조정
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      const container = containerRef.current;
+      const canvas = canvasRef.current;
+      if (!container || !canvas) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const padding = 32; // 컨테이너 패딩 (p-4 = 16px * 2)
+      
+      const newWidth = Math.floor(containerRect.width - padding);
+      const newHeight = Math.floor(containerRect.height - padding);
+      
+      // 최소 크기 보장
+      const minWidth = 400;
+      const minHeight = 300;
+      
+      const finalWidth = Math.max(newWidth, minWidth);
+      const finalHeight = Math.max(newHeight, minHeight);
+      
+      // Canvas 크기가 변경되었을 때만 업데이트
+      if (canvasSize.width !== finalWidth || canvasSize.height !== finalHeight) {
+        setCanvasSize({ width: finalWidth, height: finalHeight });
+        
+        // Canvas 해상도 설정 (High DPI 지원)
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = finalWidth * dpr;
+        canvas.height = finalHeight * dpr;
+        
+        // CSS 크기는 논리적 크기로 설정
+        canvas.style.width = `${finalWidth}px`;
+        canvas.style.height = `${finalHeight}px`;
+        
+        // Context 스케일링 적용
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.scale(dpr, dpr);
+          initializeCanvas(ctx, finalWidth, finalHeight);
+        }
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener('resize', updateCanvasSize);
+    
+    // MutationObserver로 컨테이너 크기 변화 감지
+    const resizeObserver = new ResizeObserver(updateCanvasSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => {
+      window.removeEventListener('resize', updateCanvasSize);
+      resizeObserver.disconnect();
+    };
+  }, [initializeCanvas, canvasSize.width, canvasSize.height]);
+  
+  // \ub124\uc774\ud2f0\ube0c \ud130\uce58 \uc774\ubca4\ud2b8 \ub9ac\uc2a4\ub108 \ucd94\uac00 (passive: false \uc635\uc158)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
 
-    // 종이 질감 배경
-    ctx.fillStyle = '#FFFEF7';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDrawing) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
 
-    // 종이 텍스처 추가
-    ctx.globalAlpha = 0.05;
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      ctx.fillStyle = Math.random() > 0.5 ? '#E8E8E8' : '#F5F5F5';
-      ctx.fillRect(x, y, 1, 1);
-    }
-    ctx.globalAlpha = 1;
-  }, []);
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    // passive: false 옵션으로 리스너 추가
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+      canvas.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, [isDrawing]);
 
   // 크레용 텍스처 브러시 그리기
   const drawCrayonStroke = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, pressure: number = 1) => {
@@ -164,16 +254,37 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     }
   }, [drawCrayonStroke]);
 
+  // 정확한 좌표 계산 함수
+  const getCanvasCoordinates = useCallback((clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+    
+    // 기본 좌표 계산
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    // Canvas 스케일링 비율 계산
+    const scaleX = canvasSize.width / rect.width;
+    const scaleY = canvasSize.height / rect.height;
+    
+    // 최종 Canvas 좌표
+    const canvasX = x * scaleX;
+    const canvasY = y * scaleY;
+    
+    
+    return { x: canvasX, y: canvasY };
+  }, [canvasSize]);
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.stopPropagation();
     e.preventDefault();
     
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY);
 
     setIsDrawing(true);
     setLastPoint({ x, y });
@@ -185,16 +296,14 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
   };
 
   const startTouchDrawing = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.stopPropagation();
     e.preventDefault();
     
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(touch.clientX, touch.clientY);
 
     setIsDrawing(true);
     setLastPoint({ x, y });
@@ -208,15 +317,13 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !lastPoint) return;
     
-    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.stopPropagation();
     e.preventDefault();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY);
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -229,16 +336,14 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
   const touchDraw = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !lastPoint) return;
     
-    e.stopPropagation(); // 창 드래그 이벤트 전파 차단
+    e.stopPropagation();
     e.preventDefault();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const { x, y } = getCanvasCoordinates(touch.clientX, touch.clientY);
 
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -258,8 +363,11 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
 
   const stopTouchDrawing = (e?: React.TouchEvent<HTMLCanvasElement>) => {
     if (e) {
-      e.stopPropagation(); // 창 드래그 이벤트 전파 차단
-      e.preventDefault();
+      e.stopPropagation();
+      // preventDefault를 조건부로 호출
+      if (e.cancelable) {
+        e.preventDefault();
+      }
     }
     setIsDrawing(false);
     setLastPoint(null);
@@ -272,19 +380,14 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 종이 배경으로 초기화
-    ctx.fillStyle = '#FFFEF7';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 종이 텍스처 다시 추가
-    ctx.globalAlpha = 0.05;
-    for (let i = 0; i < 1000; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      ctx.fillStyle = Math.random() > 0.5 ? '#E8E8E8' : '#F5F5F5';
-      ctx.fillRect(x, y, 1, 1);
-    }
-    ctx.globalAlpha = 1;
+    // Canvas 크기 재설정으로 클리어
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvasSize.width * dpr;
+    canvas.height = canvasSize.height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    // 종이 배경 다시 그리기
+    initializeCanvas(ctx, canvasSize.width, canvasSize.height);
   };
 
   return (
@@ -359,14 +462,13 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
       {/* 캔버스 영역 */}
       <div className="flex-1 p-4 overflow-hidden">
         <div 
+          ref={containerRef}
           className="w-full h-full border-4 border-orange-200 rounded-lg shadow-inner bg-white relative"
           onMouseDown={(e) => e.stopPropagation()}
         >
           <canvas
             ref={canvasRef}
-            width={800}
-            height={600}
-            className="w-full h-full cursor-crosshair"
+            className="cursor-crosshair block"
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
@@ -375,7 +477,14 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
             onTouchMove={touchDraw}
             onTouchEnd={stopTouchDrawing}
             onTouchCancel={() => stopTouchDrawing()}
-            style={{ imageRendering: 'pixelated' }}
+            style={{ 
+              imageRendering: 'pixelated',
+              width: `${canvasSize.width}px`,
+              height: `${canvasSize.height}px`,
+              maxWidth: '100%',
+              maxHeight: '100%',
+              touchAction: 'none' // 기본 터치 동작 비활성화
+            }}
           />
         </div>
       </div>
