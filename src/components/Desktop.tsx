@@ -15,7 +15,8 @@ import {
   playPageFlipSound, 
   playStrumSound, 
   playMailboxSound, 
-  playFlashSound 
+  playFlashSound,
+  playCatMeow 
 } from '@/utils/audioUtils';
 
 // 기본 아이콘 정보 (위치는 동적으로 계산됨)
@@ -91,6 +92,12 @@ const desktopIconsData = [
     title: 'tuner',
     icon: '/images/icons/tuner.svg',
     windowComponent: 'TunerWindow'
+  },
+  {
+    id: 'metronome',
+    title: 'metronome',
+    icon: '/images/icons/metronome.svg',
+    windowComponent: 'MetronomeWindow'
   }
 ];
 
@@ -532,6 +539,29 @@ export default function Desktop() {
           width: Math.min(isMobile ? 350 : 480, maxWidth), 
           height: Math.min(optimalTunerHeight, maxHeight) 
         };
+      case 'MetronomeWindow':
+        // 메트로놈 윈도우 최적 크기 계산
+        const metronomeHeaderHeight = 60;    // 헤더 (제목)
+        const catCharacterHeight = 120;      // 고양이 캐릭터 영역
+        const beatIndicatorHeight = 40;      // 박자 인디케이터
+        const statusHeight = 60;             // 현재 상태 표시
+        const playButtonHeight = 60;         // 재생/정지 버튼
+        const bpmControlHeight = 80;         // BPM 조절 슬라이더
+        const settingsHeight = 120;          // 박자 및 고양이 목소리 설정
+        const additionalControlsHeight = 50; // 추가 컨트롤
+        const statusBarHeight = 40;          // 하단 상태바
+        const metronomeMainPadding = isMobile ? 16 : 32; // 메인 패딩
+        const metronomeSpacing = 32;         // 간격들의 합
+        
+        const optimalMetronomeHeight = metronomeHeaderHeight + catCharacterHeight + 
+                                     beatIndicatorHeight + statusHeight + playButtonHeight + 
+                                     bpmControlHeight + settingsHeight + additionalControlsHeight + 
+                                     statusBarHeight + metronomeMainPadding + metronomeSpacing;
+                                     
+        return { 
+          width: Math.min(isMobile ? 350 : 420, maxWidth), 
+          height: Math.min(optimalMetronomeHeight, maxHeight) 
+        };
       default: 
         return { 
           width: Math.min(isMobile ? 320 : 400, maxWidth), 
@@ -616,6 +646,7 @@ export default function Desktop() {
     'email': playMailboxSound,
     'instagram': playFlashSound,
     'trash': playTrashSound,
+    'metronome': () => playCatMeow('adult'),
   } as const;
 
   // Icon action mapping for special behaviors

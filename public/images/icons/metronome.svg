@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Metronome base -->
+  <path d="M20 48 L44 48 L40 56 L24 56 Z" fill="#8B7AAE" stroke="#2C2C2C" stroke-width="2"/>
+  
+  <!-- Metronome body -->
+  <path d="M22 20 L42 20 L44 48 L20 48 Z" fill="#F5F3E7" stroke="#2C2C2C" stroke-width="2"/>
+  
+  <!-- Metronome pendulum -->
+  <line x1="32" y1="20" x2="36" y2="38" stroke="#E5A45C" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Pendulum weight -->
+  <circle cx="36" cy="38" r="3" fill="#E5A45C" stroke="#2C2C2C" stroke-width="1"/>
+  
+  <!-- Cat face on metronome -->
+  <circle cx="32" cy="28" r="8" fill="#A8C5D1" stroke="#2C2C2C" stroke-width="1.5"/>
+  
+  <!-- Cat ears -->
+  <path d="M26 22 L28 26 L30 22 Z" fill="#A8C5D1" stroke="#2C2C2C" stroke-width="1"/>
+  <path d="M34 22 L36 26 L38 22 Z" fill="#A8C5D1" stroke="#2C2C2C" stroke-width="1"/>
+  
+  <!-- Cat eyes -->
+  <circle cx="29" cy="27" r="1.5" fill="#2C2C2C"/>
+  <circle cx="35" cy="27" r="1.5" fill="#2C2C2C"/>
+  
+  <!-- Cat nose -->
+  <path d="M31 29 L32 30 L33 29 Z" fill="#2C2C2C"/>
+  
+  <!-- Cat mouth -->
+  <path d="M32 30 Q30 32 28 31" stroke="#2C2C2C" stroke-width="1" fill="none"/>
+  <path d="M32 30 Q34 32 36 31" stroke="#2C2C2C" stroke-width="1" fill="none"/>
+  
+  <!-- Metronome dial -->
+  <circle cx="32" cy="42" r="2" fill="#2C2C2C"/>
+  
+  <!-- Musical notes floating around -->
+  <text x="18" y="16" font-family="serif" font-size="8" fill="#E5A45C">♪</text>
+  <text x="48" y="14" font-family="serif" font-size="6" fill="#8B7AAE">♫</text>
+  <text x="46" y="26" font-family="serif" font-size="7" fill="#A8C5D1">♪</text>
+</svg>

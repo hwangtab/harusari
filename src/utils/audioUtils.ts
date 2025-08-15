@@ -707,3 +707,126 @@ export const playMailboxSound = () => {
 export const playFlashSound = () => {
   playSound(createFlashBuffer, VOLUMES.HIGH, DURATIONS.VERY_SHORT);
 };
+
+// Cat meow sound generation for metronome
+
+/**
+ * Creates a realistic cat meow sound buffer with natural frequency modulation
+ * @param audioContext The audio context
+ * @param pitch Pitch variation: 'kitten' (high), 'adult' (medium), 'large' (low)
+ * @param isAccent Whether this is an accented first beat
+ * @param duration Duration in seconds
+ * @returns AudioBuffer containing the cat meow
+ */
+export const createCatMeowBuffer = (
+  audioContext: AudioContext, 
+  pitch: 'kitten' | 'adult' | 'large' = 'adult',
+  isAccent: boolean = false,
+  duration: number = DURATIONS.MEDIUM
+): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const frameCount = sampleRate * duration;
+  const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+
+  // Base frequencies for different cat sizes
+  const baseFreqs = {
+    kitten: { start: 800, mid: 600, end: 400 },   // High-pitched kitten
+    adult: { start: 600, mid: 450, end: 300 },    // Adult cat
+    large: { start: 400, mid: 300, end: 200 }     // Large cat
+  };
+
+  const freq = baseFreqs[pitch];
+  const accentMultiplier = isAccent ? 1.3 : 1.0; // Accent makes it slightly lower and louder
+
+  for (let i = 0; i < frameCount; i++) {
+    const t = i / sampleRate;
+    const progress = t / duration;
+    
+    // Frequency modulation - classic meow pattern (high -> mid -> low)
+    let currentFreq;
+    if (progress < 0.2) {
+      // Initial "mya" sound
+      currentFreq = freq.start + (freq.mid - freq.start) * (progress / 0.2);
+    } else if (progress < 0.6) {
+      // Sustained "aaa" sound
+      currentFreq = freq.mid;
+    } else {
+      // Final "ow" sound
+      currentFreq = freq.mid + (freq.end - freq.mid) * ((progress - 0.6) / 0.4);
+    }
+    
+    // Apply accent frequency adjustment
+    currentFreq = currentFreq / accentMultiplier;
+    
+    // Generate the fundamental tone
+    let sample = Math.sin(t * currentFreq * 2 * Math.PI);
+    
+    // Add harmonics for more realistic cat voice
+    sample += Math.sin(t * currentFreq * 2 * 2 * Math.PI) * 0.3;  // 2nd harmonic
+    sample += Math.sin(t * currentFreq * 3 * 2 * Math.PI) * 0.15; // 3rd harmonic
+    
+    // Add slight roughness/breathiness
+    const roughness = (Math.random() * 2 - 1) * 0.1;
+    sample += roughness;
+    
+    // Amplitude envelope - cat meow shape
+    let envelope;
+    if (progress < 0.1) {
+      // Quick attack for "m" consonant
+      envelope = progress / 0.1;
+    } else if (progress < 0.3) {
+      // Peak of "ya" 
+      envelope = 1.0;
+    } else if (progress < 0.7) {
+      // Sustained "aaa"
+      envelope = 0.8;
+    } else {
+      // Decay for "ow"
+      envelope = 0.8 * (1 - (progress - 0.7) / 0.3);
+    }
+    
+    // Apply accent volume boost
+    if (isAccent) {
+      envelope *= 1.4;
+    }
+    
+    // Add subtle vibrato for natural cat voice
+    const vibrato = 1 + Math.sin(t * 12 * 2 * Math.PI) * 0.03;
+    
+    data[i] = sample * envelope * vibrato * 0.2;
+  }
+
+  return buffer;
+};
+
+/**
+ * Creates a special accented meow for first beats (longer "myaaow" sound)
+ * @param audioContext The audio context
+ * @param pitch Cat voice pitch variation
+ * @param duration Duration in seconds
+ * @returns AudioBuffer containing the accented cat meow
+ */
+export const createAccentMeowBuffer = (
+  audioContext: AudioContext, 
+  pitch: 'kitten' | 'adult' | 'large' = 'adult',
+  duration: number = DURATIONS.MEDIUM_LONG
+): AudioBuffer => {
+  return createCatMeowBuffer(audioContext, pitch, true, duration);
+};
+
+/**
+ * Plays a regular cat meow sound for metronome beats
+ * @param pitch Cat voice pitch variation
+ */
+export const playCatMeow = (pitch: 'kitten' | 'adult' | 'large' = 'adult') => {
+  playSound((ctx) => createCatMeowBuffer(ctx, pitch, false), VOLUMES.MEDIUM, DURATIONS.MEDIUM);
+};
+
+/**
+ * Plays an accented cat meow sound for metronome first beats
+ * @param pitch Cat voice pitch variation
+ */
+export const playAccentCatMeow = (pitch: 'kitten' | 'adult' | 'large' = 'adult') => {
+  playSound((ctx) => createAccentMeowBuffer(ctx, pitch), VOLUMES.HIGH, DURATIONS.MEDIUM_LONG);
+};
