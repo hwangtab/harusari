@@ -6,7 +6,17 @@ import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 import DesktopIcon from './DesktopIcon';
 import WindowManager from './WindowManager';
 import Taskbar from './Taskbar';
-import { playTrashSound } from '@/utils/audioUtils';
+import { 
+  playTrashSound, 
+  playMelodySound, 
+  playScratchSound, 
+  playQuizSound, 
+  playShutterSound, 
+  playPageFlipSound, 
+  playStrumSound, 
+  playMailboxSound, 
+  playFlashSound 
+} from '@/utils/audioUtils';
 
 // 기본 아이콘 정보 (위치는 동적으로 계산됨)
 const desktopIconsData = [
@@ -592,7 +602,36 @@ export default function Desktop() {
     }
   };;;
 
+  // Icon sound mapping for type safety and maintainability
+  const iconSounds = {
+    'music-player': playMelodySound,
+    'sketchbook': playScratchSound,
+    'quiz': playQuizSound,
+    'images': playShutterSound,
+    'albuminfo': playPageFlipSound,
+    'credit': playPageFlipSound,
+    'critic': playPageFlipSound,
+    'specialthanks': playPageFlipSound,
+    'tuner': playStrumSound,
+    'email': playMailboxSound,
+    'instagram': playFlashSound,
+    'trash': playTrashSound,
+  } as const;
+
+  // Icon action mapping for special behaviors
+  const iconActions = {
+    'instagram': () => window.open('https://www.instagram.com/9.17.p.m/', '_blank'),
+    'email': () => window.open('mailto:homeoutgimo@karts.ac.kr', '_self'),
+  } as const;
+
   const handleIconClick = (icon: typeof desktopIconsData[0] & { x: number; y: number }) => {
+    // Play appropriate sound for the icon
+    const soundFunction = iconSounds[icon.id as keyof typeof iconSounds];
+    if (soundFunction) {
+      soundFunction();
+    }
+
+    // Handle window opening for components
     if (icon.windowComponent) {
       const optimalSize = getOptimalWindowSize(icon.windowComponent);
       const position = getWindowPosition(
@@ -613,15 +652,12 @@ export default function Desktop() {
         isMinimized: false,
         isMaximized: false
       });
-    } else if (icon.id === 'trash') {
-      // Play noise sound
-      playTrashSound();
-    } else if (icon.id === 'instagram') {
-      // Open Instagram link in new tab
-      window.open('https://www.instagram.com/9.17.p.m/', '_blank');
-    } else if (icon.id === 'email') {
-      // Open email client with mailto link
-      window.open('mailto:homeoutgimo@karts.ac.kr', '_self');
+    }
+
+    // Handle special icon actions (external links, etc.)
+    const actionFunction = iconActions[icon.id as keyof typeof iconActions];
+    if (actionFunction) {
+      actionFunction();
     }
   };
 
