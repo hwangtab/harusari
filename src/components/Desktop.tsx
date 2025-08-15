@@ -474,8 +474,8 @@ export default function Desktop() {
         };
       case 'SketchbookWindow':
         return { 
-          width: Math.min(isMobile ? 350 : 900, maxWidth), 
-          height: Math.min(isMobile ? 500 : 700, maxHeight) 
+          width: Math.min(isMobile ? Math.floor(screenWidth * 0.95) : 900, maxWidth), 
+          height: Math.min(isMobile ? Math.floor(screenHeight * 0.90) : 700, maxHeight) 
         };
       case 'QuizWindow':
         const optimalQuizHeight = calculateQuizWindowHeight();

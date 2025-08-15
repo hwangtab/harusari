@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface SketchbookWindowProps {
   windowId: string;
@@ -37,6 +38,10 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
   const [brushSize, setBrushSize] = useState(8);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const { width: screenWidth } = useWindowDimensions();
+  
+  // 모바일 여부 확인
+  const isMobile = screenWidth < 768;
 
   // Canvas 초기화 함수 (useEffect보다 먼저 정의)
   const initializeCanvas = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -79,14 +84,15 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
       if (!container || !canvas) return;
 
       const containerRect = container.getBoundingClientRect();
-      const padding = 32; // 컨테이너 패딩 (p-4 = 16px * 2)
+      // 실제 패딩에 맞게 조정 (모바일 p-1 = 8px, 데스크톱 p-4 = 32px) + 테두리 8px
+      const padding = isMobile ? 16 : 40; // 패딩 + 테두리
       
       const newWidth = Math.floor(containerRect.width - padding);
       const newHeight = Math.floor(containerRect.height - padding);
       
-      // 최소 크기 보장
-      const minWidth = 400;
-      const minHeight = 300;
+      // 모바일용 최소 크기를 더 작게 설정
+      const minWidth = isMobile ? 200 : 400;
+      const minHeight = isMobile ? 150 : 300;
       
       const finalWidth = Math.max(newWidth, minWidth);
       const finalHeight = Math.max(newHeight, minHeight);
@@ -128,41 +134,6 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     };
   }, [initializeCanvas, canvasSize.width, canvasSize.height]);
   
-  // \ub124\uc774\ud2f0\ube0c \ud130\uce58 \uc774\ubca4\ud2b8 \ub9ac\uc2a4\ub108 \ucd94\uac00 (passive: false \uc635\uc158)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isDrawing) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    // passive: false 옵션으로 리스너 추가
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-    canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
-
-    return () => {
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-      canvas.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [isDrawing]);
 
   // 크레용 텍스처 브러시 그리기
   const drawCrayonStroke = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, pressure: number = 1) => {
@@ -273,7 +244,6 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     const canvasX = x * scaleX;
     const canvasY = y * scaleY;
     
-    
     return { x: canvasX, y: canvasY };
   }, [canvasSize]);
 
@@ -297,12 +267,13 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
 
   const startTouchDrawing = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.stopPropagation();
-    e.preventDefault();
     
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const touch = e.touches[0];
+    if (!touch) return;
+
     const { x, y } = getCanvasCoordinates(touch.clientX, touch.clientY);
 
     setIsDrawing(true);
@@ -337,7 +308,6 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     if (!isDrawing || !lastPoint) return;
     
     e.stopPropagation();
-    e.preventDefault();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -364,10 +334,6 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
   const stopTouchDrawing = (e?: React.TouchEvent<HTMLCanvasElement>) => {
     if (e) {
       e.stopPropagation();
-      // preventDefault를 조건부로 호출
-      if (e.cancelable) {
-        e.preventDefault();
-      }
     }
     setIsDrawing(false);
     setLastPoint(null);
@@ -394,60 +360,112 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
     <div className="h-full bg-amber-50 flex flex-col">
       {/* 툴바 */}
       <div className="bg-yellow-100 border-b-2 border-orange-200 p-2 flex-shrink-0">
-        <div className="flex items-center gap-4 mb-2">
-          {/* 도구 선택 */}
-          <div className="flex gap-1">
-            {[
-              { tool: 'crayon' as Tool, label: '🖍️', name: '크레용' },
-              { tool: 'pencil' as Tool, label: '✏️', name: '색연필' },
-              { tool: 'pastel' as Tool, label: '🎨', name: '파스텔' },
-              { tool: 'eraser' as Tool, label: '🧽', name: '지우개' },
-            ].map(({ tool, label, name }) => (
+        {isMobile ? (
+          // 모바일: 컴팩트 레이아웃
+          <div className="space-y-1">
+            {/* 도구 선택: 한 줄 배치 */}
+            <div className="flex gap-1">
+              {[
+                { tool: 'crayon' as Tool, label: '🖍️', name: '크레용' },
+                { tool: 'pencil' as Tool, label: '✏️', name: '색연필' },
+                { tool: 'pastel' as Tool, label: '🎨', name: '파스텔' },
+                { tool: 'eraser' as Tool, label: '🧽', name: '지우개' },
+              ].map(({ tool, label, name }) => (
+                <button
+                  key={tool}
+                  onClick={() => setCurrentTool(tool)}
+                  className={`h-8 px-1.5 py-0.5 text-xs rounded border-2 font-medium transition-all flex-1 ${
+                    currentTool === tool
+                      ? 'bg-orange-200 border-orange-400 text-orange-800 shadow-inner'
+                      : 'bg-white border-orange-300 text-orange-700 hover:bg-orange-50'
+                  }`}
+                  title={name}
+                >
+                  <div className="flex flex-col items-center gap-0">
+                    <span className="text-xs">{label}</span>
+                    <span className="text-[10px] leading-none">{name}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            
+            {/* 브러시 크기와 지우기 */}
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] font-medium text-orange-800">크기:</span>
+              <input
+                type="range"
+                min="2"
+                max="20"
+                value={brushSize}
+                onChange={(e) => setBrushSize(Number(e.target.value))}
+                className="flex-1 h-1"
+              />
+              <span className="text-[10px] text-orange-700 w-4 text-center">{brushSize}</span>
               <button
-                key={tool}
-                onClick={() => setCurrentTool(tool)}
-                className={`px-3 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
-                  currentTool === tool
-                    ? 'bg-orange-200 border-orange-400 text-orange-800 shadow-inner'
-                    : 'bg-white border-orange-300 text-orange-700 hover:bg-orange-50'
-                }`}
-                title={name}
+                onClick={clearCanvas}
+                className="px-1.5 py-0.5 text-[10px] bg-red-100 border border-red-300 text-red-700 rounded hover:bg-red-200 transition-colors font-medium"
               >
-                {label} {name}
+                🗑️
               </button>
-            ))}
+            </div>
           </div>
+        ) : (
+          // 데스크톱: 기존 가로 레이아웃
+          <div className="flex items-center gap-4 mb-2">
+            {/* 도구 선택 */}
+            <div className="flex gap-1">
+              {[
+                { tool: 'crayon' as Tool, label: '🖍️', name: '크레용' },
+                { tool: 'pencil' as Tool, label: '✏️', name: '색연필' },
+                { tool: 'pastel' as Tool, label: '🎨', name: '파스텔' },
+                { tool: 'eraser' as Tool, label: '🧽', name: '지우개' },
+              ].map(({ tool, label, name }) => (
+                <button
+                  key={tool}
+                  onClick={() => setCurrentTool(tool)}
+                  className={`px-3 py-2 text-sm rounded-lg border-2 font-medium transition-all ${
+                    currentTool === tool
+                      ? 'bg-orange-200 border-orange-400 text-orange-800 shadow-inner'
+                      : 'bg-white border-orange-300 text-orange-700 hover:bg-orange-50'
+                  }`}
+                  title={name}
+                >
+                  {label} {name}
+                </button>
+              ))}
+            </div>
 
-          {/* 브러시 크기 */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-orange-800">크기:</span>
-            <input
-              type="range"
-              min="2"
-              max="20"
-              value={brushSize}
-              onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-20"
-            />
-            <span className="text-sm text-orange-700 w-6">{brushSize}</span>
+            {/* 브러시 크기 */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-orange-800">크기:</span>
+              <input
+                type="range"
+                min="2"
+                max="20"
+                value={brushSize}
+                onChange={(e) => setBrushSize(Number(e.target.value))}
+                className="w-20"
+              />
+              <span className="text-sm text-orange-700 w-6">{brushSize}</span>
+            </div>
+
+            {/* 전체 지우기 */}
+            <button
+              onClick={clearCanvas}
+              className="px-3 py-2 text-sm bg-red-100 border-2 border-red-300 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
+            >
+              🗑️ 지우기
+            </button>
           </div>
-
-          {/* 전체 지우기 */}
-          <button
-            onClick={clearCanvas}
-            className="px-3 py-2 text-sm bg-red-100 border-2 border-red-300 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium"
-          >
-            🗑️ 지우기
-          </button>
-        </div>
+        )}
 
         {/* 색상 팔레트 */}
-        <div className="flex flex-wrap gap-1">
+        <div className={isMobile ? 'grid grid-cols-3 gap-2 justify-items-center' : 'flex flex-wrap gap-1'}>
           {crayonColors.map(({ name, color }) => (
             <button
               key={color}
               onClick={() => setCurrentColor(color)}
-              className={`w-8 h-8 rounded-full border-3 transition-all ${
+              className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} rounded-full border-2 transition-all ${
                 currentColor === color
                   ? 'border-yellow-600 scale-110 shadow-lg'
                   : 'border-yellow-400 hover:scale-105'
@@ -460,10 +478,16 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
       </div>
 
       {/* 캔버스 영역 */}
-      <div className="flex-1 p-4 overflow-hidden">
+      <div 
+        className={`flex-1 ${isMobile ? 'p-1' : 'p-4'}`}
+        style={{
+          // 오버스크롤만 방지
+          overscrollBehavior: 'none'
+        }}
+      >
         <div 
           ref={containerRef}
-          className="w-full h-full border-4 border-orange-200 rounded-lg shadow-inner bg-white relative"
+          className="w-full h-full border-4 border-orange-200 rounded-lg shadow-inner bg-white relative overflow-hidden"
           onMouseDown={(e) => e.stopPropagation()}
         >
           <canvas
@@ -483,7 +507,7 @@ export default function SketchbookWindow({ windowId: _ }: SketchbookWindowProps)
               height: `${canvasSize.height}px`,
               maxWidth: '100%',
               maxHeight: '100%',
-              touchAction: 'none' // 기본 터치 동작 비활성화
+              touchAction: 'none' // 모든 기본 터치 동작 비활성화
             }}
           />
         </div>
