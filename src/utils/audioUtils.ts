@@ -46,8 +46,8 @@ const FREQUENCIES = {
  */
 const createAudioContext = (): AudioContext => {
   const AudioContextClass = window.AudioContext || 
-                           (window as any).webkitAudioContext || 
-                           (window as any).mozAudioContext;
+                           (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext; mozAudioContext?: typeof AudioContext }).webkitAudioContext || 
+                           (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext; mozAudioContext?: typeof AudioContext }).mozAudioContext;
   if (!AudioContextClass) {
     throw new Error('Web Audio API not supported');
   }

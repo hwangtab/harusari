@@ -30,7 +30,7 @@ const CONSTANTS = {
 // Audio Context type guard
 const createAudioContext = (): AudioContext | null => {
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     return AudioContextClass ? new AudioContextClass() : null;
   } catch (error) {
     console.warn('AudioContext creation failed:', error);
@@ -73,7 +73,7 @@ const saveSettings = (settings: MetronomeSettings): void => {
   }
 };
 
-export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
+export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   // Initialize state with saved settings
   const savedSettings = loadSettings();
   const [bpm, setBpm] = useState<number>(savedSettings.bpm ?? CONSTANTS.BPM.DEFAULT);
