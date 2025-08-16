@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playCatMeow, playAccentCatMeow } from '@/utils/audioUtils';
+import { playCatMeow, playAccentCatMeow, playMiyamiya, playPurring, playSniffing, type CatEmotion } from '@/utils/audioUtils';
 import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface MetronomeWindowProps {
@@ -11,6 +11,7 @@ interface MetronomeWindowProps {
 
 type TimeSignature = '2/4' | '3/4' | '4/4';
 type CatPitch = 'kitten' | 'adult' | 'large';
+type CuteSoundMode = 'normal' | 'miyamiya' | 'emotional' | 'mixed';
 
 // Constants for better maintainability
 const CONSTANTS = {
@@ -49,6 +50,8 @@ interface MetronomeSettings {
   catPitch: CatPitch;
   volume: number;
   isVisualOnly: boolean;
+  cuteSoundMode: CuteSoundMode;
+  catEmotion: CatEmotion;
 }
 
 // Load settings from localStorage
@@ -80,6 +83,8 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
   const [currentBeat, setCurrentBeat] = useState<number>(0);
   const [volume, setVolume] = useState<number>(savedSettings.volume ?? CONSTANTS.VOLUME_DEFAULT);
   const [isVisualOnly, setIsVisualOnly] = useState<boolean>(savedSettings.isVisualOnly ?? false);
+  const [cuteSoundMode, setCuteSoundMode] = useState<CuteSoundMode>(savedSettings.cuteSoundMode ?? 'normal');
+  const [catEmotion, setCatEmotion] = useState<CatEmotion>(savedSettings.catEmotion ?? 'neutral');
   const [audioError, setAudioError] = useState<string | null>(null);
   
   // Refs for precise timing
@@ -94,10 +99,12 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
       timeSignature,
       catPitch,
       volume,
-      isVisualOnly
+      isVisualOnly,
+      cuteSoundMode,
+      catEmotion
     };
     saveSettings(settings);
-  }, [bpm, timeSignature, catPitch, volume, isVisualOnly]);
+  }, [bpm, timeSignature, catPitch, volume, isVisualOnly, cuteSoundMode, catEmotion]);
   
   const { width: screenWidth } = useWindowDimensions();
   const isMobile = screenWidth < CONSTANTS.MOBILE_BREAKPOINT;
@@ -116,6 +123,61 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
   const getBeatInterval = (): number => {
     return (60 / bpm) * 1000;
   };
+
+  // Play cute cat sounds based on mode
+  const playCuteCatSound = useCallback((isFirstBeat: boolean) => {
+    try {
+      switch (cuteSoundMode) {
+        case 'miyamiya':
+          if (isFirstBeat) {
+            playMiyamiya(catPitch);
+          } else {
+            playCatMeow(catPitch, catEmotion);
+          }
+          break;
+        
+        case 'emotional':
+          if (isFirstBeat) {
+            playAccentCatMeow(catPitch, catEmotion);
+          } else {
+            playCatMeow(catPitch, catEmotion);
+          }
+          break;
+        
+        case 'mixed':
+          const randomChoice = Math.random();
+          if (isFirstBeat) {
+            if (randomChoice < 0.1) {
+              playPurring();
+            } else if (randomChoice < 0.3) {
+              playMiyamiya(catPitch);
+            } else {
+              playAccentCatMeow(catPitch, catEmotion);
+            }
+          } else {
+            if (randomChoice < 0.1) {
+              playSniffing();
+            } else if (randomChoice < 0.2) {
+              playPurring();
+            } else {
+              playCatMeow(catPitch, catEmotion);
+            }
+          }
+          break;
+        
+        default: // 'normal'
+          if (isFirstBeat) {
+            playAccentCatMeow(catPitch, catEmotion);
+          } else {
+            playCatMeow(catPitch, catEmotion);
+          }
+          break;
+      }
+    } catch (error) {
+      console.warn('오디오 재생 실패:', error);
+      setAudioError('오디오 재생에 실패했습니다.');
+    }
+  }, [catPitch, cuteSoundMode, catEmotion]);
 
   // Stop metronome
   const stopMetronome = useCallback(() => {
@@ -157,16 +219,7 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
         
         // Play sound if not in visual-only mode and audio is available
         if (!isVisualOnly && audioContextRef.current) {
-          try {
-            if (isFirstBeat) {
-              playAccentCatMeow(catPitch);
-            } else {
-              playCatMeow(catPitch);
-            }
-          } catch (error) {
-            console.warn('오디오 재생 실패:', error);
-            setAudioError('오디오 재생에 실패했습니다.');
-          }
+          playCuteCatSound(isFirstBeat);
         }
         
         // Calculate next beat time
@@ -182,7 +235,7 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
     
     // Use a higher frequency timer for better precision
     intervalRef.current = setInterval(tick, CONSTANTS.TIMER_INTERVAL_MS);
-  }, [bpm, beatsPerMeasure, catPitch, isVisualOnly]);
+  }, [bpm, beatsPerMeasure, isVisualOnly, playCuteCatSound]);
 
   // Toggle play/stop
   const toggleMetronome = useCallback(() => {
@@ -476,6 +529,62 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
                 ))}
               </div>
             </div>
+
+            {/* Cute Sound Mode */}
+            <div className="bg-white border-2 border-retro-black rounded-lg p-3">
+              <label className="block text-sm font-semibold mb-2">귀여움 모드:</label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { key: 'normal', label: '🐈 기본', desc: '일반 야옹' },
+                  { key: 'miyamiya', label: '🐱 미야미야', desc: '연속 야옹' },
+                  { key: 'emotional', label: '😻 감정표현', desc: '기분 야옹' },
+                  { key: 'mixed', label: '🎭 랜덤믹스', desc: '깜짝 효과' }
+                ] as const).map(({ key, label, desc }) => (
+                  <button
+                    key={key}
+                    onClick={() => setCuteSoundMode(key)}
+                    className={`px-2 py-2 rounded border-2 text-xs font-medium transition-all ${
+                      cuteSoundMode === key
+                        ? 'bg-album-orange text-retro-black border-retro-black'
+                        : 'bg-cream text-retro-black border-retro-black hover:bg-album-orange/20'
+                    }`}
+                    disabled={isPlaying}
+                    title={desc}
+                  >
+                    {isMobile ? key === 'normal' ? '🐈' : key === 'miyamiya' ? '🐱' : key === 'emotional' ? '😻' : '🎭' : label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Cat Emotion (only visible when emotional mode is selected) */}
+            {cuteSoundMode === 'emotional' && (
+              <div className="bg-white border-2 border-retro-black rounded-lg p-3">
+                <label className="block text-sm font-semibold mb-2">고양이 기분:</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { key: 'neutral', label: '😐 평범', emoji: '😐' },
+                    { key: 'happy', label: '😸 행복', emoji: '😸' },
+                    { key: 'sleepy', label: '😴 졸림', emoji: '😴' },
+                    { key: 'playful', label: '😹 장난', emoji: '😹' },
+                    { key: 'affectionate', label: '😻 애정', emoji: '😻' }
+                  ] as const).map(({ key, label, emoji }) => (
+                    <button
+                      key={key}
+                      onClick={() => setCatEmotion(key)}
+                      className={`px-2 py-2 rounded border-2 text-xs font-medium transition-all ${
+                        catEmotion === key
+                          ? 'bg-album-blue text-retro-black border-retro-black'
+                          : 'bg-cream text-retro-black border-retro-black hover:bg-album-blue/20'
+                      }`}
+                      disabled={isPlaying}
+                    >
+                      {isMobile ? emoji : label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Additional Controls */}
@@ -511,9 +620,19 @@ export default function MetronomeWindow({ windowId: _ }: MetronomeWindowProps) {
           {audioError ? (
             <div className="text-album-orange font-semibold">⚠️ {audioError}</div>
           ) : isPlaying ? (
-            `연주 중 • ${timeSignature} • 박자 ${currentBeat + 1}/${beatsPerMeasure}`
+            `연주 중 • ${timeSignature} • 박자 ${currentBeat + 1}/${beatsPerMeasure} • ${
+              cuteSoundMode === 'normal' ? '기본 야옹' : 
+              cuteSoundMode === 'miyamiya' ? '미야미야 모드' :
+              cuteSoundMode === 'emotional' ? `감정표현 (${catEmotion})` :
+              '랜덤믹스 모드'
+            }`
           ) : (
-            '준비됨 • 스페이스바: 시작/정지, 화살표: BPM조절, Ctrl+M: 무음모드'
+            `준비됨 • ${
+              cuteSoundMode === 'normal' ? '기본' : 
+              cuteSoundMode === 'miyamiya' ? '미야미야' :
+              cuteSoundMode === 'emotional' ? '감정표현' :
+              '랜덤믹스'
+            } 모드 • 스페이스바: 시작/정지, 화살표: BPM조절, Ctrl+M: 무음모드`
           )}
         </div>
       </div>

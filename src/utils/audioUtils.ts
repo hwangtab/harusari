@@ -710,6 +710,9 @@ export const playFlashSound = () => {
 
 // Cat meow sound generation for metronome
 
+// Cat emotional states for enhanced expressiveness
+export type CatEmotion = 'happy' | 'sleepy' | 'playful' | 'affectionate' | 'neutral';
+
 /**
  * Creates a realistic cat meow sound buffer with natural frequency modulation
  * @param audioContext The audio context
@@ -722,68 +725,89 @@ export const createCatMeowBuffer = (
   audioContext: AudioContext, 
   pitch: 'kitten' | 'adult' | 'large' = 'adult',
   isAccent: boolean = false,
-  duration: number = DURATIONS.MEDIUM
+  duration: number = DURATIONS.MEDIUM,
+  emotion: CatEmotion = 'neutral'
 ): AudioBuffer => {
   const sampleRate = audioContext.sampleRate;
   const frameCount = sampleRate * duration;
   const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
   const data = buffer.getChannelData(0);
 
-  // Base frequencies for different cat sizes
+  // Enhanced base frequencies for cuter cat sounds
   const baseFreqs = {
-    kitten: { start: 800, mid: 600, end: 400 },   // High-pitched kitten
-    adult: { start: 600, mid: 450, end: 300 },    // Adult cat
-    large: { start: 400, mid: 300, end: 200 }     // Large cat
+    kitten: { start: 1000, mid: 750, end: 500 },   // Even higher-pitched for cuteness
+    adult: { start: 700, mid: 550, end: 350 },     // Slightly higher adult cat
+    large: { start: 500, mid: 400, end: 250 }      // Warmer large cat
   };
 
   const freq = baseFreqs[pitch];
   const accentMultiplier = isAccent ? 1.3 : 1.0; // Accent makes it slightly lower and louder
+  
+  // Emotional frequency and timing modifications
+  const emotionalMods = {
+    happy: { freqMult: 1.1, speedMult: 1.2, vibratoMult: 1.5 },
+    sleepy: { freqMult: 0.85, speedMult: 0.7, vibratoMult: 0.5 },
+    playful: { freqMult: 1.15, speedMult: 1.4, vibratoMult: 2.0 },
+    affectionate: { freqMult: 0.95, speedMult: 0.9, vibratoMult: 0.8 },
+    neutral: { freqMult: 1.0, speedMult: 1.0, vibratoMult: 1.0 }
+  };
+  
+  const emotionMod = emotionalMods[emotion];
 
   for (let i = 0; i < frameCount; i++) {
     const t = i / sampleRate;
     const progress = t / duration;
     
-    // Frequency modulation - classic meow pattern (high -> mid -> low)
+    // Frequency modulation - classic meow pattern with emotional adjustments
+    const emotionalProgress = progress * emotionMod.speedMult; // Emotional timing
     let currentFreq;
-    if (progress < 0.2) {
+    if (emotionalProgress < 0.2) {
       // Initial "mya" sound
-      currentFreq = freq.start + (freq.mid - freq.start) * (progress / 0.2);
-    } else if (progress < 0.6) {
+      currentFreq = freq.start + (freq.mid - freq.start) * (emotionalProgress / 0.2);
+    } else if (emotionalProgress < 0.6) {
       // Sustained "aaa" sound
       currentFreq = freq.mid;
     } else {
       // Final "ow" sound
-      currentFreq = freq.mid + (freq.end - freq.mid) * ((progress - 0.6) / 0.4);
+      currentFreq = freq.mid + (freq.end - freq.mid) * ((emotionalProgress - 0.6) / 0.4);
     }
     
-    // Apply accent frequency adjustment
-    currentFreq = currentFreq / accentMultiplier;
+    // Apply emotional and accent frequency adjustments
+    currentFreq = (currentFreq * emotionMod.freqMult) / accentMultiplier;
     
-    // Generate the fundamental tone
+    // Generate the fundamental tone with enhanced cuteness
     let sample = Math.sin(t * currentFreq * 2 * Math.PI);
     
-    // Add harmonics for more realistic cat voice
-    sample += Math.sin(t * currentFreq * 2 * 2 * Math.PI) * 0.3;  // 2nd harmonic
-    sample += Math.sin(t * currentFreq * 3 * 2 * Math.PI) * 0.15; // 3rd harmonic
+    // Add harmonics for more realistic and cute cat voice
+    sample += Math.sin(t * currentFreq * 2 * 2 * Math.PI) * 0.25;  // 2nd harmonic (slightly reduced)
+    sample += Math.sin(t * currentFreq * 3 * 2 * Math.PI) * 0.12;  // 3rd harmonic
+    sample += Math.sin(t * currentFreq * 1.5 * 2 * Math.PI) * 0.08; // Sub-harmonic for warmth
     
-    // Add slight roughness/breathiness
-    const roughness = (Math.random() * 2 - 1) * 0.1;
-    sample += roughness;
+    // Add cute chirping quality (higher frequency modulation)
+    const chirp = Math.sin(t * currentFreq * 4 * 2 * Math.PI) * 0.05;
+    sample += chirp;
     
-    // Amplitude envelope - cat meow shape
+    // Gentle breathiness instead of roughness
+    const breathiness = (Math.random() * 2 - 1) * 0.05; // Reduced for cuteness
+    sample += breathiness;
+    
+    // Enhanced amplitude envelope for cuter meow shape
     let envelope;
-    if (progress < 0.1) {
-      // Quick attack for "m" consonant
-      envelope = progress / 0.1;
-    } else if (progress < 0.3) {
-      // Peak of "ya" 
-      envelope = 1.0;
-    } else if (progress < 0.7) {
-      // Sustained "aaa"
-      envelope = 0.8;
+    if (progress < 0.08) {
+      // Softer attack for "m" consonant (more gentle)
+      envelope = Math.pow(progress / 0.08, 0.7); // Curved attack
+    } else if (progress < 0.25) {
+      // Extended peak of "ya" with slight vibrato
+      const vibratoEnv = 1 + Math.sin(t * 15 * 2 * Math.PI) * 0.05;
+      envelope = 1.0 * vibratoEnv;
+    } else if (progress < 0.65) {
+      // Sustained "aaa" with cute warble
+      const warble = 1 + Math.sin(t * 8 * 2 * Math.PI) * 0.03;
+      envelope = 0.85 * warble;
     } else {
-      // Decay for "ow"
-      envelope = 0.8 * (1 - (progress - 0.7) / 0.3);
+      // Smoother decay for "ow" (more graceful ending)
+      const fadeProgress = (progress - 0.65) / 0.35;
+      envelope = 0.85 * Math.pow(1 - fadeProgress, 1.5); // Curved decay
     }
     
     // Apply accent volume boost
@@ -791,10 +815,30 @@ export const createCatMeowBuffer = (
       envelope *= 1.4;
     }
     
-    // Add subtle vibrato for natural cat voice
-    const vibrato = 1 + Math.sin(t * 12 * 2 * Math.PI) * 0.03;
+    // Enhanced vibrato and cute modulations with emotional expression
+    const baseVibratoFreq = 10 * emotionMod.vibratoMult;
+    const vibratoDepth = emotion === 'playful' ? 0.06 : emotion === 'sleepy' ? 0.02 : 0.04;
+    const vibrato = 1 + Math.sin(t * baseVibratoFreq * 2 * Math.PI) * vibratoDepth;
     
-    data[i] = sample * envelope * vibrato * 0.2;
+    // Add cute "purr" undertone with emotional variations
+    let purrEffect = 1;
+    if (pitch === 'kitten') {
+      const purrFreq = emotion === 'sleepy' ? 15 : emotion === 'playful' ? 35 : 25;
+      const purrDepth = emotion === 'affectionate' ? 0.04 : 0.02;
+      purrEffect = 1 + Math.sin(t * purrFreq * 2 * Math.PI) * purrDepth;
+    }
+    
+    // Emotional sound modifications
+    let emotionalEffect = 1;
+    if (emotion === 'happy') {
+      // Add chirpy brightness
+      emotionalEffect = 1 + Math.sin(t * 40 * 2 * Math.PI) * 0.03;
+    } else if (emotion === 'sleepy') {
+      // Add gentle warmth
+      emotionalEffect = 1 + Math.sin(t * 5 * 2 * Math.PI) * 0.02;
+    }
+    
+    data[i] = sample * envelope * vibrato * purrEffect * emotionalEffect * 0.22;
   }
 
   return buffer;
@@ -810,23 +854,193 @@ export const createCatMeowBuffer = (
 export const createAccentMeowBuffer = (
   audioContext: AudioContext, 
   pitch: 'kitten' | 'adult' | 'large' = 'adult',
-  duration: number = DURATIONS.MEDIUM_LONG
+  duration: number = DURATIONS.MEDIUM_LONG,
+  emotion: CatEmotion = 'neutral'
 ): AudioBuffer => {
-  return createCatMeowBuffer(audioContext, pitch, true, duration);
+  return createCatMeowBuffer(audioContext, pitch, true, duration, emotion);
 };
 
 /**
  * Plays a regular cat meow sound for metronome beats
  * @param pitch Cat voice pitch variation
+ * @param emotion Cat emotional state
  */
-export const playCatMeow = (pitch: 'kitten' | 'adult' | 'large' = 'adult') => {
-  playSound((ctx) => createCatMeowBuffer(ctx, pitch, false), VOLUMES.MEDIUM, DURATIONS.MEDIUM);
+export const playCatMeow = (
+  pitch: 'kitten' | 'adult' | 'large' = 'adult',
+  emotion: CatEmotion = 'neutral'
+) => {
+  playSound((ctx) => createCatMeowBuffer(ctx, pitch, false, DURATIONS.MEDIUM, emotion), VOLUMES.MEDIUM, DURATIONS.MEDIUM);
 };
 
 /**
  * Plays an accented cat meow sound for metronome first beats
  * @param pitch Cat voice pitch variation
+ * @param emotion Cat emotional state
  */
-export const playAccentCatMeow = (pitch: 'kitten' | 'adult' | 'large' = 'adult') => {
-  playSound((ctx) => createAccentMeowBuffer(ctx, pitch), VOLUMES.HIGH, DURATIONS.MEDIUM_LONG);
+export const playAccentCatMeow = (
+  pitch: 'kitten' | 'adult' | 'large' = 'adult',
+  emotion: CatEmotion = 'neutral'
+) => {
+  playSound((ctx) => createAccentMeowBuffer(ctx, pitch, DURATIONS.MEDIUM_LONG, emotion), VOLUMES.HIGH, DURATIONS.MEDIUM_LONG);
+};
+
+/**
+ * Creates a "miyamiya" double meow pattern for extra cuteness
+ * @param audioContext The audio context
+ * @param pitch Cat voice pitch variation
+ * @param emotion Emotional state
+ * @returns AudioBuffer containing the double meow
+ */
+export const createMiyamiyaBuffer = (
+  audioContext: AudioContext,
+  pitch: 'kitten' | 'adult' | 'large' = 'adult',
+  emotion: CatEmotion = 'playful'
+): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const totalDuration = DURATIONS.MEDIUM_LONG + 0.1; // Slightly longer for double sound
+  const frameCount = sampleRate * totalDuration;
+  const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+
+  // Create two short meows with a brief pause
+  const firstMeowBuffer = createCatMeowBuffer(audioContext, pitch, false, DURATIONS.MEDIUM_SHORT, emotion);
+  const secondMeowBuffer = createCatMeowBuffer(audioContext, pitch, false, DURATIONS.MEDIUM_SHORT, emotion);
+  
+  const firstMeowData = firstMeowBuffer.getChannelData(0);
+  const secondMeowData = secondMeowBuffer.getChannelData(0);
+  
+  const pauseDuration = 0.08; // Brief pause between "miya" and "miya"
+  const firstMeowFrames = firstMeowData.length;
+  const pauseFrames = Math.floor(sampleRate * pauseDuration);
+  
+  // Copy first meow
+  for (let i = 0; i < firstMeowFrames && i < frameCount; i++) {
+    data[i] = firstMeowData[i];
+  }
+  
+  // Copy second meow after pause
+  const secondStart = firstMeowFrames + pauseFrames;
+  for (let i = 0; i < secondMeowData.length && secondStart + i < frameCount; i++) {
+    data[secondStart + i] = secondMeowData[i] * 0.9; // Slightly softer second meow
+  }
+  
+  return buffer;
+};
+
+/**
+ * Creates a purring "rrrr" sound effect
+ * @param audioContext The audio context
+ * @param duration Duration in seconds
+ * @returns AudioBuffer containing the purr sound
+ */
+export const createPurringBuffer = (
+  audioContext: AudioContext,
+  duration: number = DURATIONS.MEDIUM
+): AudioBuffer => {
+  const sampleRate = audioContext.sampleRate;
+  const frameCount = sampleRate * duration;
+  const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < frameCount; i++) {
+    const t = i / sampleRate;
+    
+    // Base purr frequency around 25-50 Hz
+    const baseFreq = 30 + Math.sin(t * 3) * 15; // Varying purr rhythm
+    
+    // Multiple harmonic layers for rich purr texture
+    let sample = 0;
+    sample += Math.sin(t * baseFreq * 2 * Math.PI) * 0.4;
+    sample += Math.sin(t * baseFreq * 2 * 2 * Math.PI) * 0.2;
+    sample += Math.sin(t * baseFreq * 3 * 2 * Math.PI) * 0.1;
+    
+    // Add rumbling texture with noise
+    const rumble = (Math.random() * 2 - 1) * 0.15;
+    sample += rumble;
+    
+    // Breathing pattern envelope
+    const breathingRate = 1.5; // Breaths per second
+    const breathingEnvelope = Math.sin(t * breathingRate * 2 * Math.PI) * 0.3 + 0.7;
+    
+    // Overall gentle envelope
+    const envelope = Math.exp(-t * 0.5); // Slow fade
+    
+    data[i] = sample * envelope * breathingEnvelope * 0.18;
+  }
+
+  return buffer;
+};
+
+/**
+ * Creates a sniffing "킁킁" sound effect
+ * @param audioContext The audio context
+ * @returns AudioBuffer containing the sniff sound
+ */
+export const createSniffingBuffer = (
+  audioContext: AudioContext
+): AudioBuffer => {
+  const duration = 0.3;
+  const sampleRate = audioContext.sampleRate;
+  const frameCount = sampleRate * duration;
+  const buffer = audioContext.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < frameCount; i++) {
+    const t = i / sampleRate;
+    
+    // Two sharp intake sounds
+    let sample = 0;
+    
+    // First sniff (higher pitch)
+    if (t < 0.08) {
+      const sniffT = t / 0.08;
+      const freq = 2000 + sniffT * 1000; // Rising frequency
+      sample += Math.sin(t * freq * 2 * Math.PI) * Math.exp(-sniffT * 10);
+      
+      // Add airflow noise
+      const airflow = (Math.random() * 2 - 1) * 0.3 * Math.exp(-sniffT * 8);
+      sample += airflow;
+    }
+    
+    // Brief pause
+    else if (t < 0.12) {
+      // Silence
+    }
+    
+    // Second sniff (slightly lower)
+    else if (t < 0.2) {
+      const sniffT = (t - 0.12) / 0.08;
+      const freq = 1800 + sniffT * 800;
+      sample += Math.sin((t - 0.12) * freq * 2 * Math.PI) * Math.exp(-sniffT * 10) * 0.8;
+      
+      const airflow = (Math.random() * 2 - 1) * 0.25 * Math.exp(-sniffT * 8);
+      sample += airflow;
+    }
+    
+    data[i] = sample * 0.2;
+  }
+
+  return buffer;
+};
+
+/**
+ * Plays a "miyamiya" double meow sound
+ * @param pitch Cat voice pitch variation
+ */
+export const playMiyamiya = (pitch: 'kitten' | 'adult' | 'large' = 'adult') => {
+  playSound((ctx) => createMiyamiyaBuffer(ctx, pitch, 'playful'), VOLUMES.MEDIUM, DURATIONS.MEDIUM_LONG + 0.1);
+};
+
+/**
+ * Plays a purring sound
+ */
+export const playPurring = () => {
+  playSound(createPurringBuffer, VOLUMES.MEDIUM, DURATIONS.MEDIUM);
+};
+
+/**
+ * Plays a sniffing sound
+ */
+export const playSniffing = () => {
+  playSound(createSniffingBuffer, VOLUMES.MEDIUM, 0.3);
 };
