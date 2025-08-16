@@ -223,6 +223,34 @@ class CatAudioManager {
   }
 
   /**
+   * Select appropriate audio file based on cat type, emotion, and accent
+   */
+  private selectAudioFile(
+    catType: CatPitchType, 
+    emotion: CatEmotion, 
+    isAccent: boolean
+  ): string {
+    // Accent beats (strong beats) - use more dramatic/varied sounds
+    if (isAccent) {
+      // For kittens and playful emotions, use cartoon sound for cuteness
+      if (catType === 'kitten' || emotion === 'playful' || emotion === 'happy') {
+        return CAT_AUDIO_FILES.cartoon;
+      }
+      // For adult/large cats or calm emotions, use natural sound for depth
+      return CAT_AUDIO_FILES.natural;
+    } 
+    // Regular beats (weak beats) - use contrasting sounds for rhythm clarity
+    else {
+      // Opposite strategy for regular beats to create contrast
+      if (catType === 'kitten' || emotion === 'playful' || emotion === 'happy') {
+        return CAT_AUDIO_FILES.natural; // Natural sound provides contrast to cartoon accent
+      }
+      // For adult/large cats, use cartoon sound for lighter regular beats
+      return CAT_AUDIO_FILES.cartoon;
+    }
+  }
+
+  /**
    * Calculate optimal duration for given BPM
    */
   private calculateOptimalDuration(bpm: number, isAccent: boolean = false): number {
@@ -273,10 +301,8 @@ class CatAudioManager {
     try {
       const audioContext = await this.initAudioContext();
       
-      // Choose audio file based on emotion and cat type
-      const audioFile = emotion === 'playful' || catType === 'kitten' 
-        ? CAT_AUDIO_FILES.cartoon 
-        : CAT_AUDIO_FILES.natural;
+      // Choose audio file based on accent/regular beat and cat characteristics
+      const audioFile = this.selectAudioFile(catType, emotion, isAccent);
 
       // Load audio file
       const originalBuffer = await this.loadAudioFile(audioFile);
