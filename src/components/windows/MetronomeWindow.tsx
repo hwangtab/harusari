@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { playCatMeow, playAccentCatMeow, playMiyamiya, playPurring, playSniffing, type CatEmotion } from '@/utils/audioUtils';
+import { playCatMeow as playOldCatMeow, playAccentCatMeow as playOldAccentCatMeow, playMiyamiya, playPurring, playSniffing, type CatEmotion } from '@/utils/audioUtils';
+import { playCatMeow, playAccentCatMeow, preloadCatAudio, type CatPitchType } from '@/utils/catAudioManager';
 import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface MetronomeWindowProps {
@@ -10,7 +11,7 @@ interface MetronomeWindowProps {
 }
 
 type TimeSignature = '2/4' | '3/4' | '4/4';
-type CatPitch = 'kitten' | 'adult' | 'large';
+type CatPitch = CatPitchType;
 type CuteSoundMode = 'normal' | 'miyamiya' | 'emotional' | 'mixed';
 
 // Constants for better maintainability
@@ -92,6 +93,15 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   const nextBeatTimeRef = useRef<number>(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   
+  // Initialize real cat audio on component mount
+  useEffect(() => {
+    // Preload cat audio files for better performance
+    preloadCatAudio().catch(error => {
+      console.warn('Failed to preload cat audio:', error);
+      setAudioError('고양이 오디오 로딩 실패 - 합성 사운드로 대체됩니다.');
+    });
+  }, []);
+
   // Save settings when they change
   useEffect(() => {
     const settings: MetronomeSettings = {
@@ -125,22 +135,23 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   };
 
   // Play cute cat sounds based on mode
-  const playCuteCatSound = useCallback((isFirstBeat: boolean) => {
+  const playCuteCatSound = useCallback(async (isFirstBeat: boolean) => {
     try {
       switch (cuteSoundMode) {
         case 'miyamiya':
           if (isFirstBeat) {
+            // Use old miyamiya for special effect, but try real audio for regular beats
             playMiyamiya(catPitch);
           } else {
-            playCatMeow(catPitch, catEmotion);
+            await playCatMeow(catPitch, catEmotion, bpm);
           }
           break;
         
         case 'emotional':
           if (isFirstBeat) {
-            playAccentCatMeow(catPitch, catEmotion);
+            await playAccentCatMeow(catPitch, catEmotion, bpm);
           } else {
-            playCatMeow(catPitch, catEmotion);
+            await playCatMeow(catPitch, catEmotion, bpm);
           }
           break;
         
@@ -152,7 +163,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             } else if (randomChoice < 0.3) {
               playMiyamiya(catPitch);
             } else {
-              playAccentCatMeow(catPitch, catEmotion);
+              await playAccentCatMeow(catPitch, catEmotion, bpm);
             }
           } else {
             if (randomChoice < 0.1) {
@@ -160,24 +171,34 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             } else if (randomChoice < 0.2) {
               playPurring();
             } else {
-              playCatMeow(catPitch, catEmotion);
+              await playCatMeow(catPitch, catEmotion, bpm);
             }
           }
           break;
         
         default: // 'normal'
           if (isFirstBeat) {
-            playAccentCatMeow(catPitch, catEmotion);
+            await playAccentCatMeow(catPitch, catEmotion, bpm);
           } else {
-            playCatMeow(catPitch, catEmotion);
+            await playCatMeow(catPitch, catEmotion, bpm);
           }
           break;
       }
     } catch (error) {
-      console.warn('오디오 재생 실패:', error);
-      setAudioError('오디오 재생에 실패했습니다.');
+      console.warn('실제 오디오 재생 실패, 합성 사운드로 대체:', error);
+      // Fallback to synthetic sounds
+      try {
+        if (isFirstBeat) {
+          playOldAccentCatMeow(catPitch, catEmotion);
+        } else {
+          playOldCatMeow(catPitch, catEmotion);
+        }
+      } catch (fallbackError) {
+        console.warn('합성 사운드도 실패:', fallbackError);
+        setAudioError('오디오 재생에 실패했습니다.');
+      }
     }
-  }, [catPitch, cuteSoundMode, catEmotion]);
+  }, [catPitch, cuteSoundMode, catEmotion, bpm]);
 
   // Stop metronome
   const stopMetronome = useCallback(() => {
@@ -620,14 +641,14 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
           {audioError ? (
             <div className="text-album-orange font-semibold">⚠️ {audioError}</div>
           ) : isPlaying ? (
-            `연주 중 • ${timeSignature} • 박자 ${currentBeat + 1}/${beatsPerMeasure} • ${
+            `🎵 실제 고양이 소리로 연주 중 • ${timeSignature} • 박자 ${currentBeat + 1}/${beatsPerMeasure} • ${
               cuteSoundMode === 'normal' ? '기본 야옹' : 
               cuteSoundMode === 'miyamiya' ? '미야미야 모드' :
               cuteSoundMode === 'emotional' ? `감정표현 (${catEmotion})` :
               '랜덤믹스 모드'
             }`
           ) : (
-            `준비됨 • ${
+            `🐱 실제 고양이 소리 준비됨 • ${
               cuteSoundMode === 'normal' ? '기본' : 
               cuteSoundMode === 'miyamiya' ? '미야미야' :
               cuteSoundMode === 'emotional' ? '감정표현' :
