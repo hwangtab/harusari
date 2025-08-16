@@ -6,6 +6,7 @@
 
 export type CatPitchType = 'kitten' | 'adult' | 'large';
 export type CatEmotion = 'happy' | 'sleepy' | 'playful' | 'affectionate' | 'neutral';
+export type BeatStrength = 'primary' | 'secondary' | 'regular';
 
 // Audio file paths
 const CAT_AUDIO_FILES = {
@@ -223,58 +224,74 @@ class CatAudioManager {
   }
 
   /**
-   * Select appropriate audio file based on cat type, emotion, and accent
+   * Select appropriate audio file based on cat type, emotion, and beat strength
    */
   private selectAudioFile(
     catType: CatPitchType, 
     emotion: CatEmotion, 
-    isAccent: boolean
+    beatStrength: BeatStrength
   ): string {
-    // Accent beats (strong beats) - use more dramatic/varied sounds
-    if (isAccent) {
-      // For kittens and playful emotions, use cartoon sound for cuteness
-      if (catType === 'kitten' || emotion === 'playful' || emotion === 'happy') {
-        return CAT_AUDIO_FILES.cartoon;
-      }
-      // For adult/large cats or calm emotions, use natural sound for depth
-      return CAT_AUDIO_FILES.natural;
-    } 
-    // Regular beats (weak beats) - use contrasting sounds for rhythm clarity
-    else {
-      // Opposite strategy for regular beats to create contrast
-      if (catType === 'kitten' || emotion === 'playful' || emotion === 'happy') {
-        return CAT_AUDIO_FILES.natural; // Natural sound provides contrast to cartoon accent
-      }
-      // For adult/large cats, use cartoon sound for lighter regular beats
-      return CAT_AUDIO_FILES.cartoon;
+    const isCuteType = catType === 'kitten' || emotion === 'playful' || emotion === 'happy';
+    
+    switch (beatStrength) {
+      case 'primary':
+        // Primary beats (strongest) - use most dramatic sound for each type
+        return isCuteType ? CAT_AUDIO_FILES.cartoon : CAT_AUDIO_FILES.natural;
+        
+      case 'secondary':
+        // Secondary beats (medium) - use contrasting sound for variety
+        return isCuteType ? CAT_AUDIO_FILES.natural : CAT_AUDIO_FILES.cartoon;
+        
+      case 'regular':
+      default:
+        // Regular beats (weakest) - use lighter sound opposite to primary
+        return isCuteType ? CAT_AUDIO_FILES.natural : CAT_AUDIO_FILES.cartoon;
     }
   }
 
   /**
-   * Calculate optimal duration for given BPM
+   * Calculate optimal duration for given BPM and beat strength
    */
-  private calculateOptimalDuration(bpm: number, isAccent: boolean = false): number {
+  private calculateOptimalDuration(bpm: number, beatStrength: BeatStrength = 'regular'): number {
     // Beat duration in seconds
     const beatDuration = 60 / bpm;
     
-    // Use 60-80% of beat duration for sound, leaving gap for clarity
-    const soundRatio = isAccent ? 0.8 : 0.6;
+    // Use different ratios based on beat strength
+    const soundRatios = {
+      primary: 0.85,    // Longest for primary beats
+      secondary: 0.75,  // Medium for secondary beats  
+      regular: 0.65     // Shortest for regular beats
+    };
+    
+    const soundRatio = soundRatios[beatStrength];
     return Math.max(0.1, Math.min(0.4, beatDuration * soundRatio));
   }
 
   /**
-   * Process audio for specific cat type, emotion, and BPM
+   * Calculate volume adjustment based on beat strength
+   */
+  private getVolumeMultiplier(beatStrength: BeatStrength): number {
+    switch (beatStrength) {
+      case 'primary': return 1.0;    // Full volume for primary beats
+      case 'secondary': return 0.85; // Reduced volume for secondary beats
+      case 'regular': return 0.7;    // Lowest volume for regular beats
+      default: return 0.7;
+    }
+  }
+
+  /**
+   * Process audio for specific cat type, emotion, BPM, and beat strength
    */
   private async processAudioForMetronome(
     audioBuffer: AudioBuffer,
     catType: CatPitchType,
     emotion: CatEmotion,
     bpm: number,
-    isAccent: boolean = false
+    beatStrength: BeatStrength = 'regular'
   ): Promise<AudioBuffer> {
     const pitchSettings = PITCH_SETTINGS[catType];
     const emotionSettings = EMOTION_SETTINGS[emotion];
-    const targetDuration = this.calculateOptimalDuration(bpm, isAccent);
+    const targetDuration = this.calculateOptimalDuration(bpm, beatStrength);
 
     // Apply pitch shift for cat type
     let processedBuffer = audioBuffer;
@@ -296,20 +313,20 @@ class CatAudioManager {
     catType: CatPitchType = 'adult',
     emotion: CatEmotion = 'neutral',
     bpm: number = 120,
-    isAccent: boolean = false
+    beatStrength: BeatStrength = 'regular'
   ): Promise<void> {
     try {
       const audioContext = await this.initAudioContext();
       
-      // Choose audio file based on accent/regular beat and cat characteristics
-      const audioFile = this.selectAudioFile(catType, emotion, isAccent);
+      // Choose audio file based on beat strength and cat characteristics
+      const audioFile = this.selectAudioFile(catType, emotion, beatStrength);
 
       // Load audio file
       const originalBuffer = await this.loadAudioFile(audioFile);
       
       // Process for metronome use
       const processedBuffer = await this.processAudioForMetronome(
-        originalBuffer, catType, emotion, bpm, isAccent
+        originalBuffer, catType, emotion, bpm, beatStrength
       );
 
       // Create and configure audio nodes
@@ -318,11 +335,12 @@ class CatAudioManager {
       
       source.buffer = processedBuffer;
 
-      // Calculate volume
+      // Calculate volume based on beat strength and cat characteristics
       const pitchSettings = PITCH_SETTINGS[catType];
       const emotionSettings = EMOTION_SETTINGS[emotion];
-      const baseVolume = isAccent ? 0.8 : 0.6;
-      const finalVolume = baseVolume * pitchSettings.volume * emotionSettings.volumeBoost;
+      const strengthVolume = this.getVolumeMultiplier(beatStrength);
+      const baseVolume = 0.75;
+      const finalVolume = baseVolume * strengthVolume * pitchSettings.volume * emotionSettings.volumeBoost;
 
       // Smooth envelope to prevent clicks
       const duration = processedBuffer.duration;
@@ -383,9 +401,10 @@ export const catAudioManager = new CatAudioManager();
 export const playCatMeow = (
   catType: CatPitchType = 'adult',
   emotion: CatEmotion = 'neutral',
-  bpm: number = 120
+  bpm: number = 120,
+  beatStrength: BeatStrength = 'regular'
 ) => {
-  return catAudioManager.playCatMeow(catType, emotion, bpm, false);
+  return catAudioManager.playCatMeow(catType, emotion, bpm, beatStrength);
 };
 
 export const playAccentCatMeow = (
@@ -393,7 +412,15 @@ export const playAccentCatMeow = (
   emotion: CatEmotion = 'neutral',
   bpm: number = 120
 ) => {
-  return catAudioManager.playCatMeow(catType, emotion, bpm, true);
+  return catAudioManager.playCatMeow(catType, emotion, bpm, 'primary');
+};
+
+export const playSecondaryCatMeow = (
+  catType: CatPitchType = 'adult', 
+  emotion: CatEmotion = 'neutral',
+  bpm: number = 120
+) => {
+  return catAudioManager.playCatMeow(catType, emotion, bpm, 'secondary');
 };
 
 // Preload function for initialization

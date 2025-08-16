@@ -3,16 +3,289 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCatMeow as playOldCatMeow, playAccentCatMeow as playOldAccentCatMeow, playMiyamiya, playPurring, playSniffing, type CatEmotion } from '@/utils/audioUtils';
-import { playCatMeow, playAccentCatMeow, preloadCatAudio, type CatPitchType } from '@/utils/catAudioManager';
+import { playCatMeow, playAccentCatMeow, playSecondaryCatMeow, preloadCatAudio, type CatPitchType, type BeatStrength as CatBeatStrength } from '@/utils/catAudioManager';
 import { useWindowDimensions } from '@/hooks/useWindowDimensions';
 
 interface MetronomeWindowProps {
   windowId: string;
 }
 
-type TimeSignature = '2/4' | '3/4' | '4/4';
+type ExtendedTimeSignature = '2/4' | '3/4' | '4/4' | '5/4' | '6/8' | '7/8' | '9/8' | '12/8';
+type BeatStrength = 'primary' | 'secondary' | 'regular';
+type RhythmMode = 'classic' | 'jazz' | 'latin' | 'world';
 type CatPitch = CatPitchType;
 type CuteSoundMode = 'normal' | 'miyamiya' | 'emotional' | 'mixed';
+
+// Beat pattern definition for complex rhythms
+interface BeatPattern {
+  beatsPerMeasure: number;
+  beatStrengths: BeatStrength[];
+  subdivision: number; // 4 for quarter notes, 8 for eighth notes
+  grouping?: number[]; // Beat grouping (e.g., [3,3] for 6/8)
+  name: string;
+  description: string;
+}
+
+// Beat patterns for different time signatures and rhythm modes
+const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPattern>> = {
+  '2/4': {
+    classic: {
+      beatsPerMeasure: 2,
+      beatStrengths: ['primary', 'regular'],
+      subdivision: 4,
+      name: '2/4 클래식',
+      description: '강-약'
+    },
+    jazz: {
+      beatsPerMeasure: 2,
+      beatStrengths: ['primary', 'secondary'],
+      subdivision: 4,
+      name: '2/4 재즈',
+      description: '강-중강'
+    },
+    latin: {
+      beatsPerMeasure: 2,
+      beatStrengths: ['primary', 'regular'],
+      subdivision: 4,
+      name: '2/4 라틴',
+      description: '강-약'
+    },
+    world: {
+      beatsPerMeasure: 2,
+      beatStrengths: ['primary', 'regular'],
+      subdivision: 4,
+      name: '2/4 월드',
+      description: '강-약'
+    }
+  },
+  '3/4': {
+    classic: {
+      beatsPerMeasure: 3,
+      beatStrengths: ['primary', 'regular', 'regular'],
+      subdivision: 4,
+      name: '3/4 왈츠',
+      description: '강-약-약'
+    },
+    jazz: {
+      beatsPerMeasure: 3,
+      beatStrengths: ['primary', 'secondary', 'regular'],
+      subdivision: 4,
+      name: '3/4 재즈왈츠',
+      description: '강-중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 3,
+      beatStrengths: ['primary', 'regular', 'secondary'],
+      subdivision: 4,
+      name: '3/4 라틴',
+      description: '강-약-중강'
+    },
+    world: {
+      beatsPerMeasure: 3,
+      beatStrengths: ['primary', 'regular', 'regular'],
+      subdivision: 4,
+      name: '3/4 포크',
+      description: '강-약-약'
+    }
+  },
+  '4/4': {
+    classic: {
+      beatsPerMeasure: 4,
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular'],
+      subdivision: 4,
+      name: '4/4 클래식',
+      description: '강-약-중강-약'
+    },
+    jazz: {
+      beatsPerMeasure: 4,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary'],
+      subdivision: 4,
+      name: '4/4 스윙',
+      description: '강-중강-약-중강'
+    },
+    latin: {
+      beatsPerMeasure: 4,
+      beatStrengths: ['primary', 'regular', 'secondary', 'secondary'],
+      subdivision: 4,
+      name: '4/4 살사',
+      description: '강-약-중강-중강'
+    },
+    world: {
+      beatsPerMeasure: 4,
+      beatStrengths: ['primary', 'regular', 'regular', 'regular'],
+      subdivision: 4,
+      name: '4/4 포크',
+      description: '강-약-약-약'
+    }
+  },
+  '5/4': {
+    classic: {
+      beatsPerMeasure: 5,
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 4,
+      name: '5/4 클래식',
+      description: '강-약-중강-약-약'
+    },
+    jazz: {
+      beatsPerMeasure: 5,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'regular'],
+      subdivision: 4,
+      name: '5/4 재즈',
+      description: '강-중강-약-중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 5,
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary'],
+      subdivision: 4,
+      name: '5/4 라틴',
+      description: '강-약-중강-약-중강'
+    },
+    world: {
+      beatsPerMeasure: 5,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular'],
+      subdivision: 4,
+      grouping: [3, 2],
+      name: '5/4 불가리아',
+      description: '강-약-약|중강-약'
+    }
+  },
+  '6/8': {
+    classic: {
+      beatsPerMeasure: 6,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3],
+      name: '6/8 컴파운드',
+      description: '강-약-약|중강-약-약'
+    },
+    jazz: {
+      beatsPerMeasure: 6,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3],
+      name: '6/8 재즈',
+      description: '강-중강-약|중강-중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 6,
+      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      subdivision: 8,
+      grouping: [3, 3],
+      name: '6/8 라틴',
+      description: '강-약-중강|중강-약-중강'
+    },
+    world: {
+      beatsPerMeasure: 6,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3],
+      name: '6/8 켈틱',
+      description: '강-약-약|중강-약-약'
+    }
+  },
+  '7/8': {
+    classic: {
+      beatsPerMeasure: 7,
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 2, 2],
+      name: '7/8 클래식',
+      description: '강-약-중강|약-약|중강-약'
+    },
+    jazz: {
+      beatsPerMeasure: 7,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 2, 2],
+      name: '7/8 재즈',
+      description: '강-중강-약|중강-약|중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 7,
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular', 'secondary'],
+      subdivision: 8,
+      grouping: [2, 3, 2],
+      name: '7/8 라틴',
+      description: '강-약|중강-약-중강|약-중강'
+    },
+    world: {
+      beatsPerMeasure: 7,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 2, 2],
+      name: '7/8 발칸',
+      description: '강-약-약|중강-약|중강-약'
+    }
+  },
+  '9/8': {
+    classic: {
+      beatsPerMeasure: 9,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3],
+      name: '9/8 컴파운드',
+      description: '강-약-약|중강-약-약|중강-약-약'
+    },
+    jazz: {
+      beatsPerMeasure: 9,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3],
+      name: '9/8 재즈',
+      description: '강-중강-약|중강-중강-약|중강-중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 9,
+      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      subdivision: 8,
+      grouping: [3, 3, 3],
+      name: '9/8 라틴',
+      description: '강-약-중강|중강-약-중강|중강-약-중강'
+    },
+    world: {
+      beatsPerMeasure: 9,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3],
+      name: '9/8 터키',
+      description: '강-약-약|중강-약-약|중강-약-약'
+    }
+  },
+  '12/8': {
+    classic: {
+      beatsPerMeasure: 12,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3, 3],
+      name: '12/8 컴파운드',
+      description: '강-약-약|중강-약-약|중강-약-약|중강-약-약'
+    },
+    jazz: {
+      beatsPerMeasure: 12,
+      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3, 3],
+      name: '12/8 셔플',
+      description: '강-중강-약|중강-중강-약|중강-중강-약|중강-중강-약'
+    },
+    latin: {
+      beatsPerMeasure: 12,
+      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      subdivision: 8,
+      grouping: [3, 3, 3, 3],
+      name: '12/8 아프로큐반',
+      description: '강-약-중강|중강-약-중강|중강-약-중강|중강-약-중강'
+    },
+    world: {
+      beatsPerMeasure: 12,
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      subdivision: 8,
+      grouping: [3, 3, 3, 3],
+      name: '12/8 블루스',
+      description: '강-약-약|중강-약-약|중강-약-약|중강-약-약'
+    }
+  }
+} as const;
 
 // Constants for better maintainability
 const CONSTANTS = {
@@ -47,7 +320,8 @@ const validateBpm = (value: number): number => {
 // Settings interface
 interface MetronomeSettings {
   bpm: number;
-  timeSignature: TimeSignature;
+  timeSignature: ExtendedTimeSignature;
+  rhythmMode: RhythmMode;
   catPitch: CatPitch;
   volume: number;
   isVisualOnly: boolean;
@@ -78,7 +352,8 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   // Initialize state with saved settings
   const savedSettings = loadSettings();
   const [bpm, setBpm] = useState<number>(savedSettings.bpm ?? CONSTANTS.BPM.DEFAULT);
-  const [timeSignature, setTimeSignature] = useState<TimeSignature>(savedSettings.timeSignature ?? '4/4');
+  const [timeSignature, setTimeSignature] = useState<ExtendedTimeSignature>(savedSettings.timeSignature ?? '4/4');
+  const [rhythmMode, setRhythmMode] = useState<RhythmMode>(savedSettings.rhythmMode ?? 'classic');
   const [catPitch, setCatPitch] = useState<CatPitch>(savedSettings.catPitch ?? 'adult');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentBeat, setCurrentBeat] = useState<number>(0);
@@ -107,6 +382,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     const settings: MetronomeSettings = {
       bpm,
       timeSignature,
+      rhythmMode,
       catPitch,
       volume,
       isVisualOnly,
@@ -114,50 +390,60 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
       catEmotion
     };
     saveSettings(settings);
-  }, [bpm, timeSignature, catPitch, volume, isVisualOnly, cuteSoundMode, catEmotion]);
+  }, [bpm, timeSignature, rhythmMode, catPitch, volume, isVisualOnly, cuteSoundMode, catEmotion]);
   
   const { width: screenWidth } = useWindowDimensions();
   const isMobile = screenWidth < CONSTANTS.MOBILE_BREAKPOINT;
   
-  // Memoized beats per measure calculation
+  // Get current beat pattern based on time signature and rhythm mode
+  const currentBeatPattern = useMemo((): BeatPattern => {
+    return BEAT_PATTERNS[timeSignature][rhythmMode];
+  }, [timeSignature, rhythmMode]);
+
+  // Memoized beats per measure from pattern
   const beatsPerMeasure = useMemo((): number => {
-    switch (timeSignature) {
-      case '2/4': return 2;
-      case '3/4': return 3;
-      case '4/4': return 4;
-      default: return 4;
-    }
-  }, [timeSignature]);
+    return currentBeatPattern.beatsPerMeasure;
+  }, [currentBeatPattern]);
+
+  // Get beat strength for current beat
+  const getCurrentBeatStrength = useCallback((beatIndex: number): BeatStrength => {
+    return currentBeatPattern.beatStrengths[beatIndex % currentBeatPattern.beatStrengths.length];
+  }, [currentBeatPattern]);
 
   // Calculate interval in milliseconds
   const getBeatInterval = (): number => {
     return (60 / bpm) * 1000;
   };
 
-  // Play cute cat sounds based on mode
-  const playCuteCatSound = useCallback(async (isFirstBeat: boolean) => {
+  // Play cute cat sounds based on mode and beat strength
+  const playCuteCatSound = useCallback(async (beatStrength: CatBeatStrength) => {
     try {
+      const isFirstBeat = beatStrength === 'primary';
+      
       switch (cuteSoundMode) {
         case 'miyamiya':
           if (isFirstBeat) {
-            // Use old miyamiya for special effect, but try real audio for regular beats
+            // Use old miyamiya for special effect on primary beats
             playMiyamiya(catPitch);
           } else {
-            await playCatMeow(catPitch, catEmotion, bpm);
+            await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
           }
           break;
         
         case 'emotional':
-          if (isFirstBeat) {
+          // Use the full 3-tier system for emotional mode
+          if (beatStrength === 'primary') {
             await playAccentCatMeow(catPitch, catEmotion, bpm);
+          } else if (beatStrength === 'secondary') {
+            await playSecondaryCatMeow(catPitch, catEmotion, bpm);
           } else {
-            await playCatMeow(catPitch, catEmotion, bpm);
+            await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
           }
           break;
         
         case 'mixed':
           const randomChoice = Math.random();
-          if (isFirstBeat) {
+          if (beatStrength === 'primary') {
             if (randomChoice < 0.1) {
               playPurring();
             } else if (randomChoice < 0.3) {
@@ -165,22 +451,31 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             } else {
               await playAccentCatMeow(catPitch, catEmotion, bpm);
             }
+          } else if (beatStrength === 'secondary') {
+            if (randomChoice < 0.15) {
+              playSniffing();
+            } else {
+              await playSecondaryCatMeow(catPitch, catEmotion, bpm);
+            }
           } else {
             if (randomChoice < 0.1) {
               playSniffing();
             } else if (randomChoice < 0.2) {
               playPurring();
             } else {
-              await playCatMeow(catPitch, catEmotion, bpm);
+              await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
             }
           }
           break;
         
         default: // 'normal'
-          if (isFirstBeat) {
+          // Use full 3-tier system for normal mode
+          if (beatStrength === 'primary') {
             await playAccentCatMeow(catPitch, catEmotion, bpm);
+          } else if (beatStrength === 'secondary') {
+            await playSecondaryCatMeow(catPitch, catEmotion, bpm);
           } else {
-            await playCatMeow(catPitch, catEmotion, bpm);
+            await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
           }
           break;
       }
@@ -188,6 +483,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
       console.warn('실제 오디오 재생 실패, 합성 사운드로 대체:', error);
       // Fallback to synthetic sounds
       try {
+        const isFirstBeat = beatStrength === 'primary';
         if (isFirstBeat) {
           playOldAccentCatMeow(catPitch, catEmotion);
         } else {
@@ -240,7 +536,9 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
         
         // Play sound if not in visual-only mode and audio is available
         if (!isVisualOnly && audioContextRef.current) {
-          playCuteCatSound(isFirstBeat);
+          const currentBeatIndex = beatCount % beatsPerMeasure;
+          const beatStrength = getCurrentBeatStrength(currentBeatIndex);
+          playCuteCatSound(beatStrength);
         }
         
         // Calculate next beat time
@@ -347,26 +645,53 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     return currentBeat === 0 ? 'accent' : 'beat';
   }, [isPlaying, currentBeat]);
 
-  // Memoized beat indicators for performance
+  // Memoized beat indicators with strength-based styling
   const beatIndicators = useMemo(() => {
     const indicators = [];
     
     for (let i = 0; i < beatsPerMeasure; i++) {
+      const beatStrength = getCurrentBeatStrength(i);
+      
+      // Define styling based on beat strength
+      const getStyleForStrength = (strength: BeatStrength, isActive: boolean) => {
+        const baseClasses = 'rounded-full border-2 flex items-center justify-center font-bold transition-all';
+        
+        switch (strength) {
+          case 'primary':
+            return {
+              className: `${baseClasses} w-8 h-8 text-sm border-album-orange bg-album-orange text-retro-black`,
+              scale: isActive ? 1.4 : 1,
+              backgroundColor: isActive ? '#E5A45C' : '#E5A45C'
+            };
+          case 'secondary':
+            return {
+              className: `${baseClasses} w-7 h-7 text-xs border-album-blue bg-album-blue text-cream`,
+              scale: isActive ? 1.3 : 1,
+              backgroundColor: isActive ? '#A8C5D1' : '#A8C5D1'
+            };
+          case 'regular':
+          default:
+            return {
+              className: `${baseClasses} w-6 h-6 text-xs border-album-purple bg-album-purple text-cream`,
+              scale: isActive ? 1.2 : 1,
+              backgroundColor: isActive ? '#8B7AAE' : '#8B7AAE'
+            };
+        }
+      };
+      
+      const isActive = currentBeat === i && isPlaying;
+      const styling = getStyleForStrength(beatStrength, isActive);
+      
       indicators.push(
         <motion.div
           key={i}
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
-            i === 0 
-              ? 'border-album-orange bg-album-orange text-retro-black' // First beat (accent)
-              : 'border-album-purple bg-album-purple text-cream'
-          }`}
+          className={styling.className}
           animate={{
-            scale: currentBeat === i && isPlaying ? 1.3 : 1,
-            backgroundColor: currentBeat === i && isPlaying 
-              ? (i === 0 ? '#E5A45C' : '#8B7AAE') 
-              : (i === 0 ? '#E5A45C' : '#8B7AAE'),
+            scale: styling.scale,
+            backgroundColor: styling.backgroundColor,
           }}
           transition={{ duration: 0.1 }}
+          title={`${i + 1}박 (${beatStrength === 'primary' ? '강박' : beatStrength === 'secondary' ? '중강박' : '약박'})`}
         >
           {i + 1}
         </motion.div>
@@ -374,7 +699,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     }
     
     return indicators;
-  }, [beatsPerMeasure, currentBeat, isPlaying]);
+  }, [beatsPerMeasure, currentBeat, isPlaying, getCurrentBeatStrength]);
 
   return (
     <div 
@@ -440,7 +765,10 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             {bpm} BPM
           </div>
           <div className="text-sm text-retro-black opacity-70">
-            {timeSignature} • {catPitch === 'kitten' ? '새끼 고양이' : catPitch === 'adult' ? '성묘' : '큰 고양이'}
+            {currentBeatPattern.name} • {catPitch === 'kitten' ? '새끼 고양이' : catPitch === 'adult' ? '성묘' : '큰 고양이'}
+          </div>
+          <div className="text-xs text-retro-black opacity-60">
+            {currentBeatPattern.description}
           </div>
         </div>
 
@@ -509,12 +837,12 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             {/* Time Signature */}
             <div className="bg-white border-2 border-retro-black rounded-lg p-3">
               <label className="block text-sm font-semibold mb-2">박자:</label>
-              <div className="flex gap-2">
-                {(['2/4', '3/4', '4/4'] as TimeSignature[]).map((sig) => (
+              <div className="grid grid-cols-4 gap-1 mb-2">
+                {(['2/4', '3/4', '4/4', '5/4'] as ExtendedTimeSignature[]).map((sig) => (
                   <button
                     key={sig}
                     onClick={() => setTimeSignature(sig)}
-                    className={`px-3 py-2 rounded border-2 text-sm font-medium transition-all ${
+                    className={`px-2 py-1 rounded border text-xs font-medium transition-all ${
                       timeSignature === sig
                         ? 'bg-album-purple text-cream border-retro-black'
                         : 'bg-cream text-retro-black border-retro-black hover:bg-album-purple/20'
@@ -522,6 +850,49 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
                     disabled={isPlaying}
                   >
                     {sig}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-4 gap-1">
+                {(['6/8', '7/8', '9/8', '12/8'] as ExtendedTimeSignature[]).map((sig) => (
+                  <button
+                    key={sig}
+                    onClick={() => setTimeSignature(sig)}
+                    className={`px-2 py-1 rounded border text-xs font-medium transition-all ${
+                      timeSignature === sig
+                        ? 'bg-album-purple text-cream border-retro-black'
+                        : 'bg-cream text-retro-black border-retro-black hover:bg-album-purple/20'
+                    }`}
+                    disabled={isPlaying}
+                  >
+                    {sig}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Rhythm Mode */}
+            <div className="bg-white border-2 border-retro-black rounded-lg p-3">
+              <label className="block text-sm font-semibold mb-2">리듬 모드:</label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { key: 'classic', label: '🎼 클래식', desc: '전통적 강약' },
+                  { key: 'jazz', label: '🎷 재즈', desc: '신코페이션' },
+                  { key: 'latin', label: '💃 라틴', desc: '클라베 리듬' },
+                  { key: 'world', label: '🌍 월드', desc: '민족 리듬' }
+                ] as const).map(({ key, label, desc }) => (
+                  <button
+                    key={key}
+                    onClick={() => setRhythmMode(key)}
+                    className={`px-2 py-2 rounded border-2 text-xs font-medium transition-all ${
+                      rhythmMode === key
+                        ? 'bg-album-blue text-retro-black border-retro-black'
+                        : 'bg-cream text-retro-black border-retro-black hover:bg-album-blue/20'
+                    }`}
+                    disabled={isPlaying}
+                    title={desc}
+                  >
+                    {isMobile ? key === 'classic' ? '🎼' : key === 'jazz' ? '🎷' : key === 'latin' ? '💃' : '🌍' : label}
                   </button>
                 ))}
               </div>
@@ -641,14 +1012,14 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
           {audioError ? (
             <div className="text-album-orange font-semibold">⚠️ {audioError}</div>
           ) : isPlaying ? (
-            `🎵 실제 고양이 소리로 연주 중 • ${timeSignature} • 박자 ${currentBeat + 1}/${beatsPerMeasure} • ${
+            `🎵 연주 중 • ${currentBeatPattern.name} • 박자 ${currentBeat + 1}/${beatsPerMeasure} (${getCurrentBeatStrength(currentBeat) === 'primary' ? '강박' : getCurrentBeatStrength(currentBeat) === 'secondary' ? '중강박' : '약박'}) • ${
               cuteSoundMode === 'normal' ? '기본 야옹' : 
               cuteSoundMode === 'miyamiya' ? '미야미야 모드' :
               cuteSoundMode === 'emotional' ? `감정표현 (${catEmotion})` :
               '랜덤믹스 모드'
             }`
           ) : (
-            `🐱 실제 고양이 소리 준비됨 • ${
+            `🐱 다중 박자 메트로놈 준비됨 • ${currentBeatPattern.name} • ${
               cuteSoundMode === 'normal' ? '기본' : 
               cuteSoundMode === 'miyamiya' ? '미야미야' :
               cuteSoundMode === 'emotional' ? '감정표현' :
