@@ -357,6 +357,25 @@ button, a, [role="button"], .clickable {
     font-size: 13px;
   }
   
+  /* Window control buttons touch optimization */
+  .window-titlebar button {
+    min-height: 44px; /* iOS/Android 권장 최소 터치 크기 */
+    min-width: 44px;
+    position: relative;
+  }
+  
+  /* Touch padding for smaller visual buttons */
+  .window-titlebar button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    z-index: -1;
+  }
+  
   /* Mobile scroll optimization */
   *::-webkit-scrollbar {
     width: 12px;

@@ -203,43 +203,28 @@ export default function Window({ window, children }: WindowProps) {
         <span className="text-retro-black font-bold">{window.title}</span>
         <div className="flex space-x-1">
           <button
-            className="w-5 h-5 bg-album-orange hover:bg-album-orange/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
+            className={`${screenWidth < 768 ? 'w-8 h-8 text-sm p-1' : 'w-5 h-5 text-xs'} bg-album-orange hover:bg-album-orange/80 active:bg-album-orange/60 font-bold text-white border border-retro-black flex items-center justify-center transition-colors touch-manipulation`}
             onClick={handleMinimize}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleMinimize();
-            }}
             title="Minimize"
           >
             _
           </button>
           <button
-            className="w-5 h-5 bg-album-blue hover:bg-album-blue/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
+            className={`${screenWidth < 768 ? 'w-8 h-8 text-sm p-1' : 'w-5 h-5 text-xs'} bg-album-blue hover:bg-album-blue/80 active:bg-album-blue/60 font-bold text-white border border-retro-black flex items-center justify-center transition-colors touch-manipulation`}
             onClick={handleMaximize}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleMaximize();
-            }}
             title="Maximize"
           >
             □
           </button>
           <button
-            className="w-5 h-5 bg-glitch-magenta hover:bg-glitch-magenta/80 text-xs font-bold text-white border border-retro-black flex items-center justify-center"
+            className={`${screenWidth < 768 ? 'w-8 h-8 text-sm p-1' : 'w-5 h-5 text-xs'} bg-glitch-magenta hover:bg-glitch-magenta/80 active:bg-glitch-magenta/60 font-bold text-white border border-retro-black flex items-center justify-center transition-colors touch-manipulation`}
             onClick={handleClose}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleClose();
-            }}
             title="Close"
           >
             ×

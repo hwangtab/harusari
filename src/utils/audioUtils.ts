@@ -35,8 +35,8 @@ const FREQUENCIES = {
   A2: 110.00,  // A (5th string)
   D3: 146.83,  // D (4th string)
   G3: 196.00,  // G (3rd string)
-  B3: 246.94,  // B (2nd string)
-  E4: 329.63   // High E (1st string)
+  B3: 246.94   // B (2nd string)
+  // E4 already defined above as High E
 } as const;
 
 /**
