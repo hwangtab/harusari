@@ -397,7 +397,9 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   
   // Get current beat pattern based on time signature and rhythm mode
   const currentBeatPattern = useMemo((): BeatPattern => {
-    return BEAT_PATTERNS[timeSignature][rhythmMode];
+    const pattern = BEAT_PATTERNS[timeSignature][rhythmMode];
+    console.log(`📐 Pattern updated: ${timeSignature} ${rhythmMode} -> ${pattern.name}`, pattern.beatStrengths);
+    return pattern;
   }, [timeSignature, rhythmMode]);
 
   // Memoized beats per measure from pattern
@@ -407,7 +409,9 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
 
   // Get beat strength for current beat
   const getCurrentBeatStrength = useCallback((beatIndex: number): BeatStrength => {
-    return currentBeatPattern.beatStrengths[beatIndex % currentBeatPattern.beatStrengths.length];
+    const strength = currentBeatPattern.beatStrengths[beatIndex % currentBeatPattern.beatStrengths.length];
+    console.log(`🎯 Beat ${beatIndex}: pattern=${currentBeatPattern.name}, strengths=[${currentBeatPattern.beatStrengths.join(', ')}], result=${strength}`);
+    return strength;
   }, [currentBeatPattern]);
 
   // Calculate interval in milliseconds
@@ -537,6 +541,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
         if (!isVisualOnly && audioContextRef.current) {
           const currentBeatIndex = beatCount % beatsPerMeasure;
           const beatStrength = getCurrentBeatStrength(currentBeatIndex);
+          console.log(`🚨 Calling playCuteCatSound with: ${beatStrength}, from pattern: ${currentBeatPattern.name}, beatIndex: ${currentBeatIndex}`);
           playCuteCatSound(beatStrength);
         }
         
@@ -553,7 +558,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     
     // Use a higher frequency timer for better precision
     intervalRef.current = setInterval(tick, CONSTANTS.TIMER_INTERVAL_MS);
-  }, [bpm, beatsPerMeasure, isVisualOnly, playCuteCatSound]);
+  }, [bpm, beatsPerMeasure, isVisualOnly, playCuteCatSound, getCurrentBeatStrength]);
 
   // Toggle play/stop
   const toggleMetronome = useCallback(() => {
@@ -611,13 +616,14 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     };
   }, []);
 
-  // Update metronome when BPM changes during playback
+  // Update metronome when BPM, rhythm mode, or time signature changes during playback
   useEffect(() => {
     if (isPlaying) {
+      console.log(`🔄 Restarting metronome for rhythm mode: ${rhythmMode}, pattern: ${currentBeatPattern.name}`);
       stopMetronome();
       startMetronome();
     }
-  }, [bpm, beatsPerMeasure, isPlaying, startMetronome, stopMetronome]);
+  }, [bpm, beatsPerMeasure, rhythmMode, currentBeatPattern, isPlaying, startMetronome, stopMetronome]);
 
   // Cat character animation variants
   const catVariants = {

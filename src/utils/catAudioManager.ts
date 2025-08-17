@@ -224,28 +224,27 @@ class CatAudioManager {
   }
 
   /**
-   * Select appropriate audio file based on cat type, emotion, and beat strength
+   * Select appropriate audio file based on beat strength for maximum distinction
    */
   private selectAudioFile(
     catType: CatPitchType, 
     emotion: CatEmotion, 
     beatStrength: BeatStrength
   ): string {
-    const isCuteType = catType === 'kitten' || emotion === 'playful' || emotion === 'happy';
-    
+    // Maximum distinction strategy: alternate files to avoid same-file confusion
     switch (beatStrength) {
       case 'primary':
-        // Primary beats (strongest) - use most dramatic sound for each type
-        return isCuteType ? CAT_AUDIO_FILES.cartoon : CAT_AUDIO_FILES.natural;
+        // Primary beats (강박) - cartoon for dramatic punch
+        return CAT_AUDIO_FILES.cartoon;
         
       case 'secondary':
-        // Secondary beats (medium) - use contrasting sound for variety
-        return isCuteType ? CAT_AUDIO_FILES.natural : CAT_AUDIO_FILES.cartoon;
+        // Secondary beats (중강박) - natural for contrast
+        return CAT_AUDIO_FILES.natural;
         
       case 'regular':
       default:
-        // Regular beats (weakest) - use lighter sound opposite to primary
-        return isCuteType ? CAT_AUDIO_FILES.natural : CAT_AUDIO_FILES.cartoon;
+        // Regular beats (약박) - back to cartoon but heavily modified
+        return CAT_AUDIO_FILES.cartoon;
     }
   }
 
@@ -271,14 +270,28 @@ class CatAudioManager {
    * Calculate volume adjustment based on beat strength
    */
   private getVolumeMultiplier(beatStrength: BeatStrength): number {
+    // EXTREME volume differences for unmistakable 3-tier distinction
     switch (beatStrength) {
-      case 'primary': return 1.0;    // Full volume for primary beats
-      case 'secondary': return 0.85; // Reduced volume for secondary beats
-      case 'regular': return 0.7;    // Lowest volume for regular beats
-      default: return 0.7;
+      case 'primary': return 1.0;    // Full volume for primary beats (강박)
+      case 'secondary': return 0.7;  // Medium volume for secondary beats (중강박)
+      case 'regular': return 0.2;    // Very low volume for regular beats (약박)
+      default: return 0.2;
     }
   }
 
+
+  /**
+   * Calculate pitch adjustment based on beat strength for clear distinction
+   */
+  private getPitchMultiplier(beatStrength: BeatStrength): number {
+    // EXTREME pitch differences to maximize distinction
+    switch (beatStrength) {
+      case 'primary': return 0.8;    // Lower pitch for primary beats (deep, authoritative)
+      case 'secondary': return 1.0;  // Normal pitch for secondary beats
+      case 'regular': return 1.8;    // Much higher pitch for regular beats (very light, almost whisper)
+      default: return 1.8;
+    }
+  }
 
   /**
    * Process audio for specific cat type, emotion, BPM, and beat strength
@@ -293,11 +306,17 @@ class CatAudioManager {
     const pitchSettings = PITCH_SETTINGS[catType];
     const emotionSettings = EMOTION_SETTINGS[emotion];
     const targetDuration = this.calculateOptimalDuration(bpm, beatStrength);
+    
+    // Get beat strength specific pitch adjustment
+    const beatStrengthPitch = this.getPitchMultiplier(beatStrength);
 
-    // Apply pitch shift for cat type
+    // Combine cat type pitch with beat strength pitch adjustment
+    const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch;
+
+    // Apply combined pitch shift
     let processedBuffer = audioBuffer;
-    if (pitchSettings.pitchShift !== 1.0) {
-      processedBuffer = this.createPitchShiftedBuffer(audioBuffer, pitchSettings.pitchShift);
+    if (combinedPitchShift !== 1.0) {
+      processedBuffer = this.createPitchShiftedBuffer(audioBuffer, combinedPitchShift);
     }
 
     // Apply time stretching for BPM requirement
@@ -317,6 +336,9 @@ class CatAudioManager {
     beatStrength: BeatStrength = 'regular'
   ): Promise<void> {
     try {
+      // DEBUG: Log for pattern verification
+      console.log(`🎵 Beat: ${beatStrength} | File: ${beatStrength === 'primary' ? 'cartoon' : beatStrength === 'secondary' ? 'natural' : 'cartoon'} | Vol: ${this.getVolumeMultiplier(beatStrength)} | Pitch: ${this.getPitchMultiplier(beatStrength)}`);
+      
       const audioContext = await this.initAudioContext();
       
       // Choose audio file based on beat strength and cat characteristics
