@@ -377,6 +377,20 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     });
   }, []);
 
+  // Sync emotion state with catAudioManager when in emotional mode
+  useEffect(() => {
+    if (cuteSoundMode === 'emotional') {
+      // Import catAudioManager and update emotion state
+      import('@/utils/catAudioManager').then(({ catAudioManager }) => {
+        catAudioManager.setEmotion(catEmotion);
+        console.log(`🎭 MetronomeWindow: Updated cat emotion to ${catEmotion} for emotional mode`);
+      }).catch(error => {
+        console.warn('Failed to update cat emotion:', error);
+        setAudioError('감정 설정 업데이트 실패');
+      });
+    }
+  }, [catEmotion, cuteSoundMode]);
+
   // Save settings when they change
   useEffect(() => {
     const settings: MetronomeSettings = {
@@ -419,60 +433,74 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
     return (60 / bpm) * 1000;
   };
 
+  // Mixed mode sound probability constants
+  const MIXED_MODE_CHANCES = {
+    PRIMARY: { 
+      PURRING: 0.1, 
+      MIYAMIYA: 0.2 // Total special sounds: 30%, default: 70%
+    },
+    SECONDARY: { 
+      SNIFFING: 0.15 // Special sounds: 15%, default: 85%
+    },
+    REGULAR: { 
+      SNIFFING: 0.1, 
+      PURRING: 0.1 // Total special sounds: 20%, default: 80%
+    }
+  } as const;
+
+  // Handle mixed mode sound selection with proper randomization
+  const playMixedSound = useCallback(async (beatStrength: CatBeatStrength) => {
+    const randomChoice = Math.random();
+    
+    if (beatStrength === 'primary') {
+      if (randomChoice < MIXED_MODE_CHANCES.PRIMARY.PURRING) {
+        await playPurring();
+      } else if (randomChoice < MIXED_MODE_CHANCES.PRIMARY.PURRING + MIXED_MODE_CHANCES.PRIMARY.MIYAMIYA) {
+        await playMiyamiya(catPitch);
+      } else {
+        await playAccentCatMeow(catPitch, catEmotion, bpm);
+      }
+    } else if (beatStrength === 'secondary') {
+      if (randomChoice < MIXED_MODE_CHANCES.SECONDARY.SNIFFING) {
+        await playSniffing();
+      } else {
+        await playSecondaryCatMeow(catPitch, catEmotion, bpm);
+      }
+    } else { // regular
+      if (randomChoice < MIXED_MODE_CHANCES.REGULAR.SNIFFING) {
+        await playSniffing();
+      } else if (randomChoice < MIXED_MODE_CHANCES.REGULAR.SNIFFING + MIXED_MODE_CHANCES.REGULAR.PURRING) {
+        await playPurring();
+      } else {
+        await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
+      }
+    }
+  }, [catPitch, catEmotion, bpm]);
+
   // Play cute cat sounds based on mode and beat strength
   const playCuteCatSound = useCallback(async (beatStrength: CatBeatStrength) => {
     try {
       switch (cuteSoundMode) {
         case 'miyamiya':
           if (beatStrength === 'primary') {
-            // Use miyamiya for all primary beats (강박)
-            playMiyamiya(catPitch);
-          } else {
-            // Use cat meow for secondary/regular beats with proper strength
-            await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
-          }
-          break;
-        
-        case 'emotional':
-          // Use the full 3-tier system for emotional mode
-          if (beatStrength === 'primary') {
-            await playAccentCatMeow(catPitch, catEmotion, bpm);
+            // Use full miyamiya for primary beats (강박)
+            await playMiyamiya(catPitch);
           } else if (beatStrength === 'secondary') {
-            await playSecondaryCatMeow(catPitch, catEmotion, bpm);
+            // Use softer purring for secondary beats in miyamiya mode
+            await playPurring();
           } else {
-            await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
+            // Use sniffing for regular beats to maintain miyamiya theme
+            await playSniffing();
           }
           break;
         
         case 'mixed':
-          const randomChoice = Math.random();
-          if (beatStrength === 'primary') {
-            if (randomChoice < 0.1) {
-              playPurring();
-            } else if (randomChoice < 0.3) {
-              playMiyamiya(catPitch);
-            } else {
-              await playAccentCatMeow(catPitch, catEmotion, bpm);
-            }
-          } else if (beatStrength === 'secondary') {
-            if (randomChoice < 0.15) {
-              playSniffing();
-            } else {
-              await playSecondaryCatMeow(catPitch, catEmotion, bpm);
-            }
-          } else {
-            if (randomChoice < 0.1) {
-              playSniffing();
-            } else if (randomChoice < 0.2) {
-              playPurring();
-            } else {
-              await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
-            }
-          }
+          await playMixedSound(beatStrength);
           break;
         
-        default: // 'normal'
-          // Use full 3-tier system for normal mode
+        case 'emotional':
+        default: // 'normal' and 'emotional' use same 3-tier system
+          // Use full 3-tier system for normal and emotional modes
           if (beatStrength === 'primary') {
             await playAccentCatMeow(catPitch, catEmotion, bpm);
           } else if (beatStrength === 'secondary') {
@@ -1020,14 +1048,14 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
             `🎵 연주 중 • ${currentBeatPattern.name} • 박자 ${currentBeat + 1}/${beatsPerMeasure} (${getCurrentBeatStrength(currentBeat) === 'primary' ? '강박' : getCurrentBeatStrength(currentBeat) === 'secondary' ? '중강박' : '약박'}) • ${
               cuteSoundMode === 'normal' ? '기본 야옹' : 
               cuteSoundMode === 'miyamiya' ? '미야미야 모드' :
-              cuteSoundMode === 'emotional' ? `감정표현 (${catEmotion})` :
+              cuteSoundMode === 'emotional' ? `감정표현 모드: ${catEmotion === 'happy' ? '😸 행복' : catEmotion === 'sleepy' ? '😴 졸림' : catEmotion === 'playful' ? '😹 장난' : catEmotion === 'affectionate' ? '😻 애정' : '😐 평범'}` :
               '랜덤믹스 모드'
             }`
           ) : (
             `🐱 다중 박자 메트로놈 준비됨 • ${currentBeatPattern.name} • ${
               cuteSoundMode === 'normal' ? '기본' : 
               cuteSoundMode === 'miyamiya' ? '미야미야' :
-              cuteSoundMode === 'emotional' ? '감정표현' :
+              cuteSoundMode === 'emotional' ? `감정표현 (${catEmotion === 'happy' ? '😸' : catEmotion === 'sleepy' ? '😴' : catEmotion === 'playful' ? '😹' : catEmotion === 'affectionate' ? '😻' : '😐'})` :
               '랜덤믹스'
             } 모드 • 스페이스바: 시작/정지, 화살표: BPM조절, Ctrl+M: 무음모드`
           )}

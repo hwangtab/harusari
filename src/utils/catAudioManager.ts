@@ -21,13 +21,13 @@ const PITCH_SETTINGS = {
   large: { pitchShift: 0.75, volume: 1.1 }
 } as const;
 
-// Emotion-based audio processing settings
+// Emotion-based audio processing settings - EXTREME DIFFERENCES for clear distinction
 const EMOTION_SETTINGS = {
-  happy: { volumeBoost: 1.1, speedMod: 1.05, brightness: 1.2 },
-  sleepy: { volumeBoost: 0.9, speedMod: 0.95, brightness: 0.8 },
-  playful: { volumeBoost: 1.15, speedMod: 1.1, brightness: 1.3 },
-  affectionate: { volumeBoost: 0.95, speedMod: 0.98, brightness: 0.9 },
-  neutral: { volumeBoost: 1.0, speedMod: 1.0, brightness: 1.0 }
+  happy: { volumeBoost: 1.8, speedMod: 1.4, brightness: 2.0 },        // 매우 밝고 활발함 (180% 볼륨)
+  sleepy: { volumeBoost: 0.3, speedMod: 0.6, brightness: 0.2 },       // 매우 조용하고 느림 (30% 볼륨)
+  playful: { volumeBoost: 2.2, speedMod: 1.6, brightness: 2.5 },      // 극도로 활발하고 높음 (220% 볼륨)
+  affectionate: { volumeBoost: 0.6, speedMod: 0.8, brightness: 0.5 }, // 부드럽고 따뜻함 (60% 볼륨)
+  neutral: { volumeBoost: 1.0, speedMod: 1.0, brightness: 1.0 }       // 기본값 (100% 볼륨)
 } as const;
 
 interface AudioCacheEntry {
@@ -40,6 +40,22 @@ class CatAudioManager {
   private audioContext: AudioContext | null = null;
   private audioCache = new Map<string, AudioCacheEntry>();
   private loadingPromises = new Map<string, Promise<AudioBuffer>>();
+  private currentEmotion: CatEmotion = 'neutral';
+
+  /**
+   * Set emotion state for dynamic audio processing
+   */
+  setEmotion(emotion: CatEmotion): void {
+    this.currentEmotion = emotion;
+    console.log(`🎭 Cat emotion updated to: ${emotion}`);
+  }
+
+  /**
+   * Get current emotion state
+   */
+  getCurrentEmotion(): CatEmotion {
+    return this.currentEmotion;
+  }
 
   /**
    * Initialize audio context
@@ -224,27 +240,38 @@ class CatAudioManager {
   }
 
   /**
-   * Select appropriate audio file based on beat strength for maximum distinction
+   * Select appropriate audio file based on beat strength AND emotion for maximum distinction
    */
   private selectAudioFile(
     catType: CatPitchType, 
     emotion: CatEmotion, 
     beatStrength: BeatStrength
   ): string {
-    // Maximum distinction strategy: alternate files to avoid same-file confusion
+    // Emotion-based file selection for variety
+    const emotionFilePreference = {
+      happy: CAT_AUDIO_FILES.cartoon,     // 밝고 활발한 cartoon
+      playful: CAT_AUDIO_FILES.cartoon,   // 장난스러운 cartoon  
+      neutral: CAT_AUDIO_FILES.cartoon,   // 기본 cartoon
+      sleepy: CAT_AUDIO_FILES.natural,    // 조용한 natural
+      affectionate: CAT_AUDIO_FILES.natural // 애정어린 natural
+    };
+
+    // Beat strength에 따른 기본 전략 + 감정별 파일 선택
     switch (beatStrength) {
       case 'primary':
-        // Primary beats (강박) - cartoon for dramatic punch
-        return CAT_AUDIO_FILES.cartoon;
+        // Primary beats (강박) - 감정별 파일 사용
+        return emotionFilePreference[emotion];
         
       case 'secondary':
-        // Secondary beats (중강박) - natural for contrast
-        return CAT_AUDIO_FILES.natural;
+        // Secondary beats (중강박) - 반대 파일로 대비 효과
+        return emotionFilePreference[emotion] === CAT_AUDIO_FILES.cartoon 
+          ? CAT_AUDIO_FILES.natural 
+          : CAT_AUDIO_FILES.cartoon;
         
       case 'regular':
       default:
-        // Regular beats (약박) - back to cartoon but heavily modified
-        return CAT_AUDIO_FILES.cartoon;
+        // Regular beats (약박) - 감정별 파일 그대로 사용 (볼륨으로 구분)
+        return emotionFilePreference[emotion];
     }
   }
 
@@ -336,20 +363,35 @@ class CatAudioManager {
     beatStrength: BeatStrength = 'regular'
   ): Promise<void> {
     try {
-      // DEBUG: Log for pattern verification
-      console.log(`🎵 Beat: ${beatStrength} | File: ${beatStrength === 'primary' ? 'cartoon' : beatStrength === 'secondary' ? 'natural' : 'cartoon'} | Vol: ${this.getVolumeMultiplier(beatStrength)} | Pitch: ${this.getPitchMultiplier(beatStrength)}`);
+      // Use internal emotion state if available, fallback to parameter
+      const effectiveEmotion = this.currentEmotion || emotion;
       
       const audioContext = await this.initAudioContext();
       
       // Choose audio file based on beat strength and cat characteristics
-      const audioFile = this.selectAudioFile(catType, emotion, beatStrength);
+      const audioFile = this.selectAudioFile(catType, effectiveEmotion, beatStrength);
+      
+      // Get settings for detailed logging
+      const pitchSettings = PITCH_SETTINGS[catType];
+      const emotionSettings = EMOTION_SETTINGS[effectiveEmotion];
+      const strengthVolume = this.getVolumeMultiplier(beatStrength);
+      const beatStrengthPitch = this.getPitchMultiplier(beatStrength);
+      const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch;
+      const baseVolume = 0.75;
+      const finalVolume = baseVolume * strengthVolume * pitchSettings.volume * emotionSettings.volumeBoost;
+      
+      // DEBUG: Detailed logging for pattern verification
+      console.log(`🎵 ${beatStrength.toUpperCase()} | 😸${effectiveEmotion} | File: ${audioFile.includes('cartoon') ? 'cartoon' : 'natural'}`);
+      console.log(`   📊 Vol: ${strengthVolume}(beat) × ${emotionSettings.volumeBoost}(emotion) = ${(strengthVolume * emotionSettings.volumeBoost).toFixed(2)} | Final: ${finalVolume.toFixed(2)}`);
+      console.log(`   🎼 Pitch: ${beatStrengthPitch}(beat) × ${pitchSettings.pitchShift}(cat) = ${combinedPitchShift.toFixed(2)} | Speed: ${emotionSettings.speedMod}`);
+      
 
       // Load audio file
       const originalBuffer = await this.loadAudioFile(audioFile);
       
       // Process for metronome use
       const processedBuffer = await this.processAudioForMetronome(
-        originalBuffer, catType, emotion, bpm, beatStrength
+        originalBuffer, catType, effectiveEmotion, bpm, beatStrength
       );
 
       // Create and configure audio nodes
@@ -358,22 +400,59 @@ class CatAudioManager {
       
       source.buffer = processedBuffer;
 
-      // Calculate volume based on beat strength and cat characteristics
-      const pitchSettings = PITCH_SETTINGS[catType];
-      const emotionSettings = EMOTION_SETTINGS[emotion];
-      const strengthVolume = this.getVolumeMultiplier(beatStrength);
-      const baseVolume = 0.75;
-      const finalVolume = baseVolume * strengthVolume * pitchSettings.volume * emotionSettings.volumeBoost;
+      // Use already calculated volume values from above
+      // finalVolume already calculated above for consistent logging
 
-      // Smooth envelope to prevent clicks
+      // Apply emotion-specific audio effects
       const duration = processedBuffer.duration;
-      const attackTime = 0.01;
-      const releaseTime = Math.min(0.05, duration * 0.2);
-
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + attackTime);
-      gainNode.gain.linearRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + duration - releaseTime);
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+      
+      // Emotion-based envelope and effects
+      switch (effectiveEmotion) {
+        case 'happy':
+          // Quick attack, bright sustain
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume, audioContext.currentTime + 0.005); // Very fast attack
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.95, audioContext.currentTime + duration - 0.02);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+          break;
+          
+        case 'sleepy':
+          // Very slow fade in/out
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.3, audioContext.currentTime + duration * 0.3); // Slow fade in
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.5, audioContext.currentTime + duration * 0.7); // Gentle peak
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration * 1.2); // Extended fade out
+          break;
+          
+        case 'playful':
+          // Bouncy envelope with quick changes
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.2, audioContext.currentTime + 0.003); // Super fast attack
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + duration * 0.3);
+          gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + duration * 0.6);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration * 0.9); // Quick cutoff
+          break;
+          
+        case 'affectionate':
+          // Soft, warm envelope
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.7, audioContext.currentTime + duration * 0.2); // Gentle rise
+          gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + duration * 0.5); // Warm peak
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.6, audioContext.currentTime + duration * 0.8);
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration * 1.1); // Soft fade
+          break;
+          
+        case 'neutral':
+        default:
+          // Standard envelope
+          const attackTime = 0.01;
+          const releaseTime = Math.min(0.05, duration * 0.2);
+          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + attackTime);
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + duration - releaseTime);
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+          break;
+      }
 
       // Connect and play
       source.connect(gainNode);
