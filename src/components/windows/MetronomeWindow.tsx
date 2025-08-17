@@ -33,7 +33,7 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
       beatsPerMeasure: 2,
       beatStrengths: ['primary', 'regular'],
       subdivision: 4,
-      name: '2/4 클래식',
+      name: '2/4 행진곡',
       description: '강-약'
     },
     jazz: {
@@ -41,21 +41,21 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
       beatStrengths: ['primary', 'secondary'],
       subdivision: 4,
       name: '2/4 재즈',
-      description: '강-중강'
+      description: '강-중강 (백비트 강조)'
     },
     latin: {
       beatsPerMeasure: 2,
-      beatStrengths: ['primary', 'regular'],
+      beatStrengths: ['primary', 'secondary'],
       subdivision: 4,
       name: '2/4 라틴',
-      description: '강-약'
+      description: '강-중강'
     },
     world: {
       beatsPerMeasure: 2,
-      beatStrengths: ['primary', 'regular'],
+      beatStrengths: ['primary', 'secondary'],
       subdivision: 4,
-      name: '2/4 월드',
-      description: '강-약'
+      name: '2/4 폴카',
+      description: '강-중강'
     }
   },
   '3/4': {
@@ -68,10 +68,10 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
     },
     jazz: {
       beatsPerMeasure: 3,
-      beatStrengths: ['primary', 'secondary', 'regular'],
+      beatStrengths: ['primary', 'secondary', 'secondary'],
       subdivision: 4,
       name: '3/4 재즈왈츠',
-      description: '강-중강-약'
+      description: '강-중강-중강'
     },
     latin: {
       beatsPerMeasure: 3,
@@ -82,10 +82,10 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
     },
     world: {
       beatsPerMeasure: 3,
-      beatStrengths: ['primary', 'regular', 'regular'],
+      beatStrengths: ['primary', 'secondary', 'regular'],
       subdivision: 4,
-      name: '3/4 포크',
-      description: '강-약-약'
+      name: '3/4 마주르카',
+      description: '강-중강-약'
     }
   },
   '4/4': {
@@ -101,21 +101,21 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
       beatStrengths: ['primary', 'secondary', 'regular', 'secondary'],
       subdivision: 4,
       name: '4/4 스윙',
-      description: '강-중강-약-중강'
+      description: '강-중강-약-중강 (백비트 강조)'
     },
     latin: {
       beatsPerMeasure: 4,
-      beatStrengths: ['primary', 'regular', 'secondary', 'secondary'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'primary'],
       subdivision: 4,
-      name: '4/4 살사',
-      description: '강-약-중강-중강'
+      name: '4/4 손 클라베',
+      description: '강-약-중강-강'
     },
     world: {
       beatsPerMeasure: 4,
-      beatStrengths: ['primary', 'regular', 'regular', 'regular'],
+      beatStrengths: ['primary', 'secondary', 'primary', 'secondary'],
       subdivision: 4,
-      name: '4/4 포크',
-      description: '강-약-약-약'
+      name: '4/4 아프리칸',
+      description: '강-중강-강-중강'
     }
   },
   '5/4': {
@@ -160,60 +160,60 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
     },
     jazz: {
       beatsPerMeasure: 6,
-      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
       subdivision: 8,
       grouping: [3, 3],
       name: '6/8 재즈',
-      description: '강-중강-약|중강-중강-약'
+      description: '강-약-중강|약-중강-약'
     },
     latin: {
       beatsPerMeasure: 6,
-      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      beatStrengths: ['primary', 'regular', 'regular', 'primary', 'regular', 'regular'],
       subdivision: 8,
       grouping: [3, 3],
-      name: '6/8 라틴',
-      description: '강-약-중강|중강-약-중강'
+      name: '6/8 아프로큐반',
+      description: '강-약-약|강-약-약'
     },
     world: {
       beatsPerMeasure: 6,
-      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
       subdivision: 8,
-      grouping: [3, 3],
-      name: '6/8 켈틱',
-      description: '강-약-약|중강-약-약'
+      grouping: [2, 2, 2],
+      name: '6/8 켈틱 지그',
+      description: '강-약|중강-약|중강-약'
     }
   },
   '7/8': {
     classic: {
       beatsPerMeasure: 7,
-      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular', 'regular'],
       subdivision: 8,
-      grouping: [3, 2, 2],
-      name: '7/8 클래식',
-      description: '강-약-중강|약-약|중강-약'
+      grouping: [2, 2, 3],
+      name: '7/8 (2+2+3)',
+      description: '강-약|중강-약|중강-약-약'
     },
     jazz: {
       beatsPerMeasure: 7,
       beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
       subdivision: 8,
-      grouping: [3, 2, 2],
+      grouping: [2, 2, 3],
       name: '7/8 재즈',
       description: '강-중강-약|중강-약|중강-약'
     },
     latin: {
       beatsPerMeasure: 7,
-      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular', 'secondary'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'primary', 'regular', 'secondary'],
       subdivision: 8,
-      grouping: [2, 3, 2],
+      grouping: [2, 2, 3],
       name: '7/8 라틴',
-      description: '강-약|중강-약-중강|약-중강'
+      description: '강-약|중강-약|강-약-중강'
     },
     world: {
       beatsPerMeasure: 7,
       beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
       subdivision: 8,
       grouping: [3, 2, 2],
-      name: '7/8 발칸',
+      name: '7/8 발칸 (3+2+2)',
       description: '강-약-약|중강-약|중강-약'
     }
   },
@@ -228,61 +228,61 @@ const BEAT_PATTERNS: Record<ExtendedTimeSignature, Record<RhythmMode, BeatPatter
     },
     jazz: {
       beatsPerMeasure: 9,
-      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      beatStrengths: ['primary', 'secondary', 'regular', 'primary', 'secondary', 'regular', 'primary', 'secondary', 'regular'],
       subdivision: 8,
       grouping: [3, 3, 3],
       name: '9/8 재즈',
-      description: '강-중강-약|중강-중강-약|중강-중강-약'
+      description: '강-중강-약|강-중강-약|강-중강-약'
     },
     latin: {
       beatsPerMeasure: 9,
-      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      beatStrengths: ['primary', 'regular', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular'],
       subdivision: 8,
-      grouping: [3, 3, 3],
+      grouping: [4, 3, 2],
       name: '9/8 라틴',
-      description: '강-약-중강|중강-약-중강|중강-약-중강'
+      description: '강-약-약-약|중강-약-약|중강-약'
     },
     world: {
       beatsPerMeasure: 9,
-      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      beatStrengths: ['primary', 'regular', 'primary', 'regular', 'primary', 'regular', 'primary', 'regular', 'secondary'],
       subdivision: 8,
-      grouping: [3, 3, 3],
-      name: '9/8 터키',
-      description: '강-약-약|중강-약-약|중강-약-약'
+      grouping: [2, 2, 2, 3],
+      name: '9/8 터키 (2+2+2+3)',
+      description: '강-약|강-약|강-약|강-약-중강'
     }
   },
   '12/8': {
     classic: {
       beatsPerMeasure: 12,
-      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'primary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
       subdivision: 8,
       grouping: [3, 3, 3, 3],
       name: '12/8 컴파운드',
-      description: '강-약-약|중강-약-약|중강-약-약|중강-약-약'
+      description: '강-약-약|중강-약-약|강-약-약|중강-약-약'
     },
     jazz: {
       beatsPerMeasure: 12,
-      beatStrengths: ['primary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'primary', 'regular', 'secondary', 'primary', 'regular', 'secondary', 'primary', 'regular', 'secondary'],
       subdivision: 8,
       grouping: [3, 3, 3, 3],
-      name: '12/8 셔플',
-      description: '강-중강-약|중강-중강-약|중강-중강-약|중강-중강-약'
+      name: '12/8 블루스 셔플',
+      description: '강-약-중강|강-약-중강|강-약-중강|강-약-중강'
     },
     latin: {
       beatsPerMeasure: 12,
-      beatStrengths: ['primary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary', 'secondary', 'regular', 'secondary'],
+      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'primary', 'regular', 'regular'],
       subdivision: 8,
       grouping: [3, 3, 3, 3],
-      name: '12/8 아프로큐반',
-      description: '강-약-중강|중강-약-중강|중강-약-중강|중강-약-중강'
+      name: '12/8 아프로-벨',
+      description: '강-약-약|중강-약-약|중강-약-약|강-약-약'
     },
     world: {
       beatsPerMeasure: 12,
-      beatStrengths: ['primary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular', 'secondary', 'regular', 'regular'],
+      beatStrengths: ['primary', 'regular', 'secondary', 'regular', 'secondary', 'regular', 'primary', 'regular', 'secondary', 'regular', 'secondary', 'regular'],
       subdivision: 8,
-      grouping: [3, 3, 3, 3],
-      name: '12/8 블루스',
-      description: '강-약-약|중강-약-약|중강-약-약|중강-약-약'
+      grouping: [2, 2, 2, 2, 2, 2],
+      name: '12/8 아프리칸',
+      description: '강-약|중강-약|중강-약|강-약|중강-약|중강-약'
     }
   }
 } as const;
@@ -418,14 +418,13 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
   // Play cute cat sounds based on mode and beat strength
   const playCuteCatSound = useCallback(async (beatStrength: CatBeatStrength) => {
     try {
-      const isFirstBeat = beatStrength === 'primary';
-      
       switch (cuteSoundMode) {
         case 'miyamiya':
-          if (isFirstBeat) {
-            // Use old miyamiya for special effect on primary beats
+          if (beatStrength === 'primary') {
+            // Use miyamiya for all primary beats (강박)
             playMiyamiya(catPitch);
           } else {
+            // Use cat meow for secondary/regular beats with proper strength
             await playCatMeow(catPitch, catEmotion, bpm, beatStrength);
           }
           break;

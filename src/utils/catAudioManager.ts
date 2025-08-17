@@ -279,6 +279,7 @@ class CatAudioManager {
     }
   }
 
+
   /**
    * Process audio for specific cat type, emotion, BPM, and beat strength
    */
