@@ -824,45 +824,89 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
 
           {/* BPM Control */}
           <div className="bg-white border-2 border-retro-black rounded-lg p-4">
-            <div className="flex items-center gap-3 mb-2">
-              <label className="text-sm font-semibold min-w-fit">템포 (BPM):</label>
-              <input
-                type="range"
-                min={CONSTANTS.BPM.MIN}
-                max={CONSTANTS.BPM.MAX}
-                value={bpm}
-                onChange={(e) => setBpm(validateBpm(Number(e.target.value)))}
-                className="flex-1"
-                disabled={isPlaying}
-                aria-label="템포 조절 (위/아래 화살표키)"
-              />
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setBpm(validateBpm(bpm - 1))}
-                  className="px-2 py-1 bg-album-blue text-retro-black border border-retro-black rounded text-xs"
-                  disabled={isPlaying}
-                >
-                  -
-                </button>
+            {isMobile ? (
+              /* Mobile: Vertical Layout */
+              <div className="space-y-3">
+                <label className="text-sm font-semibold block">템포 (BPM): {bpm}</label>
                 <input
-                  type="number"
+                  type="range"
                   min={CONSTANTS.BPM.MIN}
                   max={CONSTANTS.BPM.MAX}
                   value={bpm}
-                  onChange={(e) => setBpm(validateBpm(Number(e.target.value) || CONSTANTS.BPM.DEFAULT))}
-                  className={`${isMobile ? 'w-10' : 'w-16'} px-1 py-1 border border-retro-black rounded text-center text-xs flex-shrink-0`}
+                  onChange={(e) => setBpm(validateBpm(Number(e.target.value)))}
+                  className="w-full"
                   disabled={isPlaying}
-                  aria-label="BPM 직접 입력"
+                  aria-label="템포 조절 (위/아래 화살표키)"
                 />
-                <button
-                  onClick={() => setBpm(validateBpm(bpm + 1))}
-                  className="px-2 py-1 bg-album-blue text-retro-black border border-retro-black rounded text-xs"
-                  disabled={isPlaying}
-                >
-                  +
-                </button>
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => setBpm(validateBpm(bpm - 1))}
+                    className="px-3 py-2 bg-album-blue text-retro-black border border-retro-black rounded text-sm font-semibold"
+                    disabled={isPlaying}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min={CONSTANTS.BPM.MIN}
+                    max={CONSTANTS.BPM.MAX}
+                    value={bpm}
+                    onChange={(e) => setBpm(validateBpm(Number(e.target.value) || CONSTANTS.BPM.DEFAULT))}
+                    className="w-16 px-2 py-2 border border-retro-black rounded text-center text-sm font-semibold"
+                    disabled={isPlaying}
+                    aria-label="BPM 직접 입력"
+                  />
+                  <button
+                    onClick={() => setBpm(validateBpm(bpm + 1))}
+                    className="px-3 py-2 bg-album-blue text-retro-black border border-retro-black rounded text-sm font-semibold"
+                    disabled={isPlaying}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Desktop: Horizontal Layout */
+              <div className="flex items-center gap-3 mb-2">
+                <label className="text-sm font-semibold min-w-fit">템포 (BPM):</label>
+                <input
+                  type="range"
+                  min={CONSTANTS.BPM.MIN}
+                  max={CONSTANTS.BPM.MAX}
+                  value={bpm}
+                  onChange={(e) => setBpm(validateBpm(Number(e.target.value)))}
+                  className="flex-1"
+                  disabled={isPlaying}
+                  aria-label="템포 조절 (위/아래 화살표키)"
+                />
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setBpm(validateBpm(bpm - 1))}
+                    className="px-2 py-1 bg-album-blue text-retro-black border border-retro-black rounded text-xs"
+                    disabled={isPlaying}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min={CONSTANTS.BPM.MIN}
+                    max={CONSTANTS.BPM.MAX}
+                    value={bpm}
+                    onChange={(e) => setBpm(validateBpm(Number(e.target.value) || CONSTANTS.BPM.DEFAULT))}
+                    className="w-16 px-2 py-1 border border-retro-black rounded text-center text-xs"
+                    disabled={isPlaying}
+                    aria-label="BPM 직접 입력"
+                  />
+                  <button
+                    onClick={() => setBpm(validateBpm(bpm + 1))}
+                    className="px-2 py-1 bg-album-blue text-retro-black border border-retro-black rounded text-xs"
+                    disabled={isPlaying}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Settings */}
