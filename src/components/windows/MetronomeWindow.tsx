@@ -850,7 +850,7 @@ export default function MetronomeWindow({ windowId }: MetronomeWindowProps) {
                   max={CONSTANTS.BPM.MAX}
                   value={bpm}
                   onChange={(e) => setBpm(validateBpm(Number(e.target.value) || CONSTANTS.BPM.DEFAULT))}
-                  className={`${isMobile ? 'w-12' : 'w-16'} px-2 py-1 border border-retro-black rounded text-center text-xs flex-shrink-0`}
+                  className={`${isMobile ? 'w-10' : 'w-16'} px-1 py-1 border border-retro-black rounded text-center text-xs flex-shrink-0`}
                   disabled={isPlaying}
                   aria-label="BPM 직접 입력"
                 />
