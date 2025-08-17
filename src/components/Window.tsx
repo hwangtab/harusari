@@ -233,7 +233,7 @@ export default function Window({ window, children }: WindowProps) {
       </div>
 
       {/* Window Content */}
-      <div className="window-content" style={{ height: screenWidth < 768 ? 'calc(100% - 42px)' : 'calc(100% - 36px)' }}>
+      <div className="window-content" style={{ height: screenWidth < 768 ? 'calc(100% - 52px)' : 'calc(100% - 36px)' }}>
         {children}
       </div>
 
