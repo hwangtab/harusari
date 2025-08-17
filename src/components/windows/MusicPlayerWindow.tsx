@@ -80,8 +80,10 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
     let interval: NodeJS.Timeout;
     if (isPlaying) {
       const visualElements = ['▋', '▌', '▍', '▎', '▏', '█', '▓', '▒', '░'];
+      // Dynamic visualization count based on screen size
+      const visualCount = screenWidth < 768 ? 10 : 15; // Mobile: 10, Desktop: 15
       interval = setInterval(() => {
-        const newVisualization = Array.from({ length: 20 }, () =>
+        const newVisualization = Array.from({ length: visualCount }, () =>
           visualElements[Math.floor(Math.random() * visualElements.length)]
         );
         setVisualization(newVisualization);
@@ -242,14 +244,14 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
         </div>
 
         {/* Visualization */}
-        <div className="bg-retro-black p-2 mb-3 h-12 flex items-end justify-center space-x-1">
+        <div className="bg-retro-black p-2 mb-3 h-12 flex items-end justify-center space-x-0.5 overflow-x-hidden">
           {isPlaying ? (
             visualization.map((char, index) => (
               <motion.span
                 key={index}
                 className="text-album-orange"
                 animate={{ 
-                  scale: [1, 1.5, 1],
+                  scale: [1, 1.2, 1],
                   opacity: [0.5, 1, 0.5] 
                 }}
                 transition={{ 
