@@ -21,13 +21,22 @@ const PITCH_SETTINGS = {
   large: { pitchShift: 0.75, volume: 1.1 }
 } as const;
 
-// Emotion-based audio processing settings - EXTREME DIFFERENCES for clear distinction
+// Emotion-based audio processing settings - REFINED BALANCE for optimal user experience
 const EMOTION_SETTINGS = {
-  happy: { volumeBoost: 1.8, speedMod: 1.4, brightness: 2.0 },        // 매우 밝고 활발함 (180% 볼륨)
-  sleepy: { volumeBoost: 0.3, speedMod: 0.6, brightness: 0.2 },       // 매우 조용하고 느림 (30% 볼륨)
-  playful: { volumeBoost: 2.2, speedMod: 1.6, brightness: 2.5 },      // 극도로 활발하고 높음 (220% 볼륨)
-  affectionate: { volumeBoost: 0.6, speedMod: 0.8, brightness: 0.5 }, // 부드럽고 따뜻함 (60% 볼륨)
+  happy: { volumeBoost: 1.1, speedMod: 1.6, brightness: 2.0 },        // 밝고 활발함 (110% 볼륨, 빠른 속도)
+  sleepy: { volumeBoost: 0.9, speedMod: 0.6, brightness: 0.2 },       // 조용하지만 들림 (90% 볼륨, 적당히 느린 속도)
+  playful: { volumeBoost: 1.2, speedMod: 1.8, brightness: 2.5 },      // 활발하지만 적당함 (120% 볼륨, 매우 빠른 속도)
+  affectionate: { volumeBoost: 0.85, speedMod: 0.7, brightness: 0.5 }, // 부드럽고 따뜻함 (85% 볼륨, 조금 느린 속도)
   neutral: { volumeBoost: 1.0, speedMod: 1.0, brightness: 1.0 }       // 기본값 (100% 볼륨)
+} as const;
+
+// Emotion-specific pitch offset for enhanced character distinction
+const EMOTION_PITCH_OFFSET = {
+  happy: 1.2,        // 밝고 높은 피치
+  sleepy: 0.6,       // 낮고 깊은 피치
+  playful: 1.5,      // 매우 높고 튀는 피치
+  affectionate: 0.8, // 따뜻하고 중간 피치
+  neutral: 1.0       // 기본 피치
 } as const;
 
 interface AudioCacheEntry {
@@ -336,9 +345,12 @@ class CatAudioManager {
     
     // Get beat strength specific pitch adjustment
     const beatStrengthPitch = this.getPitchMultiplier(beatStrength);
+    
+    // Get emotion-specific pitch offset
+    const emotionPitchOffset = EMOTION_PITCH_OFFSET[emotion];
 
-    // Combine cat type pitch with beat strength pitch adjustment
-    const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch;
+    // Combine cat type pitch with beat strength pitch and emotion offset
+    const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch * emotionPitchOffset;
 
     // Apply combined pitch shift
     let processedBuffer = audioBuffer;
@@ -376,14 +388,15 @@ class CatAudioManager {
       const emotionSettings = EMOTION_SETTINGS[effectiveEmotion];
       const strengthVolume = this.getVolumeMultiplier(beatStrength);
       const beatStrengthPitch = this.getPitchMultiplier(beatStrength);
-      const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch;
+      const emotionPitchOffset = EMOTION_PITCH_OFFSET[effectiveEmotion];
+      const combinedPitchShift = pitchSettings.pitchShift * beatStrengthPitch * emotionPitchOffset;
       const baseVolume = 0.75;
       const finalVolume = baseVolume * strengthVolume * pitchSettings.volume * emotionSettings.volumeBoost;
       
       // DEBUG: Detailed logging for pattern verification
       console.log(`🎵 ${beatStrength.toUpperCase()} | 😸${effectiveEmotion} | File: ${audioFile.includes('cartoon') ? 'cartoon' : 'natural'}`);
       console.log(`   📊 Vol: ${strengthVolume}(beat) × ${emotionSettings.volumeBoost}(emotion) = ${(strengthVolume * emotionSettings.volumeBoost).toFixed(2)} | Final: ${finalVolume.toFixed(2)}`);
-      console.log(`   🎼 Pitch: ${beatStrengthPitch}(beat) × ${pitchSettings.pitchShift}(cat) = ${combinedPitchShift.toFixed(2)} | Speed: ${emotionSettings.speedMod}`);
+      console.log(`   🎼 Pitch: ${beatStrengthPitch}(beat) × ${pitchSettings.pitchShift}(cat) × ${emotionPitchOffset}(emotion) = ${combinedPitchShift.toFixed(2)} | Speed: ${emotionSettings.speedMod}`);
       
 
       // Load audio file
@@ -394,9 +407,50 @@ class CatAudioManager {
         originalBuffer, catType, effectiveEmotion, bpm, beatStrength
       );
 
-      // Create and configure audio nodes
+      // Create and configure audio nodes with emotion-specific effects
       const source = audioContext.createBufferSource();
       const gainNode = audioContext.createGain();
+      
+      // Create additional effect nodes based on emotion
+      let effectChain = gainNode; // Default: direct to gain
+      
+      // Add emotion-specific audio effects
+      switch (effectiveEmotion) {
+        case 'sleepy':
+          // Very gentle low-pass filter for sleepy, dreamy effect
+          const lowPassFilter = audioContext.createBiquadFilter();
+          lowPassFilter.type = 'lowpass';
+          lowPassFilter.frequency.setValueAtTime(1500, audioContext.currentTime); // Even less aggressive filtering
+          lowPassFilter.Q.setValueAtTime(0.4, audioContext.currentTime); // Very smooth rolloff
+          source.connect(lowPassFilter);
+          lowPassFilter.connect(gainNode);
+          break;
+          
+        case 'happy':
+          // High-pass filter for bright, crispy effect
+          const highPassFilter = audioContext.createBiquadFilter();
+          highPassFilter.type = 'highpass';
+          highPassFilter.frequency.setValueAtTime(300, audioContext.currentTime); // Brighter sound
+          highPassFilter.Q.setValueAtTime(0.5, audioContext.currentTime);
+          source.connect(highPassFilter);
+          highPassFilter.connect(gainNode);
+          break;
+          
+        case 'affectionate':
+          // Gentle bandpass for warm, focused sound
+          const bandPassFilter = audioContext.createBiquadFilter();
+          bandPassFilter.type = 'bandpass';
+          bandPassFilter.frequency.setValueAtTime(600, audioContext.currentTime); // Warm mid-range
+          bandPassFilter.Q.setValueAtTime(1.5, audioContext.currentTime);
+          source.connect(bandPassFilter);
+          bandPassFilter.connect(gainNode);
+          break;
+          
+        default:
+          // No additional filtering for playful and neutral
+          source.connect(gainNode);
+          break;
+      }
       
       source.buffer = processedBuffer;
 
@@ -406,40 +460,54 @@ class CatAudioManager {
       // Apply emotion-specific audio effects
       const duration = processedBuffer.duration;
       
-      // Emotion-based envelope and effects
+      // Enhanced emotion-based envelope and effects with more extreme characteristics
       switch (effectiveEmotion) {
         case 'happy':
-          // Quick attack, bright sustain
+          // Super bright with multiple peaks for "laughing" effect
           gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(finalVolume, audioContext.currentTime + 0.005); // Very fast attack
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.95, audioContext.currentTime + duration - 0.02);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.3, audioContext.currentTime + 0.002); // Ultra fast attack
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + duration * 0.15); // Quick dip
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.1, audioContext.currentTime + duration * 0.3); // Second peak
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + duration * 0.7);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration * 0.95); // Sharp cutoff
           break;
           
         case 'sleepy':
-          // Very slow fade in/out
+          // Immediate attack for metronome timing + gradual sleepy characteristics
+          const sleepyDuration = duration * 1.5; // Reasonable duration
           gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.3, audioContext.currentTime + duration * 0.3); // Slow fade in
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.5, audioContext.currentTime + duration * 0.7); // Gentle peak
-          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration * 1.2); // Extended fade out
+          
+          // Immediate attack: Essential for metronome beat recognition
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.7, audioContext.currentTime + 0.03); // 0.03초에 70% 도달
+          
+          // Sleepy characteristics: Gradual dreamy evolution after initial attack
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + sleepyDuration * 0.2); // Gentle rise
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + sleepyDuration * 0.6); // Dreamy sustain
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.5, audioContext.currentTime + sleepyDuration * 0.9); // Sleepy fade
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + sleepyDuration); // Complete fade out
           break;
           
         case 'playful':
-          // Bouncy envelope with quick changes
+          // Bouncy with controlled energy and stutter effect
           gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.2, audioContext.currentTime + 0.003); // Super fast attack
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + duration * 0.3);
-          gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + duration * 0.6);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration * 0.9); // Quick cutoff
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.1, audioContext.currentTime + 0.001); // Controlled instant attack
+          // Create stutter effect with moderate volume changes
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.7, audioContext.currentTime + duration * 0.15);
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 1.0, audioContext.currentTime + duration * 0.25); // Reduced peak
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + duration * 0.4);
+          gainNode.gain.exponentialRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + duration * 0.6); // Controlled sustain
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration * 0.85); // Quick end
           break;
           
         case 'affectionate':
-          // Soft, warm envelope
+          // Soft with tremolo-like warm fluctuations
+          const affectionateDuration = duration * 1.3; // Slightly longer for warmth
           gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.7, audioContext.currentTime + duration * 0.2); // Gentle rise
-          gainNode.gain.linearRampToValueAtTime(finalVolume, audioContext.currentTime + duration * 0.5); // Warm peak
-          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.6, audioContext.currentTime + duration * 0.8);
-          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration * 1.1); // Soft fade
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.5, audioContext.currentTime + affectionateDuration * 0.25); // Gentle rise
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.8, audioContext.currentTime + affectionateDuration * 0.4); // Warm build
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.9, audioContext.currentTime + affectionateDuration * 0.6); // Loving peak
+          gainNode.gain.linearRampToValueAtTime(finalVolume * 0.7, audioContext.currentTime + affectionateDuration * 0.8); // Warm sustain
+          gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + affectionateDuration); // Gentle fade
           break;
           
         case 'neutral':
