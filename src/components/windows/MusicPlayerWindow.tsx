@@ -215,7 +215,7 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
   };
 
   return (
-    <div className="h-full bg-album-purple text-white font-system">
+    <div className="h-full bg-album-purple text-white font-system overflow-y-auto">
       {/* Hidden audio element */}
       {currentTrackData && (
         <audio
