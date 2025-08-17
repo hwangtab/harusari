@@ -25,7 +25,8 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
     setTracks,
     nextTrack,
     previousTrack,
-    openWindow
+    openWindow,
+    focusWindow
   } = useStore();
 
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -156,33 +157,46 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
 
   const handleLyricsClick = () => {
     if (currentTrackData) {
-      // Get current window position from DOM
-      const windowElement = document.getElementById(windowId);
-      const rect = windowElement?.getBoundingClientRect();
-      const currentWindowX = rect?.left || 100;
-      const currentWindowY = rect?.top || 100;
-      const currentWindowWidth = rect?.width || 400;
-      
       const lyricsWindowWidth = 400;
       const lyricsWindowHeight = 500;
+      const isMobile = screenWidth < 768;
       
-      // Position lyrics window next to music player
       let x, y;
-      if (currentWindowX + currentWindowWidth + lyricsWindowWidth < screenWidth - 20) {
-        // Open to the right if there's space
-        x = currentWindowX + currentWindowWidth + 10;
+      
+      if (isMobile) {
+        // Mobile: Center the lyrics window on screen for better visibility
+        x = Math.max(10, (screenWidth - lyricsWindowWidth) / 2);
+        y = Math.max(10, (screenHeight - lyricsWindowHeight) / 2);
+        
+        // Ensure window stays within mobile screen bounds
+        x = Math.min(x, screenWidth - lyricsWindowWidth - 10);
+        y = Math.min(y, screenHeight - lyricsWindowHeight - 60);
       } else {
-        // Open to the left if not enough space on right
-        x = Math.max(10, currentWindowX - lyricsWindowWidth - 10);
+        // Desktop: Position next to music player as before
+        const windowElement = document.getElementById(windowId);
+        const rect = windowElement?.getBoundingClientRect();
+        const currentWindowX = rect?.left || 100;
+        const currentWindowY = rect?.top || 100;
+        const currentWindowWidth = rect?.width || 400;
+        
+        if (currentWindowX + currentWindowWidth + lyricsWindowWidth < screenWidth - 20) {
+          // Open to the right if there's space
+          x = currentWindowX + currentWindowWidth + 10;
+        } else {
+          // Open to the left if not enough space on right
+          x = Math.max(10, currentWindowX - lyricsWindowWidth - 10);
+        }
+        
+        y = currentWindowY;
+        
+        // Ensure window stays within screen bounds
+        y = Math.max(10, Math.min(y, screenHeight - lyricsWindowHeight - 60));
       }
       
-      y = currentWindowY;
-      
-      // Ensure window stays within screen bounds
-      y = Math.max(10, Math.min(y, screenHeight - lyricsWindowHeight - 60));
+      const lyricsWindowId = `lyrics-${currentTrack}-${Date.now()}`;
       
       openWindow({
-        id: `lyrics-${currentTrack}-${Date.now()}`,
+        id: lyricsWindowId,
         title: `${currentTrackData.title} - 가사`,
         component: 'LyricsWindow',
         x,
@@ -192,6 +206,11 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
         isMinimized: false,
         isMaximized: false
       });
+      
+      // Ensure the lyrics window is focused and on top, especially on mobile
+      setTimeout(() => {
+        focusWindow(lyricsWindowId);
+      }, 100);
     }
   };
 
