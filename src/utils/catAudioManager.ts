@@ -412,7 +412,7 @@ class CatAudioManager {
       const gainNode = audioContext.createGain();
       
       // Create additional effect nodes based on emotion
-      let effectChain = gainNode; // Default: direct to gain
+      const effectChain = gainNode; // Default: direct to gain
       
       // Add emotion-specific audio effects
       switch (effectiveEmotion) {
