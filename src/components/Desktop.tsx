@@ -105,25 +105,25 @@ export default function Desktop() {
   const { openWindow } = useStore();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  // 아이콘별 텍스트 너비 매핑 (text-xs 기준, 더 정확한 측정값)
+  // 아이콘별 텍스트 너비 매핑 (text-xs 기준, 안전 마진 포함)
   const getIconTextWidth = useCallback((iconTitle: string) => {
     const textWidthMap: Record<string, number> = {
-      'albuminfo': 72,
-      'credit': 45,
-      'critic': 45,
-      'specialthanks': 115,  // 실제 측정 결과 더 길음
-      'sketchbook': 78,
-      'quiz': 32,
-      'Music Player': 90,   // 공백 포함 긴 텍스트
-      'images': 48,
-      'trashcan': 62,
-      'instagram': 88,      // 실제로 더 길음
-      'email': 42,
-      'tuner': 42,
-      'metronome': 75
+      'albuminfo': 82,      // 72 + 10px 안전마진
+      'credit': 55,         // 45 + 10px
+      'critic': 55,         // 45 + 10px  
+      'specialthanks': 130, // 115 + 15px (가장 긴 텍스트라 더 큰 마진)
+      'sketchbook': 88,     // 78 + 10px
+      'quiz': 42,           // 32 + 10px
+      'Music Player': 105,  // 90 + 15px (공백 포함 긴 텍스트)
+      'images': 58,         // 48 + 10px
+      'trashcan': 72,       // 62 + 10px
+      'instagram': 100,     // 88 + 12px (자주 겹치는 텍스트)
+      'email': 52,          // 42 + 10px
+      'tuner': 52,          // 42 + 10px
+      'metronome': 85       // 75 + 10px
     };
     
-    return textWidthMap[iconTitle] || 65; // 기본값: 65px
+    return textWidthMap[iconTitle] || 75; // 기본값도 증가: 65px → 75px
   }, []);
 
   // 개별 아이콘별 전체 영역 계산
@@ -156,7 +156,7 @@ export default function Desktop() {
     const isTablet = screenWidth >= 768 && screenWidth < 1024;
     
     const iconSize = isMobile ? 24 : isTablet ? 30 : 32;
-    const baseSpacing = isMobile ? 15 : isTablet ? 20 : 25;
+    const baseSpacing = isMobile ? 35 : isTablet ? 20 : 25; // 모바일 간격 대폭 증가
     
     // 텍스트 라벨을 포함한 전체 높이 계산
     const textHeight = 12; // text-xs
@@ -227,33 +227,76 @@ export default function Desktop() {
   const getResponsiveIconPositions = useCallback(() => {
     const { isMobile, isTablet, iconSize, totalIconArea, minDistance } = getDynamicIconSettings();
     
-    // 모바일 전용 로직 (겹침 방지 강화)
+    // 모바일 전용 로직 (완전 격자 시스템)
     if (isMobile) {
-      const basePadding = 35;
-      const topPadding = 50;
+      const basePadding = 20;
+      const topPadding = 60;
       const bottomPadding = 120;
       
       const availableWidth = screenWidth - (basePadding * 2);
       const availableHeight = screenHeight - topPadding - bottomPadding;
       
-      const cols = screenWidth < 400 ? 2 : 3;
-      const positions: Record<string, { x: number; y: number }> = {};
-      const placedPositions: { x: number; y: number; title: string }[] = [];
+      // 가장 큰 아이콘 영역을 기반으로 격자 크기 계산
+      const maxIconArea = Math.max(...desktopIconsData.map(icon => 
+        getIconAreaForTitle(icon.title)
+      ).map(area => Math.max(area.width, area.height)));
       
-      const getSeededRandom = (str: string, salt: number = 0) => {
-        let hash = salt;
-        for (let i = 0; i < str.length; i++) {
-          const char = str.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash = hash & hash;
+      // 격자 셀 크기 = 최대 아이콘 영역 + 안전 여백
+      const cellSize = maxIconArea + minDistance;
+      
+      // 실제 가능한 열/행 개수 계산
+      const maxCols = Math.floor(availableWidth / cellSize);
+      const maxRows = Math.floor(availableHeight / cellSize);
+      const totalCells = maxCols * maxRows;
+      
+      // 아이콘이 너무 많으면 셀 크기 축소
+      let finalCellSize = cellSize;
+      let cols = maxCols;
+      let rows = maxRows;
+      
+      if (totalCells < desktopIconsData.length) {
+        // 최소한의 간격을 보장하면서 모든 아이콘을 수용할 수 있도록 조정
+        const neededCells = desktopIconsData.length;
+        const minCellSize = Math.max(maxIconArea + 20, 80); // 최소 셀 크기
+        
+        // 가능한 배치 찾기
+        for (let testCols = 2; testCols <= 4; testCols++) {
+          const testRows = Math.ceil(neededCells / testCols);
+          const testCellWidth = availableWidth / testCols;
+          const testCellHeight = availableHeight / testRows;
+          const testCellSize = Math.min(testCellWidth, testCellHeight);
+          
+          if (testCellSize >= minCellSize) {
+            cols = testCols;
+            rows = testRows;
+            finalCellSize = testCellSize;
+            break;
+          }
         }
-        return Math.abs(hash % 10000) / 10000;
-      };
+        
+        // 최종 폴백: 세로 스택 배치 (1열)
+        if (finalCellSize < minCellSize) {
+          cols = 1;
+          rows = neededCells;
+          finalCellSize = Math.min(availableWidth, availableHeight / rows);
+          
+          // 세로 스택도 불가능한 경우 최소 크기로 강제 설정
+          if (finalCellSize < maxIconArea + 10) {
+            finalCellSize = maxIconArea + 10;
+            // 화면을 벗어나더라도 겹침은 방지
+          }
+        }
+      }
       
-      const iconsPerColumn = Math.ceil(desktopIconsData.length / cols);
-      const columnWidth = availableWidth / cols;
-      const verticalSpacing = Math.max(minDistance + 10, Math.min(availableHeight / iconsPerColumn, 120));
+      // 격자 중앙 정렬을 위한 시작 위치 계산
+      const totalGridWidth = cols * finalCellSize;
+      const totalGridHeight = rows * finalCellSize;
+      const gridStartX = basePadding + (availableWidth - totalGridWidth) / 2;
+      const gridStartY = topPadding + (availableHeight - totalGridHeight) / 2;
       
+      const positions: Record<string, { x: number; y: number }> = {};
+      
+      // 우선순위 기반 아이콘 정렬
       const priorityOrder = ['music-player', 'images', 'albuminfo', 'quiz', 'sketchbook'];
       const sortedIcons = [...desktopIconsData].sort((a, b) => {
         const aPriority = priorityOrder.indexOf(a.id);
@@ -264,55 +307,63 @@ export default function Desktop() {
         return aPriority - bPriority;
       });
       
+      // 완전 격자 기반 배치 (랜덤 오프셋 제거)
       sortedIcons.forEach((iconData, index) => {
         const col = index % cols;
         const row = Math.floor(index / cols);
         
-        const baseX = basePadding + (col * columnWidth) + (columnWidth / 2);
-        const baseY = topPadding + (row * verticalSpacing) + 30;
+        // 격자 셀 중앙 위치
+        const cellCenterX = gridStartX + (col * finalCellSize) + (finalCellSize / 2);
+        const cellCenterY = gridStartY + (row * finalCellSize) + (finalCellSize / 2);
         
-        // 오프셋 범위를 더 제한적으로 (겹침 방지)
-        const offsetRange = Math.min(columnWidth * 0.2, 25); // 30% → 20%로 축소
-        let position = { x: 0, y: 0 };
-        let validPosition = false;
+        // 아이콘을 셀 중앙에 배치
+        const iconArea = getIconAreaForTitle(iconData.title);
+        const iconX = cellCenterX - (iconArea.width / 2);
+        const iconY = cellCenterY - (iconArea.height / 2);
+        
+        // 화면 경계 안전 검사 및 겹침 최종 검증
+        let finalX = Math.max(basePadding, Math.min(
+          screenWidth - iconArea.width - basePadding,
+          iconX
+        ));
+        let finalY = Math.max(topPadding, Math.min(
+          screenHeight - bottomPadding - iconArea.height,
+          iconY
+        ));
+        
+        // 마지막 안전장치: 다른 아이콘과 겹치는지 확인하고 조정
+        const existingPositions = Object.values(positions);
         let attempts = 0;
-        const maxAttempts = 20;
-        
-        // 겹침 검증을 통한 위치 찾기
-        while (!validPosition && attempts < maxAttempts) {
-          const offsetX = (getSeededRandom(iconData.id, attempts * 2 + 1) - 0.5) * offsetRange;
-          const offsetY = (getSeededRandom(iconData.id, attempts * 2 + 2) - 0.5) * 20; // 세로 오프셋도 축소
+        while (attempts < 10) {
+          let hasOverlap = false;
           
-          const candidateX = Math.max(basePadding, Math.min(
-            screenWidth - totalIconArea - basePadding,
-            baseX + offsetX - (totalIconArea / 2)
-          ));
-          const candidateY = Math.max(topPadding, Math.min(
-            screenHeight - bottomPadding - totalIconArea,
-            baseY + offsetY
-          ));
+          for (const existingPos of existingPositions) {
+            const dx = Math.abs(finalX - existingPos.x);
+            const dy = Math.abs(finalY - existingPos.y);
+            
+            // 최소 안전 거리 확인
+            if (dx < iconArea.width + 15 && dy < iconArea.height + 15) {
+              hasOverlap = true;
+              // 겹침 발견 시 위치 조정
+              finalY += iconArea.height + 20;
+              
+              // 화면 아래로 벗어나면 다음 열로 이동
+              if (finalY + iconArea.height > screenHeight - bottomPadding) {
+                finalX += iconArea.width + 20;
+                finalY = topPadding;
+              }
+              break;
+            }
+          }
           
-          position = { x: candidateX, y: candidateY };
-          validPosition = isValidIconPosition(position, placedPositions, iconData.title, minDistance);
+          if (!hasOverlap) break;
           attempts++;
         }
         
-        // 유효한 위치를 찾지 못한 경우 격자 위치 사용 (오프셋 없이)
-        if (!validPosition) {
-          position = {
-            x: Math.max(basePadding, Math.min(
-              screenWidth - totalIconArea - basePadding,
-              baseX - (totalIconArea / 2)
-            )),
-            y: Math.max(topPadding, Math.min(
-              screenHeight - bottomPadding - totalIconArea,
-              baseY
-            ))
-          };
-        }
-        
-        positions[iconData.id] = { x: Math.round(position.x), y: Math.round(position.y) };
-        placedPositions.push({ x: position.x, y: position.y, title: iconData.title });
+        positions[iconData.id] = { 
+          x: Math.round(finalX), 
+          y: Math.round(finalY) 
+        };
       });
       
       return positions;
@@ -585,7 +636,7 @@ export default function Desktop() {
     }
     
     return positions;
-  }, [screenWidth, screenHeight, getDynamicIconSettings, isValidIconPosition]);
+  }, [screenWidth, screenHeight, getDynamicIconSettings, isValidIconPosition, getIconAreaForTitle]);
 
   const [iconPositions, setIconPositions] = useState(getResponsiveIconPositions());
 
