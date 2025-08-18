@@ -223,192 +223,24 @@ export default function Desktop() {
     });
   }, [screenWidth, screenHeight, getIconAreaForTitle]);
 
-  // 반응형 아이콘 위치 계산 (겹침 방지 강화)
+  // 반응형 아이콘 위치 계산 (간단한 랜덤 배치 + 충돌 방지)
   const getResponsiveIconPositions = useCallback(() => {
-    const { isMobile, isTablet, iconSize, totalIconArea, minDistance } = getDynamicIconSettings();
+    const { isMobile, isTablet, minDistance } = getDynamicIconSettings();
     
-    // 모바일 전용 로직 (완전 격자 시스템)
-    if (isMobile) {
-      const basePadding = 20;
-      const topPadding = 60;
-      const bottomPadding = 120;
-      
-      const availableWidth = screenWidth - (basePadding * 2);
-      const availableHeight = screenHeight - topPadding - bottomPadding;
-      
-      // 가장 큰 아이콘 영역을 기반으로 격자 크기 계산
-      const maxIconArea = Math.max(...desktopIconsData.map(icon => 
-        getIconAreaForTitle(icon.title)
-      ).map(area => Math.max(area.width, area.height)));
-      
-      // 격자 셀 크기 = 최대 아이콘 영역 + 안전 여백
-      const cellSize = maxIconArea + minDistance;
-      
-      // 실제 가능한 열/행 개수 계산
-      const maxCols = Math.floor(availableWidth / cellSize);
-      const maxRows = Math.floor(availableHeight / cellSize);
-      const totalCells = maxCols * maxRows;
-      
-      // 아이콘이 너무 많으면 셀 크기 축소
-      let finalCellSize = cellSize;
-      let cols = maxCols;
-      let rows = maxRows;
-      
-      if (totalCells < desktopIconsData.length) {
-        // 최소한의 간격을 보장하면서 모든 아이콘을 수용할 수 있도록 조정
-        const neededCells = desktopIconsData.length;
-        const minCellSize = Math.max(maxIconArea + 20, 80); // 최소 셀 크기
-        
-        // 가능한 배치 찾기
-        for (let testCols = 2; testCols <= 4; testCols++) {
-          const testRows = Math.ceil(neededCells / testCols);
-          const testCellWidth = availableWidth / testCols;
-          const testCellHeight = availableHeight / testRows;
-          const testCellSize = Math.min(testCellWidth, testCellHeight);
-          
-          if (testCellSize >= minCellSize) {
-            cols = testCols;
-            rows = testRows;
-            finalCellSize = testCellSize;
-            break;
-          }
-        }
-        
-        // 최종 폴백: 세로 스택 배치 (1열)
-        if (finalCellSize < minCellSize) {
-          cols = 1;
-          rows = neededCells;
-          finalCellSize = Math.min(availableWidth, availableHeight / rows);
-          
-          // 세로 스택도 불가능한 경우 최소 크기로 강제 설정
-          if (finalCellSize < maxIconArea + 10) {
-            finalCellSize = maxIconArea + 10;
-            // 화면을 벗어나더라도 겹침은 방지
-          }
-        }
-      }
-      
-      // 격자 중앙 정렬을 위한 시작 위치 계산
-      const totalGridWidth = cols * finalCellSize;
-      const totalGridHeight = rows * finalCellSize;
-      const gridStartX = basePadding + (availableWidth - totalGridWidth) / 2;
-      const gridStartY = topPadding + (availableHeight - totalGridHeight) / 2;
-      
-      const positions: Record<string, { x: number; y: number }> = {};
-      
-      // 우선순위 기반 아이콘 정렬
-      const priorityOrder = ['music-player', 'images', 'albuminfo', 'quiz', 'sketchbook'];
-      const sortedIcons = [...desktopIconsData].sort((a, b) => {
-        const aPriority = priorityOrder.indexOf(a.id);
-        const bPriority = priorityOrder.indexOf(b.id);
-        if (aPriority === -1 && bPriority === -1) return 0;
-        if (aPriority === -1) return 1;
-        if (bPriority === -1) return -1;
-        return aPriority - bPriority;
-      });
-      
-      // 완전 격자 기반 배치 (랜덤 오프셋 제거)
-      sortedIcons.forEach((iconData, index) => {
-        const col = index % cols;
-        const row = Math.floor(index / cols);
-        
-        // 격자 셀 중앙 위치
-        const cellCenterX = gridStartX + (col * finalCellSize) + (finalCellSize / 2);
-        const cellCenterY = gridStartY + (row * finalCellSize) + (finalCellSize / 2);
-        
-        // 아이콘을 셀 중앙에 배치
-        const iconArea = getIconAreaForTitle(iconData.title);
-        const iconX = cellCenterX - (iconArea.width / 2);
-        const iconY = cellCenterY - (iconArea.height / 2);
-        
-        // 화면 경계 안전 검사 및 겹침 최종 검증
-        let finalX = Math.max(basePadding, Math.min(
-          screenWidth - iconArea.width - basePadding,
-          iconX
-        ));
-        let finalY = Math.max(topPadding, Math.min(
-          screenHeight - bottomPadding - iconArea.height,
-          iconY
-        ));
-        
-        // 마지막 안전장치: 다른 아이콘과 겹치는지 확인하고 조정
-        const existingPositions = Object.values(positions);
-        let attempts = 0;
-        while (attempts < 10) {
-          let hasOverlap = false;
-          
-          for (const existingPos of existingPositions) {
-            const dx = Math.abs(finalX - existingPos.x);
-            const dy = Math.abs(finalY - existingPos.y);
-            
-            // 최소 안전 거리 확인
-            if (dx < iconArea.width + 15 && dy < iconArea.height + 15) {
-              hasOverlap = true;
-              // 겹침 발견 시 위치 조정
-              finalY += iconArea.height + 20;
-              
-              // 화면 아래로 벗어나면 다음 열로 이동
-              if (finalY + iconArea.height > screenHeight - bottomPadding) {
-                finalX += iconArea.width + 20;
-                finalY = topPadding;
-              }
-              break;
-            }
-          }
-          
-          if (!hasOverlap) break;
-          attempts++;
-        }
-        
-        positions[iconData.id] = { 
-          x: Math.round(finalX), 
-          y: Math.round(finalY) 
-        };
-      });
-      
-      return positions;
-    }
-    
-    // 태블릿/데스크탑용 동적 아이콘 크기 및 간격 계산 (개선된 설정값 사용)
-    const basePadding = isTablet ? 25 : 35;
+    // 기본 패딩 설정
+    const basePadding = isMobile ? 20 : isTablet ? 25 : 35;
     const taskbarHeight = 80;
-    const extraBottomPadding = 50;
-    const extraTopPadding = 20;
+    const topPadding = isMobile ? 40 : 20;
+    const bottomPadding = isMobile ? 60 : 50;
     
-    // 아이콘 배치 가능한 영역 (상단 여백 적용)
+    // 아이콘 배치 가능한 영역 계산
     const availableWidth = screenWidth - (basePadding * 2);
-    const availableHeight = screenHeight - taskbarHeight - extraBottomPadding - extraTopPadding - (basePadding * 2);
-    
-    // 더 세분화된 격자 시스템 계산
-    const iconsCount = desktopIconsData.length;
-    
-    // 기본 격자 크기를 더 작게 설정 (더 많은 격자 셀 생성)
-    const baseGridSize = isTablet ? 70 : 80;
-    const gridCols = Math.floor(availableWidth / baseGridSize);
-    const gridRows = Math.floor(availableHeight / baseGridSize);
-    const totalGridCells = gridCols * gridRows;
-    
-    // 격자 셀 크기 계산
-    const cellWidth = availableWidth / gridCols;
-    const cellHeight = availableHeight / gridRows;
-    
-    // 격자 기반 배치 가능성 체크 (더 관대한 조건)
-    const useGridSystem = totalGridCells >= iconsCount && cellWidth >= 40 && cellHeight >= 40;
-    
-    // 사용 가능한 격자 셀 목록 생성
-    const createAvailableCells = () => {
-      const cells = [];
-      for (let row = 0; row < gridRows; row++) {
-        for (let col = 0; col < gridCols; col++) {
-          cells.push({ col, row, occupied: false });
-        }
-      }
-      return cells;
-    };
+    const availableHeight = screenHeight - taskbarHeight - topPadding - bottomPadding;
     
     const positions: Record<string, { x: number; y: number }> = {};
+    const placedPositions: { x: number; y: number; title: string }[] = [];
     
-    // 시드 기반 랜덤 함수
+    // 시드 기반 랜덤 함수 (일관된 결과를 위해)
     const getSeededRandom = (str: string, salt: number = 0) => {
       let hash = salt;
       for (let i = 0; i < str.length; i++) {
@@ -419,221 +251,84 @@ export default function Desktop() {
       return Math.abs(hash % 10000) / 10000;
     };
     
-    if (useGridSystem) {
-      // 향상된 랜덤 격자 시스템 (겹침 방지 강화)
-      const availableCells = createAvailableCells();
-      const placedPositions: { x: number; y: number; title: string }[] = [];
+    // 각 아이콘을 순차적으로 배치
+    desktopIconsData.forEach((iconData) => {
+      let position = { x: 0, y: 0 };
+      let validPosition = false;
+      let attempts = 0;
+      const maxAttempts = 100;
       
-      // 아이콘별 랜덤 강도 설정 (겹침 방지를 위해 더 보수적으로)
-      const getRandomIntensity = (iconId: string) => {
-        const importantIcons = ['music-player', 'images', 'albuminfo'];
-        return importantIcons.includes(iconId) ? 0.3 : 0.5; // 더 보수적으로 축소
-      };
+      // 유효한 위치를 찾을 때까지 시도
+      while (!validPosition && attempts < maxAttempts) {
+        // 완전 랜덤한 위치 생성 (전체 데스크탑 영역에서)
+        const randomX = getSeededRandom(iconData.id, attempts * 2);
+        const randomY = getSeededRandom(iconData.id, attempts * 2 + 1);
+        
+        // 전체 가능한 영역에서 랜덤 위치 계산
+        const candidateX = basePadding + (randomX * availableWidth);
+        const candidateY = basePadding + topPadding + (randomY * availableHeight);
+        
+        // 개별 아이콘 크기 고려한 경계 조정
+        const iconArea = getIconAreaForTitle(iconData.title);
+        const adjustedX = Math.max(basePadding, Math.min(
+          screenWidth - iconArea.width - basePadding,
+          candidateX - iconArea.width / 2
+        ));
+        const adjustedY = Math.max(basePadding + topPadding, Math.min(
+          screenHeight - taskbarHeight - bottomPadding - iconArea.height,
+          candidateY - iconArea.height / 2
+        ));
+        
+        position = { x: adjustedX, y: adjustedY };
+        
+        // 간단한 충돌 검사
+        validPosition = isValidIconPosition(position, placedPositions, iconData.title, minDistance);
+        attempts++;
+      }
       
-      // 아이콘별 우선순위 설정
-      const priorityOrder = ['music-player', 'images', 'albuminfo', 'quiz', 'sketchbook'];
-      const sortedIcons = [...desktopIconsData].sort((a, b) => {
-        const aPriority = priorityOrder.indexOf(a.id);
-        const bPriority = priorityOrder.indexOf(b.id);
-        if (aPriority === -1 && bPriority === -1) return 0;
-        if (aPriority === -1) return 1;
-        if (bPriority === -1) return -1;
-        return aPriority - bPriority;
-      });
-      
-      sortedIcons.forEach((iconData) => {
-        // 랜덤하게 격자 셀 선택
-        let selectedCell;
-        let attempts = 0;
-        const maxAttempts = 30; // 더 많은 시도
+      // 유효한 위치를 찾지 못한 경우 강제 배치 (겹침 최소화)
+      if (!validPosition) {
+        // 기존 아이콘들과 최대한 멀리 떨어진 위치 찾기
+        let bestPosition = position;
+        let maxMinDistance = 0;
         
-        do {
-          const randomIndex = Math.floor(getSeededRandom(iconData.id, attempts) * availableCells.length);
-          selectedCell = availableCells[randomIndex];
-          attempts++;
-        } while (selectedCell.occupied && attempts < maxAttempts);
-        
-        // 사용 가능한 셀을 찾지 못한 경우 첫 번째 빈 셀 사용
-        if (selectedCell.occupied) {
-          selectedCell = availableCells.find(cell => !cell.occupied) || availableCells[0];
-        }
-        
-        selectedCell.occupied = true;
-        
-        // 선택된 격자 셀의 중심 위치
-        const gridCenterX = basePadding + (selectedCell.col * cellWidth) + (cellWidth / 2);
-        const gridCenterY = basePadding + extraTopPadding + (selectedCell.row * cellHeight) + (cellHeight / 2);
-        
-        // 향상된 랜덤 오프셋 (겹침 방지를 위해 더 제한적)
-        const randomIntensity = getRandomIntensity(iconData.id);
-        const maxOffsetX = cellWidth * randomIntensity;
-        const maxOffsetY = cellHeight * randomIntensity;
-        
-        // crossCellOffset을 크게 축소 (25px → 10px)
-        const crossCellOffset = 10;
-        let position = { x: 0, y: 0 };
-        let validPosition = false;
-        let positionAttempts = 0;
-        const maxPositionAttempts = 15;
-        
-        // 겹침 검증을 통한 최종 위치 결정
-        while (!validPosition && positionAttempts < maxPositionAttempts) {
-          const offsetX = (getSeededRandom(iconData.id, positionAttempts * 3 + 1) - 0.5) * maxOffsetX;
-          const offsetY = (getSeededRandom(iconData.id, positionAttempts * 3 + 2) - 0.5) * maxOffsetY;
+        for (let i = 0; i < 20; i++) {
+          const randomX = getSeededRandom(iconData.id, attempts + i * 3);
+          const randomY = getSeededRandom(iconData.id, attempts + i * 3 + 1);
           
-          const additionalOffsetX = (getSeededRandom(iconData.id, positionAttempts * 3 + 3) - 0.5) * crossCellOffset;
-          const additionalOffsetY = (getSeededRandom(iconData.id, positionAttempts * 3 + 4) - 0.5) * crossCellOffset;
+          const candidateX = basePadding + (randomX * availableWidth);
+          const candidateY = basePadding + topPadding + (randomY * availableHeight);
           
-          // 셀 경계를 벗어나지 않도록 제한
-          const maxCellOffsetX = (cellWidth - totalIconArea) / 2;
-          const maxCellOffsetY = (cellHeight - totalIconArea) / 2;
-          const totalOffsetX = Math.max(-maxCellOffsetX, Math.min(maxCellOffsetX, offsetX + additionalOffsetX));
-          const totalOffsetY = Math.max(-maxCellOffsetY, Math.min(maxCellOffsetY, offsetY + additionalOffsetY));
-          
-          const candidateX = Math.max(basePadding, Math.min(
-            screenWidth - totalIconArea - basePadding,
-            gridCenterX + totalOffsetX - (totalIconArea / 2)
+          const iconArea = getIconAreaForTitle(iconData.title);
+          const testX = Math.max(basePadding, Math.min(
+            screenWidth - iconArea.width - basePadding,
+            candidateX - iconArea.width / 2
           ));
-          const candidateY = Math.max(basePadding + extraTopPadding, Math.min(
-            screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding,
-            gridCenterY + totalOffsetY - (totalIconArea / 2)
+          const testY = Math.max(basePadding + topPadding, Math.min(
+            screenHeight - taskbarHeight - bottomPadding - iconArea.height,
+            candidateY - iconArea.height / 2
           ));
           
-          position = { x: candidateX, y: candidateY };
-          validPosition = isValidIconPosition(position, placedPositions, iconData.title, minDistance);
-          positionAttempts++;
-        }
-        
-        // 여전히 유효한 위치를 찾지 못한 경우 셀 중심 사용
-        if (!validPosition) {
-          position = {
-            x: Math.max(basePadding, Math.min(
-              screenWidth - totalIconArea - basePadding,
-              gridCenterX - (totalIconArea / 2)
-            )),
-            y: Math.max(basePadding + extraTopPadding, Math.min(
-              screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding,
-              gridCenterY - (totalIconArea / 2)
-            ))
-          };
-        }
-        
-        positions[iconData.id] = { x: Math.round(position.x), y: Math.round(position.y) };
-        placedPositions.push({ x: position.x, y: position.y, title: iconData.title });
-      });
-    } else {
-      // 폴백: 더 자연스러운 산발적 배치 (겹침 방지 강화)
-      const placedPositions: { x: number; y: number; title: string }[] = [];
-      
-      // 아이콘별 우선순위 설정
-      const priorityOrder = ['music-player', 'images', 'albuminfo', 'quiz', 'sketchbook'];
-      const sortedIcons = [...desktopIconsData].sort((a, b) => {
-        const aPriority = priorityOrder.indexOf(a.id);
-        const bPriority = priorityOrder.indexOf(b.id);
-        if (aPriority === -1 && bPriority === -1) return 0;
-        if (aPriority === -1) return 1;
-        if (bPriority === -1) return -1;
-        return aPriority - bPriority;
-      });
-      
-      sortedIcons.forEach((iconData, index) => {
-        let attempts = 0;
-        let position = { x: 0, y: 0 };
-        let validPosition = false;
-        const maxAttempts = 200; // 더 많은 시도로 증가
-        
-        // 더 많은 영역으로 세분화하여 자연스러운 분포
-        const topY = basePadding + extraTopPadding;
-        const bottomY = screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding;
-        const midX = screenWidth / 2;
-        const midY = (topY + bottomY) / 2;
-        
-        // 9개 구역으로 세분화 (각 구역별 겹침 검증)
-        const zones = [
-          { minX: basePadding, maxX: midX - 50, minY: topY, maxY: midY - 30 },
-          { minX: midX - 50, maxX: midX + 50, minY: topY, maxY: midY - 30 },
-          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: topY, maxY: midY - 30 },
-          { minX: basePadding, maxX: midX - 50, minY: midY - 30, maxY: midY + 30 },
-          { minX: midX - 50, maxX: midX + 50, minY: midY - 30, maxY: midY + 30 },
-          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: midY - 30, maxY: midY + 30 },
-          { minX: basePadding, maxX: midX - 50, minY: midY + 30, maxY: bottomY },
-          { minX: midX - 50, maxX: midX + 50, minY: midY + 30, maxY: bottomY },
-          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: midY + 30, maxY: bottomY }
-        ];
-        
-        // 랜덤하게 구역 순서 섞기
-        const shuffledZones = [...zones].sort(() => getSeededRandom(iconData.id, attempts) - 0.5);
-        
-        for (let zoneIndex = 0; zoneIndex < shuffledZones.length && !validPosition && attempts < maxAttempts; zoneIndex++) {
-          const zone = shuffledZones[zoneIndex];
+          // 기존 아이콘들과의 최소 거리 계산
+          const minDistanceToOthers = placedPositions.reduce((min, existingPos) => {
+            const dx = Math.abs(testX - existingPos.x);
+            const dy = Math.abs(testY - existingPos.y);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return Math.min(min, distance);
+          }, Infinity);
           
-          for (let i = 0; i < 25 && !validPosition && attempts < maxAttempts; i++) { // 더 많은 시도
-            const seedX = getSeededRandom(iconData.id, attempts * 2);
-            const seedY = getSeededRandom(iconData.id, attempts * 2 + 1);
-            
-            // 더 자연스러운 분포를 위한 가중치 적용
-            const weightedX = Math.pow(seedX, 0.7);
-            const weightedY = Math.pow(seedY, 0.8);
-            
-            const candidateX = zone.minX + weightedX * (zone.maxX - zone.minX);
-            const candidateY = zone.minY + weightedY * (zone.maxY - zone.minY);
-            
-            position = { x: candidateX, y: candidateY };
-            validPosition = isValidIconPosition(position, placedPositions, iconData.title, minDistance);
-            attempts++;
+          if (minDistanceToOthers > maxMinDistance) {
+            maxMinDistance = minDistanceToOthers;
+            bestPosition = { x: testX, y: testY };
           }
         }
         
-        // 여전히 위치를 찾지 못한 경우 더 엄격한 격자 배치 + 겹침 검증
-        if (!validPosition) {
-          const flexCols = Math.max(2, Math.floor(availableWidth / (totalIconArea + minDistance)));
-          const baseSpacing = Math.max(totalIconArea + minDistance, 80);
-          
-          let gridAttempts = 0;
-          const maxGridAttempts = 50;
-          
-          while (!validPosition && gridAttempts < maxGridAttempts) {
-            const col = (index + gridAttempts) % flexCols;
-            const row = Math.floor((index + gridAttempts) / flexCols);
-            
-            // 격자에 작은 랜덤 오프셋 추가 (겹침 방지)
-            const gridOffsetX = (getSeededRandom(iconData.id, gridAttempts * 2 + 10) - 0.5) * 20; // 축소된 오프셋
-            const gridOffsetY = (getSeededRandom(iconData.id, gridAttempts * 2 + 11) - 0.5) * 15;
-            
-            const candidateX = basePadding + (col * baseSpacing) + gridOffsetX;
-            const candidateY = basePadding + extraTopPadding + (row * baseSpacing) + gridOffsetY;
-            
-            // 경계 체크
-            const boundedX = Math.max(basePadding, Math.min(candidateX, screenWidth - totalIconArea - basePadding));
-            const boundedY = Math.max(basePadding + extraTopPadding, Math.min(candidateY, screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding));
-            
-            position = { x: boundedX, y: boundedY };
-            validPosition = isValidIconPosition(position, placedPositions, iconData.title, minDistance);
-            gridAttempts++;
-          }
-        }
-        
-        // 최후의 수단: 단순 순차 배치 (최소한의 겹침 방지)
-        if (!validPosition) {
-          const simpleSpacing = totalIconArea + 10;
-          const simpleCols = Math.floor(availableWidth / simpleSpacing);
-          const col = index % simpleCols;
-          const row = Math.floor(index / simpleCols);
-          
-          position = {
-            x: basePadding + (col * simpleSpacing),
-            y: basePadding + extraTopPadding + (row * simpleSpacing)
-          };
-          
-          // 경계 체크
-          position.x = Math.max(basePadding, Math.min(position.x, screenWidth - totalIconArea - basePadding));
-          position.y = Math.max(basePadding + extraTopPadding, Math.min(position.y, screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding));
-        }
-        
-        positions[iconData.id] = { x: Math.round(position.x), y: Math.round(position.y) };
-        placedPositions.push({ x: position.x, y: position.y, title: iconData.title });
-      });
-    }
+        position = bestPosition;
+      }
+      
+      positions[iconData.id] = { x: Math.round(position.x), y: Math.round(position.y) };
+      placedPositions.push({ x: position.x, y: position.y, title: iconData.title });
+    });
     
     return positions;
   }, [screenWidth, screenHeight, getDynamicIconSettings, isValidIconPosition, getIconAreaForTitle]);
