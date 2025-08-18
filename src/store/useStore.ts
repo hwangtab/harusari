@@ -66,7 +66,7 @@ export const useStore = create<StoreState>((set, get) => ({
   
   openWindow: (windowConfig) => {
     const state = get();
-    const newZIndex = state.maxZIndex + 1;
+    const newZIndex = state.maxZIndex + 10; // Ensure new window is clearly on top
     const newWindow: Window = {
       ...windowConfig,
       zIndex: newZIndex

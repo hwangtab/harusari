@@ -56,6 +56,10 @@ const thanksSections = [
     content: '한받'
   },
   {
+    type: 'person',
+    content: '풀꽃'
+  },
+  {
     type: 'message',
     content: '이 프로젝트는 여러분들의 도움과 지지가 있었기에 완성될 수 있었습니다.'
   },
