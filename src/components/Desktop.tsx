@@ -105,45 +105,87 @@ export default function Desktop() {
   const { openWindow } = useStore();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
-  // 해상도별 동적 아이콘 크기 및 최소 거리 계산
+  // 아이콘별 텍스트 너비 매핑 (text-xs 기준, 대략 추정)
+  const getIconTextWidth = useCallback((iconTitle: string) => {
+    const textWidthMap: Record<string, number> = {
+      'albuminfo': 70,
+      'credit': 45,
+      'critic': 45,
+      'specialthanks': 90,  // 가장 긴 텍스트
+      'sketchbook': 75,
+      'quiz': 30,
+      'Music Player': 85,   // 공백 포함 긴 텍스트
+      'images': 45,
+      'trashcan': 60,
+      'instagram': 70,
+      'email': 40,
+      'tuner': 40,
+      'metronome': 70
+    };
+    
+    return textWidthMap[iconTitle] || 60; // 기본값: 60px
+  }, []);
+
+  // 해상도별 동적 아이콘 영역 크기 및 최소 거리 계산 (텍스트 포함)
   const getDynamicIconSettings = useCallback(() => {
     const isMobile = screenWidth < 768;
     const isTablet = screenWidth >= 768 && screenWidth < 1024;
     
     const iconSize = isMobile ? 24 : isTablet ? 30 : 32;
     const baseSpacing = isMobile ? 15 : isTablet ? 20 : 25;
-    const minDistance = iconSize + baseSpacing;
     
-    return { isMobile, isTablet, iconSize, minDistance };
+    // 텍스트 라벨을 포함한 전체 높이 계산
+    const textHeight = 12; // text-xs
+    const iconTextGap = 4;  // mb-1
+    const textPadding = 4;  // py-0.5 * 2
+    const totalHeight = iconSize + iconTextGap + textHeight + textPadding;
+    
+    // 최대 텍스트 너비 고려 (가장 긴 텍스트 기준)
+    const maxTextWidth = 90; // "specialthanks", "Music Player" 등
+    const totalWidth = Math.max(iconSize, maxTextWidth) + 8; // px-1 * 2
+    
+    // 전체 영역 크기 (정사각형으로 단순화)
+    const totalIconArea = Math.max(totalWidth, totalHeight);
+    const minDistance = totalIconArea + baseSpacing;
+    
+    return { 
+      isMobile, 
+      isTablet, 
+      iconSize, 
+      totalIconArea, 
+      totalWidth, 
+      totalHeight, 
+      minDistance 
+    };
   }, [screenWidth]);
 
-  // 전역 겹침 검증 함수
+  // 전역 겹침 검증 함수 (텍스트 라벨 포함)
   const isValidIconPosition = useCallback((
     newPos: { x: number; y: number }, 
     existingPositions: { x: number; y: number }[], 
-    iconSize: number, 
+    totalIconArea: number, 
     minDistance: number
   ) => {
-    // 화면 경계 검사
+    // 화면 경계 검사 (텍스트 라벨 공간 고려)
     const padding = 10;
     if (newPos.x < padding || 
         newPos.y < padding || 
-        newPos.x + iconSize > screenWidth - padding || 
-        newPos.y + iconSize > screenHeight - 80 - padding) {
+        newPos.x + totalIconArea > screenWidth - padding || 
+        newPos.y + totalIconArea > screenHeight - 80 - padding) {
       return false;
     }
     
-    // 다른 아이콘들과의 거리 검사 (경계 박스 기반)
+    // 다른 아이콘들과의 거리 검사 (전체 아이콘 영역 기반)
     return existingPositions.every(existingPos => {
       const dx = Math.abs(newPos.x - existingPos.x);
       const dy = Math.abs(newPos.y - existingPos.y);
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      // 경계 박스 겹침 검사도 추가
-      const boxOverlap = !(newPos.x + iconSize < existingPos.x || 
-                           existingPos.x + iconSize < newPos.x || 
-                           newPos.y + iconSize < existingPos.y || 
-                           existingPos.y + iconSize < newPos.y);
+      // 경계 박스 겹침 검사 (텍스트 라벨 포함 영역)
+      const boxOverlap = !(newPos.x + totalIconArea < existingPos.x || 
+                           existingPos.x + totalIconArea < newPos.x || 
+                           newPos.y + totalIconArea < existingPos.y || 
+                           existingPos.y + totalIconArea < newPos.y);
       
       return distance >= minDistance && !boxOverlap;
     });
@@ -151,7 +193,7 @@ export default function Desktop() {
 
   // 반응형 아이콘 위치 계산 (겹침 방지 강화)
   const getResponsiveIconPositions = useCallback(() => {
-    const { isMobile, isTablet, iconSize, minDistance } = getDynamicIconSettings();
+    const { isMobile, isTablet, iconSize, totalIconArea, minDistance } = getDynamicIconSettings();
     
     // 모바일 전용 로직 (겹침 방지 강화)
     if (isMobile) {
@@ -210,16 +252,16 @@ export default function Desktop() {
           const offsetY = (getSeededRandom(iconData.id, attempts * 2 + 2) - 0.5) * 20; // 세로 오프셋도 축소
           
           const candidateX = Math.max(basePadding, Math.min(
-            screenWidth - iconSize - basePadding,
-            baseX + offsetX - (iconSize / 2)
+            screenWidth - totalIconArea - basePadding,
+            baseX + offsetX - (totalIconArea / 2)
           ));
           const candidateY = Math.max(topPadding, Math.min(
-            screenHeight - bottomPadding - iconSize,
+            screenHeight - bottomPadding - totalIconArea,
             baseY + offsetY
           ));
           
           position = { x: candidateX, y: candidateY };
-          validPosition = isValidIconPosition(position, placedPositions, iconSize, minDistance);
+          validPosition = isValidIconPosition(position, placedPositions, totalIconArea, minDistance);
           attempts++;
         }
         
@@ -227,11 +269,11 @@ export default function Desktop() {
         if (!validPosition) {
           position = {
             x: Math.max(basePadding, Math.min(
-              screenWidth - iconSize - basePadding,
-              baseX - (iconSize / 2)
+              screenWidth - totalIconArea - basePadding,
+              baseX - (totalIconArea / 2)
             )),
             y: Math.max(topPadding, Math.min(
-              screenHeight - bottomPadding - iconSize,
+              screenHeight - bottomPadding - totalIconArea,
               baseY
             ))
           };
@@ -360,22 +402,22 @@ export default function Desktop() {
           const additionalOffsetY = (getSeededRandom(iconData.id, positionAttempts * 3 + 4) - 0.5) * crossCellOffset;
           
           // 셀 경계를 벗어나지 않도록 제한
-          const maxCellOffsetX = (cellWidth - iconSize) / 2;
-          const maxCellOffsetY = (cellHeight - iconSize) / 2;
+          const maxCellOffsetX = (cellWidth - totalIconArea) / 2;
+          const maxCellOffsetY = (cellHeight - totalIconArea) / 2;
           const totalOffsetX = Math.max(-maxCellOffsetX, Math.min(maxCellOffsetX, offsetX + additionalOffsetX));
           const totalOffsetY = Math.max(-maxCellOffsetY, Math.min(maxCellOffsetY, offsetY + additionalOffsetY));
           
           const candidateX = Math.max(basePadding, Math.min(
-            screenWidth - iconSize - basePadding,
-            gridCenterX + totalOffsetX - (iconSize / 2)
+            screenWidth - totalIconArea - basePadding,
+            gridCenterX + totalOffsetX - (totalIconArea / 2)
           ));
           const candidateY = Math.max(basePadding + extraTopPadding, Math.min(
-            screenHeight - taskbarHeight - extraBottomPadding - iconSize - basePadding,
-            gridCenterY + totalOffsetY - (iconSize / 2)
+            screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding,
+            gridCenterY + totalOffsetY - (totalIconArea / 2)
           ));
           
           position = { x: candidateX, y: candidateY };
-          validPosition = isValidIconPosition(position, placedPositions, iconSize, minDistance);
+          validPosition = isValidIconPosition(position, placedPositions, totalIconArea, minDistance);
           positionAttempts++;
         }
         
@@ -383,12 +425,12 @@ export default function Desktop() {
         if (!validPosition) {
           position = {
             x: Math.max(basePadding, Math.min(
-              screenWidth - iconSize - basePadding,
-              gridCenterX - (iconSize / 2)
+              screenWidth - totalIconArea - basePadding,
+              gridCenterX - (totalIconArea / 2)
             )),
             y: Math.max(basePadding + extraTopPadding, Math.min(
-              screenHeight - taskbarHeight - extraBottomPadding - iconSize - basePadding,
-              gridCenterY - (iconSize / 2)
+              screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding,
+              gridCenterY - (totalIconArea / 2)
             ))
           };
         }
@@ -419,7 +461,7 @@ export default function Desktop() {
         
         // 더 많은 영역으로 세분화하여 자연스러운 분포
         const topY = basePadding + extraTopPadding;
-        const bottomY = screenHeight - taskbarHeight - extraBottomPadding - iconSize - basePadding;
+        const bottomY = screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding;
         const midX = screenWidth / 2;
         const midY = (topY + bottomY) / 2;
         
@@ -427,13 +469,13 @@ export default function Desktop() {
         const zones = [
           { minX: basePadding, maxX: midX - 50, minY: topY, maxY: midY - 30 },
           { minX: midX - 50, maxX: midX + 50, minY: topY, maxY: midY - 30 },
-          { minX: midX + 50, maxX: screenWidth - iconSize - basePadding, minY: topY, maxY: midY - 30 },
+          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: topY, maxY: midY - 30 },
           { minX: basePadding, maxX: midX - 50, minY: midY - 30, maxY: midY + 30 },
           { minX: midX - 50, maxX: midX + 50, minY: midY - 30, maxY: midY + 30 },
-          { minX: midX + 50, maxX: screenWidth - iconSize - basePadding, minY: midY - 30, maxY: midY + 30 },
+          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: midY - 30, maxY: midY + 30 },
           { minX: basePadding, maxX: midX - 50, minY: midY + 30, maxY: bottomY },
           { minX: midX - 50, maxX: midX + 50, minY: midY + 30, maxY: bottomY },
-          { minX: midX + 50, maxX: screenWidth - iconSize - basePadding, minY: midY + 30, maxY: bottomY }
+          { minX: midX + 50, maxX: screenWidth - totalIconArea - basePadding, minY: midY + 30, maxY: bottomY }
         ];
         
         // 랜덤하게 구역 순서 섞기
@@ -454,15 +496,15 @@ export default function Desktop() {
             const candidateY = zone.minY + weightedY * (zone.maxY - zone.minY);
             
             position = { x: candidateX, y: candidateY };
-            validPosition = isValidIconPosition(position, placedPositions, iconSize, minDistance);
+            validPosition = isValidIconPosition(position, placedPositions, totalIconArea, minDistance);
             attempts++;
           }
         }
         
         // 여전히 위치를 찾지 못한 경우 더 엄격한 격자 배치 + 겹침 검증
         if (!validPosition) {
-          const flexCols = Math.max(2, Math.floor(availableWidth / (iconSize + minDistance)));
-          const baseSpacing = Math.max(iconSize + minDistance, 80);
+          const flexCols = Math.max(2, Math.floor(availableWidth / (totalIconArea + minDistance)));
+          const baseSpacing = Math.max(totalIconArea + minDistance, 80);
           
           let gridAttempts = 0;
           const maxGridAttempts = 50;
@@ -479,18 +521,18 @@ export default function Desktop() {
             const candidateY = basePadding + extraTopPadding + (row * baseSpacing) + gridOffsetY;
             
             // 경계 체크
-            const boundedX = Math.max(basePadding, Math.min(candidateX, screenWidth - iconSize - basePadding));
-            const boundedY = Math.max(basePadding + extraTopPadding, Math.min(candidateY, screenHeight - taskbarHeight - extraBottomPadding - iconSize - basePadding));
+            const boundedX = Math.max(basePadding, Math.min(candidateX, screenWidth - totalIconArea - basePadding));
+            const boundedY = Math.max(basePadding + extraTopPadding, Math.min(candidateY, screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding));
             
             position = { x: boundedX, y: boundedY };
-            validPosition = isValidIconPosition(position, placedPositions, iconSize, minDistance);
+            validPosition = isValidIconPosition(position, placedPositions, totalIconArea, minDistance);
             gridAttempts++;
           }
         }
         
         // 최후의 수단: 단순 순차 배치 (최소한의 겹침 방지)
         if (!validPosition) {
-          const simpleSpacing = iconSize + 10;
+          const simpleSpacing = totalIconArea + 10;
           const simpleCols = Math.floor(availableWidth / simpleSpacing);
           const col = index % simpleCols;
           const row = Math.floor(index / simpleCols);
@@ -501,8 +543,8 @@ export default function Desktop() {
           };
           
           // 경계 체크
-          position.x = Math.max(basePadding, Math.min(position.x, screenWidth - iconSize - basePadding));
-          position.y = Math.max(basePadding + extraTopPadding, Math.min(position.y, screenHeight - taskbarHeight - extraBottomPadding - iconSize - basePadding));
+          position.x = Math.max(basePadding, Math.min(position.x, screenWidth - totalIconArea - basePadding));
+          position.y = Math.max(basePadding + extraTopPadding, Math.min(position.y, screenHeight - taskbarHeight - extraBottomPadding - totalIconArea - basePadding));
         }
         
         positions[iconData.id] = { x: Math.round(position.x), y: Math.round(position.y) };
