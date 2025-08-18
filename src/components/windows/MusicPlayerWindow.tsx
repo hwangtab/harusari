@@ -197,8 +197,6 @@ export default function MusicPlayerWindow({ windowId }: MusicPlayerWindowProps) 
       
       const lyricsWindowId = `lyrics-${currentTrack}-${Date.now()}`;
       
-      const lyricsWindowId = `lyrics-${currentTrack}-${Date.now()}`;
-      
       openWindow({
         id: lyricsWindowId,
         title: `${currentTrackData.title} - 가사`,
