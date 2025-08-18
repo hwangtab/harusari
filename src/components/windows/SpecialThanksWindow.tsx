@@ -17,7 +17,7 @@ const thanksSections = [
   },
   {
     type: 'separator',
-    content: '──────────────────────────────'
+    content: '────────────'
   },
   {
     type: 'header',
