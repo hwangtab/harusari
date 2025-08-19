@@ -98,6 +98,12 @@ const desktopIconsData = [
     title: 'metronome',
     icon: '/images/icons/metronome.svg',
     windowComponent: 'MetronomeWindow'
+  },
+  {
+    id: 'store',
+    title: 'Store',
+    icon: '/images/icons/store.svg',
+    windowComponent: null // External link, no window
   }
 ];
 
@@ -120,7 +126,8 @@ export default function Desktop() {
       'instagram': 100,     // 88 + 12px (자주 겹치는 텍스트)
       'email': 52,          // 42 + 10px
       'tuner': 52,          // 42 + 10px
-      'metronome': 85       // 75 + 10px
+      'metronome': 85,      // 75 + 10px
+      'Store': 52           // 42 + 10px
     };
     
     return textWidthMap[iconTitle] || 75; // 기본값도 증가: 65px → 75px
@@ -582,6 +589,7 @@ export default function Desktop() {
   const iconActions = {
     'instagram': () => window.open('https://www.instagram.com/9.17.p.m/', '_blank'),
     'email': () => window.open('mailto:homeoutgimo@karts.ac.kr', '_self'),
+    'store': () => window.open('https://smartstore.naver.com/ggac/products/12205449853', '_blank'),
   } as const;
 
   const handleIconClick = (icon: typeof desktopIconsData[0] & { x: number; y: number }) => {
