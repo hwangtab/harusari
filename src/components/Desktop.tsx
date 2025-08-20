@@ -104,6 +104,12 @@ const desktopIconsData = [
     title: 'Store',
     icon: '/images/icons/store.svg',
     windowComponent: null // External link, no window
+  },
+  {
+    id: 'share',
+    title: 'Share',
+    icon: '/images/icons/share.svg',
+    windowComponent: 'ShareWindow'
   }
 ];
 
@@ -127,7 +133,8 @@ export default function Desktop() {
       'email': 52,          // 42 + 10px
       'tuner': 52,          // 42 + 10px
       'metronome': 85,      // 75 + 10px
-      'Store': 52           // 42 + 10px
+      'Store': 52,          // 42 + 10px
+      'Share': 52           // 42 + 10px
     };
     
     return textWidthMap[iconTitle] || 75; // 기본값도 증가: 65px → 75px
@@ -497,6 +504,11 @@ export default function Desktop() {
         return { 
           width: Math.min(isMobile ? 350 : 420, maxWidth), 
           height: Math.min(optimalMetronomeHeight, maxHeight) 
+        };
+      case 'ShareWindow':
+        return { 
+          width: Math.min(isMobile ? 350 : 400, maxWidth), 
+          height: Math.min(isMobile ? 450 : 500, maxHeight) 
         };
       default: 
         return { 

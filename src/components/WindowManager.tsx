@@ -16,6 +16,7 @@ import LyricsWindow from './windows/LyricsWindow';
 import AboutWindow from './windows/AboutWindow';
 import TunerWindow from './windows/TunerWindow';
 import MetronomeWindow from './windows/MetronomeWindow';
+import ShareWindow from './windows/ShareWindow';
 
 const windowComponents = {
   AlbuminfoWindow,
@@ -30,7 +31,8 @@ const windowComponents = {
   LyricsWindow,
   AboutWindow,
   TunerWindow,
-  MetronomeWindow
+  MetronomeWindow,
+  ShareWindow
 };
 
 export default function WindowManager() {
