@@ -4,11 +4,11 @@ export const SHARE_MESSAGE = `'하루살이 프로젝트'는 음악의 규범을
 
 아티스트가 세상 속에서 겪는 괴리감과 호오와 같은 혼란스러운 감각이 음악의 문법으로 재탄생 되었습니다. 음악 속 불완전함과 즉흥성이 만들어내는 독특한 질감은 청자에게 신선한 청각적 경험을 선사할 것입니다.
 
-https://harusari.vercel.app
+https://harusali.vercel.app
 
 #하루살이프로젝트 #인디음악 #로파이`;
 
-export const WEBSITE_URL = 'https://harusari.vercel.app';
+export const WEBSITE_URL = 'https://harusali.vercel.app';
 
 // Share to X (Twitter)
 export const shareToTwitter = () => {

@@ -96,7 +96,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
         
         <div className="mt-2 text-center">
           <div className="border-2 border-retro-black px-3 py-2 bg-album-blue text-xs w-fit mx-auto">
-            <span className="font-mono">harusari.vercel.app</span>
+            <span className="font-mono">harusali.vercel.app</span>
           </div>
         </div>
       </div>
