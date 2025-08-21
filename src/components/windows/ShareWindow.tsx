@@ -1,6 +1,8 @@
 'use client';
 
 import { shareActions } from '@/utils/shareUtils';
+import { SiX, SiThreads, SiFacebook, SiKakaotalk } from 'react-icons/si';
+import { FiCopy } from 'react-icons/fi';
 
 interface ShareWindowProps {
   windowId: string;
@@ -11,7 +13,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
     {
       id: 'twitter',
       label: 'X (Twitter)',
-      icon: '𝕏',
+      icon: SiX,
       action: shareActions.twitter,
       bgColor: 'bg-black',
       textColor: 'text-white',
@@ -20,7 +22,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
     {
       id: 'threads',
       label: 'Threads',
-      icon: '@',
+      icon: SiThreads,
       action: shareActions.threads,
       bgColor: 'bg-purple-600',
       textColor: 'text-white',
@@ -29,7 +31,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
     {
       id: 'facebook',
       label: 'Facebook',
-      icon: 'f',
+      icon: SiFacebook,
       action: shareActions.facebook,
       bgColor: 'bg-blue-600',
       textColor: 'text-white',
@@ -38,7 +40,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
     {
       id: 'kakao',
       label: '카카오톡',
-      icon: '💬',
+      icon: SiKakaotalk,
       action: shareActions.kakao,
       bgColor: 'bg-yellow-400',
       textColor: 'text-black',
@@ -47,7 +49,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
     {
       id: 'copy',
       label: '링크 복사',
-      icon: '📋',
+      icon: FiCopy,
       action: shareActions.copy,
       bgColor: 'bg-gray-600',
       textColor: 'text-white',
@@ -82,7 +84,7 @@ export default function ShareWindow({ windowId }: ShareWindowProps) {
                 min-h-[40px]
               `}
             >
-              <span className="text-base">{button.icon}</span>
+              <button.icon className="w-4 h-4" />
               <span className="font-mono">{button.label}</span>
             </button>
           ))}
